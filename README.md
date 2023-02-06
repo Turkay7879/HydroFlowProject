@@ -17,10 +17,10 @@ HydroFlow: a Multi-User Hydrological Model and Flow Prediction System
 ## Dependencies
 - NuGet Dependenices:
   - Microsoft.EntityFrameworkCore
-	- Microsoft.EntityFrameworkCore.Design
-	- Microsoft.EntityFrameworkCore.SqlServer
-	- Microsoft.EntityFrameworkCore.Tools
-	- Microsoft.Extensions.DependencyInjection
+  - Microsoft.EntityFrameworkCore.Design
+  - Microsoft.EntityFrameworkCore.SqlServer
+  - Microsoft.EntityFrameworkCore.Tools
+  - Microsoft.Extensions.DependencyInjection
   
 - Node Dependencies:
   - No additional packages required! Default packages bundled with a new ASP.NET Core project are used for now.
