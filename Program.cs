@@ -1,8 +1,12 @@
+using HydroFlowProject.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-/*
-builder.Services.AddDbContext<CONTEXT NAME HERE>(options =>
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
 {
     if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
     {
@@ -14,7 +18,7 @@ builder.Services.AddDbContext<CONTEXT NAME HERE>(options =>
     }
 
 });
-*/
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -24,8 +28,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        //var context = services.GetRequiredService<CONTEXT NAME HERE>();
-        //DbInitializer.Initialize(context);
+        var context = services.GetRequiredService<SqlServerDbContext>();
+        SqlServerDbInit.Initialize(context);
     }
     catch (Exception ex)
     {
