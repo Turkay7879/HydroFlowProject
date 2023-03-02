@@ -114,7 +114,6 @@ namespace HydroFlowProject.Data
                     .IsUnicode(false);
                 entity.Property(e => e.Name).HasMaxLength(50);
                 entity.Property(e => e.Password).HasMaxLength(256);
-                entity.Property(e => e.PasswordSalt).HasMaxLength(256);
                 entity.Property(e => e.Surname).HasMaxLength(50);
             });
 

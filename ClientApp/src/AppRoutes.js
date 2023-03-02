@@ -1,4 +1,4 @@
-import Basins from "./components/Basins/Basins";
+import Routes from "./components/Constants/Routes";
 import { Home } from "./components/Home";
 
 const AppRoutes = [
@@ -7,8 +7,12 @@ const AppRoutes = [
     element: <Home />,
   },
   {
-    path: "/basins",
-    element: <Basins />,
+    path: Routes.BasinsAdminPanel.route,
+    element: Routes.BasinsAdminPanel.component,
+  },
+  {
+    path: Routes.UsersAdminPanel.route,
+    element: Routes.UsersAdminPanel.component,
   },
 ];
 

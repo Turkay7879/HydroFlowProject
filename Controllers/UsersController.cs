@@ -7,29 +7,29 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HydroFlowProject.Data;
 using HydroFlowProject.Models;
-using System.Collections;
 using NuGet.Protocol;
 
 namespace HydroFlowProject.Controllers
 {
     [ApiController]
-    public class BasinsController : Controller
+    public class UsersController : Controller
     {
         private readonly SqlServerDbContext _context;
 
-        public BasinsController(SqlServerDbContext context)
+        public UsersController(SqlServerDbContext context)
         {
             _context = context;
         }
 
-        // GET: Basins
+        //GET: Users
         [HttpGet]
-        [Route("[controller]/getAllBasins")]
-        public string GetAllBasins()
+        [Route("[controller]/getAllUsers")]
+        public string GetAllUsers()
         {
-              return _context.Basins != null 
-                ? _context.Basins.ToJson()
-                : "";
+            return _context.Users != null ? _context.Users.ToJson()
+                 : "";
         }
+
+
     }
 }

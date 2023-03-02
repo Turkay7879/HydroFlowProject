@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HydroFlowProject.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230217111730_SqlServerMigration1")]
+    [Migration("20230302204313_SqlServerMigration1")]
     partial class SqlServerMigration1
     {
         /// <inheritdoc />
@@ -248,8 +248,7 @@ namespace HydroFlowProject.Migrations
 
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varbinary(256)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Surname")
                         .IsRequired()

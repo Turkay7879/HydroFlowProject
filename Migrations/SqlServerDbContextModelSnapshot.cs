@@ -245,8 +245,7 @@ namespace HydroFlowProject.Migrations
 
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("varbinary(256)");
+                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("Surname")
                         .IsRequired()
