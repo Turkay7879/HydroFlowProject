@@ -1,12 +1,17 @@
 import React from "react";
 import BasinsRemote from "./flux/BasinsRemote";
+import AddBasinModal from "./Actions/AddBasinModal";
 
 class Basins extends React.Component {
+  tableColumns = ["Basin Name", "Flow Station No", "Latitude", "Longitude", "Field", "Basin Description", "Actions"];
+
   constructor(props) {
     super(props);
     this.state = {
       loadingBasins: true,
       basins: null,
+      showAddBasinModal: false,
+      savedBasin: false
     };
   }
 
@@ -14,7 +19,14 @@ class Basins extends React.Component {
     this.refreshData();
   }
 
-  async refreshData() {
+  componentDidUpdate() {
+    if (this.state.savedBasin) {
+      this.refreshData();
+      this.setState({savedBasin: false});
+    }
+  }
+
+  refreshData = async () => {
     BasinsRemote.getAllBasins()
       .then((response) => {
         response.json().then(data => {
@@ -27,11 +39,18 @@ class Basins extends React.Component {
       });
   }
 
-  editBasin(basin) {
+  toggleAddBasinModal = () => {
+    this.setState({
+      savedBasin: this.state.showAddBasinModal,
+      showAddBasinModal: !this.state.showAddBasinModal
+    });
+  }
+
+  editBasin = (basin) => {
     console.log(`Edit Basin ${basin.Id}`)
   }
 
-  deleteBasin(basin) {
+  deleteBasin = (basin) => {
     console.log(`Delete Basin ${basin.Id}`)
   }
 
@@ -40,13 +59,7 @@ class Basins extends React.Component {
       <table className="table table-striped" aria-labelledby="tableLabel">
         <thead>
           <tr>
-            <th>Basin Name</th>
-            <th>Flow Station No</th>
-            <th>Latitude</th>
-            <th>Longitude</th>
-            <th>Field</th>
-            <th>Basin Description</th>
-            <th>Actions</th>
+            { this.tableColumns.map(col => <th key={col}>{col}</th>) }
           </tr>
         </thead>
         <tbody>
@@ -60,13 +73,9 @@ class Basins extends React.Component {
               <td>{basin.Description}</td>
               <td>
                 <div style={{display: "flex", justifyContent: "space-around"}}>
-                  <button 
-                    type="button" 
-                    class="btn btn-primary"
+                  <button type="button" className="btn btn-primary"
                     onClick={(e) => { this.editBasin(basin) }}>Edit</button>
-                  <button 
-                    type="button" 
-                    class="btn btn-danger"
+                  <button type="button" className="btn btn-danger"
                     onClick={(e) => { this.deleteBasin(basin) }}>Delete</button>
                 </div>
               </td>
@@ -79,10 +88,23 @@ class Basins extends React.Component {
 
   render() {
     return <>
+      <div style={{ display: "flex", justifyContent: "end" }}>
+         <button type="button" className="btn btn-primary"
+            onClick={() => { this.toggleAddBasinModal() }}>
+              Add Basin
+          </button>
+      </div>
       {
-        this.state.loadingBasins ? <p class="fs-1">Loading Basins...</p> :
-        !this.state.basins ? <p class="fs-1">Error Loading Basins!</p> :
+        this.state.loadingBasins ? <p className="fs-1">Loading Basins...</p> :
+        !this.state.basins ? <p className="fs-1">No Basin Found</p> :
         this.getBody()
+      }
+      {
+        this.state.showAddBasinModal && <AddBasinModal
+          showModal={this.state.showAddBasinModal}
+          onDismiss={this.toggleAddBasinModal}
+          onSave={() => {this.setState({savedBasin: true})}}
+        />
       }
     </>;
   }

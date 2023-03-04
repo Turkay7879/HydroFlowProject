@@ -31,5 +31,19 @@ namespace HydroFlowProject.Controllers
                 ? _context.Basins.ToJson()
                 : "";
         }
+
+        // POST: Save new basin
+        [HttpPost]
+        [Route("[controller]/saveBasin")]
+        public async Task<ActionResult<Basin>> SaveBasin([FromBody] Basin basin)
+        {
+            await _context.Basins.AddAsync(basin);
+            int added = await _context.SaveChangesAsync();
+            if (added > 0)
+            {
+                return Ok(basin);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
     }
 }
