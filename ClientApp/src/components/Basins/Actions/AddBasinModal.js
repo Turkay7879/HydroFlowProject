@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import Swal from "sweetalert2";
 import BasinsRemote from "../flux/BasinsRemote";
+import AddBasinForm from "./AddBasinForm";
 
 class AddBasinModal extends React.Component {
     constructor(props) {
@@ -15,6 +16,13 @@ class AddBasinModal extends React.Component {
                 FlowObservationStationLong: null,
                 Field: null,
                 Description: ""
+            },
+            formInvalidFields: {
+                basinNameInvalid: false,
+                flowStationNoInvalid: false,
+                flowStationLatInvalid: false,
+                flowStationLongInvalid: false,
+                fieldInvalid: false
             }
         };
     }
@@ -31,7 +39,11 @@ class AddBasinModal extends React.Component {
 
     getModalBody = () => {
         return <ModalBody>
-            ...
+            <AddBasinForm setBasin={(property, value) => {
+                    let newBasin = this.state.basin;
+                    newBasin[property] = value
+                    this.setState({ basin: newBasin });
+                }} selectedBasin={this.state.basin} {...this.state.formInvalidFields}/>
         </ModalBody>
     }
 
@@ -50,27 +62,67 @@ class AddBasinModal extends React.Component {
 
     checkBasin = () => {
         let basin = this.state.basin;
-        if (!basin || basin.BasinName.trim() === "" || !basin.Field || !basin.FlowObservationStationLat
-        || !basin.FlowObservationStationLong || basin.FlowStationNo.trim() === "") {
-            return Swal.fire({
-                title: "Missing Form Fields",
-                text: "Please fill the required fields to save new basin!",
-                icon: "warning"
-            });
+        let newInvalidFields = this.state.formInvalidFields;
+
+        let trimmedName = basin.BasinName.trim();
+        basin.BasinName = trimmedName;
+        newInvalidFields.basinNameInvalid = trimmedName === "";
+        
+        let trimmedFlowStationNo = basin.FlowStationNo.trim();
+        basin.FlowStationNo = trimmedFlowStationNo;
+        newInvalidFields.flowStationNoInvalid = trimmedFlowStationNo === "";
+
+        basin.Description = basin.Description.trim();
+        
+        if (!basin.Field) {
+            newInvalidFields.fieldInvalid = true;
+        } else {
+            let parsedField = parseInt(basin.Field);
+            if (parsedField === NaN) {newInvalidFields.fieldInvalid = true}
+            else {
+                basin.Field = parsedField;
+                newInvalidFields.fieldInvalid = false;
+            }
         }
+
+        if (!basin.FlowObservationStationLat) {
+            newInvalidFields.flowStationLatInvalid = true;
+        } else {
+            let parsedLatitude = parseFloat(basin.FlowObservationStationLat);
+            console.log(parsedLatitude)
+            if (parsedLatitude === NaN) {newInvalidFields.flowStationLatInvalid = true;}
+            else {
+                newInvalidFields.flowStationLatInvalid = false;
+                basin.FlowObservationStationLat = parsedLatitude;
+            }
+        }
+
+        if (!basin.FlowObservationStationLong) {
+            newInvalidFields.flowStationLongInvalid = true;
+        } else {
+            let parsedLongitude = parseFloat(basin.Field);
+            if (parsedLongitude === NaN) {newInvalidFields.flowStationLongInvalid = true;}
+            else {
+                basin.Field = parsedLongitude;
+                newInvalidFields.flowStationLongInvalid = false;
+            }
+        }
+
+        if (newInvalidFields.basinNameInvalid || newInvalidFields.fieldInvalid ||
+            newInvalidFields.flowStationLatInvalid || newInvalidFields.flowStationLongInvalid ||
+            newInvalidFields.flowStationNoInvalid) {
+                this.setState({formInvalidFields: newInvalidFields});
+                return Swal.fire({
+                    title: "Incorrect Form Fields",
+                    text: "Please fill the required fields correctly to save new basin!",
+                    icon: "warning"
+                });
+            }
+
         this.saveBasin(basin);
     }
 
     saveBasin = (basin) => {
-        // let testBasin = {
-        //     BasinName: "Basin 6",
-        //     FlowStationNo: "B0006",
-        //     FlowObservationStationLat: 1.1,
-        //     FlowObservationStationLong: 1.3,
-        //     Field: 0,
-        //     Description: "Test Description 3"
-        // };
-
         BasinsRemote.saveBasin(basin).then(response => {
             if (response.status === 200) {
                 response.json().then(data => {
