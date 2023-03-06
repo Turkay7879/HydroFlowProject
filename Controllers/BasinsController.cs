@@ -13,6 +13,7 @@ using NuGet.Protocol;
 namespace HydroFlowProject.Controllers
 {
     [ApiController]
+    [Route("api/[controller]/")]
     public class BasinsController : Controller
     {
         private readonly SqlServerDbContext _context;
@@ -24,7 +25,7 @@ namespace HydroFlowProject.Controllers
 
         // GET: Basins
         [HttpGet]
-        [Route("[controller]/getAllBasins")]
+        [Route("getAllBasins")]
         public string GetAllBasins()
         {
               return _context.Basins != null 
@@ -34,7 +35,7 @@ namespace HydroFlowProject.Controllers
 
         // POST: Save new basin
         [HttpPost]
-        [Route("[controller]/saveBasin")]
+        [Route("saveBasin")]
         public async Task<ActionResult<Basin>> SaveBasin([FromBody] Basin basin)
         {
             await _context.Basins.AddAsync(basin);
