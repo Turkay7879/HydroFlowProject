@@ -38,9 +38,31 @@ namespace HydroFlowProject.Controllers
         [Route("saveBasin")]
         public async Task<ActionResult<Basin>> SaveBasin([FromBody] Basin basin)
         {
-            await _context.Basins.AddAsync(basin);
+            var toUpdate = await _context.Basins.FindAsync(basin.Id);
+            if (toUpdate == null)
+            {
+                await _context.Basins.AddAsync(basin);
+            } else
+            {
+                _context.Basins.Entry(toUpdate).CurrentValues.SetValues(basin);
+            }
+            
             int added = await _context.SaveChangesAsync();
-            if (added > 0)
+            if (added > 0 || toUpdate != null)
+            {
+                return Ok(basin);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        // DELETE: Delete a basin
+        [HttpDelete]
+        [Route("deleteBasin")]
+        public async Task<ActionResult<Basin>> DeleteBasin([FromBody] Basin basin)
+        {
+            _context.Basins.Remove(basin);
+            int result = await _context.SaveChangesAsync();
+            if (result > 0)
             {
                 return Ok(basin);
             }

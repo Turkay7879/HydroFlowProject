@@ -1,6 +1,7 @@
 import React from "react";
 import BasinsRemote from "./flux/BasinsRemote";
 import AddBasinModal from "./Actions/AddBasinModal";
+import Swal from "sweetalert2";
 
 class Basins extends React.Component {
   tableColumns = ["Basin Name", "Flow Station No", "Latitude", "Longitude", "Field", "Basin Description", "Actions"];
@@ -11,7 +12,9 @@ class Basins extends React.Component {
       loadingBasins: true,
       basins: null,
       showAddBasinModal: false,
-      savedBasin: false
+      savedBasin: false,
+      selectedBasin: null,
+      editingBasin: false
     };
   }
 
@@ -30,7 +33,11 @@ class Basins extends React.Component {
     BasinsRemote.getAllBasins()
       .then((response) => {
         response.json().then(data => {
-          this.setState({ loadingBasins: false, basins: data });
+          this.setState({ 
+            loadingBasins: false, 
+            basins: data,
+            selectedBasin: null
+          });
         });
       })
       .catch((error) => {
@@ -41,17 +48,50 @@ class Basins extends React.Component {
 
   toggleAddBasinModal = () => {
     this.setState({
-      savedBasin: this.state.showAddBasinModal,
+      savedBasin: false,
       showAddBasinModal: !this.state.showAddBasinModal
     });
   }
 
+  toggleEditBasinModal = () => {
+    this.setState({editingBasin: !this.state.editingBasin});
+  }
+
+  onSaveBasin = () => {
+    this.setState({savedBasin: true})
+  }
+
   editBasin = (basin) => {
-    console.log(`Edit Basin ${basin.Id}`)
+    this.setState({selectedBasin: basin});
+    this.toggleEditBasinModal();
   }
 
   deleteBasin = (basin) => {
-    console.log(`Delete Basin ${basin.Id}`)
+    Swal.fire({
+      title: 'Confirm Deletion',
+      text: `Continue deleting selected basin?`,
+      icon: "warning",
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      confirmButtonText: "Delete"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        BasinsRemote.deleteBasin(basin).then(response => {
+          Swal.fire({
+            title: "Deleted Basin",
+            text: `Deleted ${basin.basinName} successfully!`,
+            icon: "success"
+          }).then(() => this.refreshData());
+        }).catch(err => {
+          Swal.fire({
+            title: "Error Deleting Basin",
+            text: err,
+            icon: "error"
+          });
+        });
+      }
+    });
+    
   }
 
   getBody() {
@@ -70,7 +110,7 @@ class Basins extends React.Component {
               <td>{basin.FlowObservationStationLat}</td>
               <td>{basin.FlowObservationStationLong}</td>
               <td>{basin.Field}</td>
-              <td>{basin.Description}</td>
+              <td>{basin.Description.length > 40 ? basin.Description.substring(0, 40)+"..." : basin.Description}</td>
               <td>
                 <div style={{display: "flex", justifyContent: "space-around"}}>
                   <button type="button" className="btn btn-primary"
@@ -103,7 +143,15 @@ class Basins extends React.Component {
         this.state.showAddBasinModal && <AddBasinModal
           showModal={this.state.showAddBasinModal}
           onDismiss={this.toggleAddBasinModal}
-          onSave={() => {this.setState({savedBasin: true})}}
+          onSave={this.onSaveBasin}
+        />
+      }
+      {
+        this.state.editingBasin && <AddBasinModal
+          showModal={this.state.editingBasin}
+          onDismiss={this.toggleEditBasinModal}
+          onSave={this.onSaveBasin}
+          selectedBasin={this.state.selectedBasin}
         />
       }
     </>;

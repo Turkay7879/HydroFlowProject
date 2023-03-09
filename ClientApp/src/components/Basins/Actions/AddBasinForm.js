@@ -5,6 +5,7 @@ class AddBasinForm extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            loading: true,
             selectedBasin: null,
             basinNameInvalid: this.props.basinNameInvalid,
             flowStationNoInvalid: this.props.flowStationNoInvalid,
@@ -16,8 +17,10 @@ class AddBasinForm extends React.Component {
 
     componentDidMount() {
         if (this.props.selectedBasin) {
-            this.setState({ selectedBasin: this.props.selectedBasin });
-        }
+            this.setState({ selectedBasin: this.props.selectedBasin }, () => {
+                this.setState({loading: false});
+            });
+        } else { this.setState({loading: false}); }
     }
 
     componentDidUpdate() {
@@ -40,7 +43,7 @@ class AddBasinForm extends React.Component {
 
     render() {
         return <>
-            <Form>
+            { !this.state.loading && <Form>
                 <FormGroup>
                     <Label for="addBasinFormName">Basin Name</Label>
                     <Input
@@ -106,7 +109,7 @@ class AddBasinForm extends React.Component {
                         onChange={(e) => this.props.setBasin('Description', e.target.value)}
                     />
                 </FormGroup>
-            </Form>
+            </Form> }
         </>
     }
 }

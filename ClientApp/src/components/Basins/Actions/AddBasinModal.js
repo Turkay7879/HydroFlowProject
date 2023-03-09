@@ -29,6 +29,9 @@ class AddBasinModal extends React.Component {
 
     componentDidMount() {
         this.setState({showModal: this.props.showModal});
+        if (this.props.selectedBasin !== null && this.props.selectedBasin !== undefined) {
+            this.setState({basin: this.props.selectedBasin});
+        }
     }
 
     getModalHeader = () => {
@@ -89,7 +92,6 @@ class AddBasinModal extends React.Component {
             newInvalidFields.flowStationLatInvalid = true;
         } else {
             let parsedLatitude = parseFloat(basin.FlowObservationStationLat);
-            console.log(parsedLatitude)
             if (parsedLatitude === NaN) {newInvalidFields.flowStationLatInvalid = true;}
             else {
                 newInvalidFields.flowStationLatInvalid = false;
@@ -127,15 +129,15 @@ class AddBasinModal extends React.Component {
             if (response.status === 200) {
                 response.json().then(data => {
                     Swal.fire({
-                        title: "Added Basin",
-                        text: `Added ${data.basinName} successfully!`,
+                        title: !this.props.selectedBasin ? "Added Basin" : "Saved Basin",
+                        text: `${!this.props.selectedBasin ? "Added" : "Saved"} ${data.basinName} successfully!`,
                         icon: "success"
                     }).then(() => this.dismissModal());
                 });
             } else {
                 Swal.fire({
                     title: "Save Failed",
-                    text: "An error occured while saving new basin!",
+                    text: "An error occured while saving basin!",
                     icon: "error"
                 });
             }
