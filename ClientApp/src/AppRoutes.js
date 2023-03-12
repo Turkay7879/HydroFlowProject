@@ -13,7 +13,11 @@ const AppRoutes = [
   {
     path: Routes.UsersAdminPanel.route,
     element: Routes.UsersAdminPanel.component,
-  },
+    },
+    {
+        path: Routes.ModelsAdminPanel.route,
+        element: Routes.ModelsAdminPanel.component,
+    },
 ];
 
 export default AppRoutes;

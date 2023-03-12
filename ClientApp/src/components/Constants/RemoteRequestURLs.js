@@ -5,7 +5,9 @@ const RemoteRequestURLs = {
   BASIN_DELETE_BASIN: "/api/basins/deleteBasin",
 
   //User Requests
-  USER_GET_ALL_USERS: "/api/users/getAllUsers"
+    USER_GET_ALL_USERS: "/api/users/getAllUsers",
+    //Model Requests
+    MODEL_GET_ALL_MODELS: "/api/models/getAllModels",
 };
 
 export default RemoteRequestURLs;
