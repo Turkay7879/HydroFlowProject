@@ -48,51 +48,19 @@ namespace HydroFlowProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        /*
-                // DELETE: Delete a Model
-                [HttpDelete]
-                [Route("deleteModel/{id}")]
-                public async Task<ActionResult<Model>> DeleteModel(int id)
-                {
-                    var Model = await _context.Models.FindAsync(id);
-                    if (Model == null)
-                    {
-                        return NotFound();
-                    }
-
-                    _context.Models.Remove(Model);
-                    int deleted = await _context.SaveChangesAsync();
-                    if (deleted > 0)
-                    {
-                        return Ok(Model);
-                    }
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-        */
-        // PUT: Update a Model
-        /*
-        [HttpPut]
-        [Route("editModel/{id}")]
-        public async Task<IActionResult> EditModel(int id, [FromBody] Model updatedModel)
+        // DELETE: Delete a model
+        [HttpDelete]
+        [Route("deleteModel")]
+        public async Task<ActionResult<Model>> DeleteModel([FromBody] Model model)
         {
-            var existingModel = await _context.Models.FindAsync(id);
-            if (existingModel == null)
+            _context.Models.Remove(model);
+            int result = await _context.SaveChangesAsync();
+            if (result > 0)
             {
-                return NotFound();
-            }
-
-            existingModel.Name = updatedModel.Name;
-            existingModel.Description = updatedModel.Description;
-            existingModel.Category = updatedModel.Category;
-
-            _context.Models.Update(existingModel);
-            int updated = await _context.SaveChangesAsync();
-            if (updated > 0)
-            {
-                return Ok(existingModel);
+                return Ok(model);
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
-        }*/
+        }
 
     }
 }

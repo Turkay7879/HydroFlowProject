@@ -8,6 +8,13 @@ const RemoteRequestURLs = {
     USER_GET_ALL_USERS: "/api/users/getAllUsers",
     //Model Requests
     MODEL_GET_ALL_MODELS: "/api/models/getAllModels",
+    MODEL_SAVE_NEW_MODEL: "/api/models/saveModel",
+    MODEL_DELETE_MODEL: "/api/models/deleteModel"
+
+
+
+
+
 };
 
 export default RemoteRequestURLs;
