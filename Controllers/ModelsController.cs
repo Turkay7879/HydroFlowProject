@@ -48,7 +48,11 @@ namespace HydroFlowProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        // DELETE: Delete a model
+
+
+        //
+        //
+        // : Delete a model
         [HttpDelete]
         [Route("deleteModel")]
         public async Task<ActionResult<Model>> DeleteModel([FromBody] Model model)

@@ -9,7 +9,7 @@ const RemoteRequestURLs = {
     //Model Requests
     MODEL_GET_ALL_MODELS: "/api/models/getAllModels",
     MODEL_SAVE_NEW_MODEL: "/api/models/saveModel",
-    MODEL_DELETE_MODEL: "/api/models/deleteModel"
+    MODEL_DELETE_MODEL: "/api/models/deleteModel",
 
 
 

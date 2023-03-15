@@ -2,6 +2,7 @@
 import { Modal, Form, Button } from 'react-bootstrap';
 import ModelsRemote from "./flux/ModelsRemote";
 import "./Models.css";
+import Swal from "sweetalert2";
 
 class Models extends Component {
     constructor(props) {
@@ -46,6 +47,32 @@ class Models extends Component {
         event.preventDefault();
         this.handleCloseModal();
     };
+    deleteModel = (model) => {
+        Swal.fire({
+            title: 'Confirm Deletion',
+            text: `Continue deleting selected Model?`,
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Cancel",
+            confirmButtonText: "Delete"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ModelsRemote.deleteModel(model).then(response => {
+                    Swal.fire({
+                        title: "Deleted Model",
+                        text: `Deleted ${model.Name} successfully!`,
+                        icon: "success"
+                    }).then(() => this.refreshData());
+                }).catch(err => {
+                    Swal.fire({
+                        title: "Error Deleting Model",
+                        text: err,
+                        icon: "error"
+                    });
+                });
+            }
+        });
+    }
 
     getBody() {
         return (
@@ -66,7 +93,7 @@ class Models extends Component {
                                 <td>{model.ModelPermissionId}</td>
                                 <td>
                                     <Button variant="primary" onClick={() => this.handleEditModel(model)}>Edit</Button>
-                                    <Button variant="danger" onClick={() => this.handleDeleteModel(model)}>Delete</Button>
+                                    <button type="button" className="btn btn-danger" onClick={(e) => { this.deleteModel(model) }}>Delete</button>
                                 </td>
                             </tr>
                         )}
@@ -74,7 +101,7 @@ class Models extends Component {
                 </table>
             </div>
         );
-    }
+    };
 
     render() {
         return (
@@ -137,8 +164,8 @@ class Models extends Component {
                                             <td>{model.ModelPermissionId}</td>
                                             <td>
                                                 <Button variant="primary" onClick={() => this.handleEditModel(model)}>Edit</Button>
-                                                <Button variant="danger" onClick={() => this.handleDeleteModel(model)}>Delete</Button>
-                                            </td>
+                                                <button type="button" className="btn btn-danger"
+                                                    onClick={(e) => { this.deleteModel(model) }}>Delete</button>                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
