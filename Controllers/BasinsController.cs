@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using HydroFlowProject.Data;
 using HydroFlowProject.Models;
+using HydroFlowProject.ViewModels;
 using System.Collections;
 using NuGet.Protocol;
 
@@ -26,18 +27,39 @@ namespace HydroFlowProject.Controllers
         // GET: Basins
         [HttpGet]
         [Route("getAllBasins")]
-        public string GetAllBasins()
+        public ActionResult<List<BasinViewModel>> GetAllBasins()
         {
-              return _context.Basins != null 
-                ? _context.Basins.ToJson()
-                : "";
+            if (!_context.Basins.Any())
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            List<BasinViewModel> allBasins = new List<BasinViewModel>();
+
+            foreach (Basin basin in _context.Basins.ToList())
+            {
+                BasinViewModel bvm = new BasinViewModel();
+                bvm = bvm.fromBasin(basin);
+                allBasins.Add(bvm);
+            }
+            foreach (BasinViewModel bvm in allBasins)
+            {
+                List<BasinPermission> permissionList = _context.BasinPermissions.Where(perm => perm.BasinId == bvm.Id).ToList();
+                BasinPermission permission = permissionList.ElementAt(0);
+                bvm.BasinPerm = permission.BasinPermissionType == null ? false : (bool)permission.BasinPermissionType;
+                bvm.BasinSpecPerm = permission.BasinSpecPerm == null ? false : (bool)permission.BasinSpecPerm;
+                bvm.UserSpecPerm = permission.UserSpecPerm == null ? false : (bool)permission.UserSpecPerm;
+            }
+
+            return Ok(allBasins);
         }
 
         // POST: Save new basin
         [HttpPost]
         [Route("saveBasin")]
-        public async Task<ActionResult<Basin>> SaveBasin([FromBody] Basin basin)
+        public async Task<ActionResult<Basin>> SaveBasin([FromBody] BasinViewModel basinVM)
         {
+            Basin basin = basinVM.toBasin();
             var toUpdate = await _context.Basins.FindAsync(basin.Id);
             if (toUpdate == null)
             {
@@ -48,11 +70,38 @@ namespace HydroFlowProject.Controllers
             }
             
             int added = await _context.SaveChangesAsync();
-            if (added > 0 || toUpdate != null)
+            if (toUpdate == null && added <= 0)
             {
-                return Ok(basin);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return StatusCode(StatusCodes.Status500InternalServerError);
+
+            BasinPermission permissions = new BasinPermission();
+            permissions.BasinId = basin.Id;
+            permissions.BasinPermissionType = basinVM.BasinPerm;
+            permissions.BasinSpecPerm = basinVM.BasinSpecPerm;
+            permissions.UserSpecPerm = basinVM.UserSpecPerm;
+
+            List<BasinPermission> permToUpdate = _context.BasinPermissions.Where(perm => perm.BasinId == basin.Id).ToList();
+            if (permToUpdate == null || permToUpdate.Capacity <= 0)
+            {
+                await _context.BasinPermissions.AddAsync(permissions);
+            } else
+            {
+                var permission = _context.BasinPermissions.FirstOrDefault(p => p.BasinId == basin.Id);
+                permission.BasinPermissionType = basinVM.BasinPerm;
+                permission.BasinSpecPerm = basinVM.BasinSpecPerm;
+                permission.UserSpecPerm = basinVM.UserSpecPerm;
+            }
+
+            int addedPerm = await _context.SaveChangesAsync();
+            if ((permToUpdate == null || permToUpdate.Capacity <= 0) && addedPerm <= 0)
+            {
+                _context.Basins.Remove(basin);
+                await _context.SaveChangesAsync();
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return StatusCode(StatusCodes.Status200OK, basinVM);
         }
 
         // DELETE: Delete a basin
@@ -67,6 +116,28 @@ namespace HydroFlowProject.Controllers
                 return Ok(basin);
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        // POST: Save Basin Permissions
+        [HttpPost]
+        [Route("savePermissions")]
+        public async Task<ActionResult<BasinPermissionViewModel>> SavePermissions([FromBody] BasinPermissionViewModel basinPermVM)
+        {
+            List<BasinPermission> toUpdate = _context.BasinPermissions.Where(perm => perm.BasinId == basinPermVM.BasinId).ToList();
+            if (toUpdate == null || toUpdate.Capacity == 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            BasinPermission permission = toUpdate.ElementAt(0);
+            permission.BasinId = basinPermVM.BasinId;
+            permission.BasinPermissionType = basinPermVM.BasinPermissionType;
+            permission.BasinSpecPerm = basinPermVM.BasinSpecPerm;
+            permission.UserSpecPerm = basinPermVM.UserSpecPerm;
+
+            _context.BasinPermissions.Entry(toUpdate.ElementAt(0)).CurrentValues.SetValues(permission);
+            await _context.SaveChangesAsync();
+            return Ok(basinPermVM);
         }
     }
 }

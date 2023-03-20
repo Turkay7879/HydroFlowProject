@@ -10,12 +10,12 @@ class AddBasinModal extends React.Component {
         this.state = {
             showModal: false,
             basin: {
-                BasinName: "",
-                FlowStationNo: "",
-                FlowObservationStationLat: null,
-                FlowObservationStationLong: null,
-                Field: null,
-                Description: ""
+                basinName: "",
+                flowStationNo: "",
+                flowObservationStationLat: null,
+                flowObservationStationLong: null,
+                field: null,
+                description: ""
             },
             formInvalidFields: {
                 basinNameInvalid: false,
@@ -28,9 +28,12 @@ class AddBasinModal extends React.Component {
     }
 
     componentDidMount() {
-        this.setState({showModal: this.props.showModal});
         if (this.props.selectedBasin !== null && this.props.selectedBasin !== undefined) {
-            this.setState({basin: this.props.selectedBasin});
+            this.setState({basin: this.props.selectedBasin}, () => {
+                this.setState({showModal: this.props.showModal});
+            });
+        } else {
+            this.setState({showModal: this.props.showModal});
         }
     }
 
@@ -67,45 +70,45 @@ class AddBasinModal extends React.Component {
         let basin = this.state.basin;
         let newInvalidFields = this.state.formInvalidFields;
 
-        let trimmedName = basin.BasinName.trim();
-        basin.BasinName = trimmedName;
+        let trimmedName = basin.basinName.trim();
+        basin.basinName = trimmedName;
         newInvalidFields.basinNameInvalid = trimmedName === "";
         
-        let trimmedFlowStationNo = basin.FlowStationNo.trim();
-        basin.FlowStationNo = trimmedFlowStationNo;
+        let trimmedFlowStationNo = basin.flowStationNo.trim();
+        basin.flowStationNo = trimmedFlowStationNo;
         newInvalidFields.flowStationNoInvalid = trimmedFlowStationNo === "";
 
-        basin.Description = basin.Description.trim();
+        basin.description = basin.description.trim();
         
-        if (!basin.Field) {
+        if (!basin.field) {
             newInvalidFields.fieldInvalid = true;
         } else {
-            let parsedField = parseInt(basin.Field);
+            let parsedField = parseInt(basin.field);
             if (parsedField === NaN) {newInvalidFields.fieldInvalid = true}
             else {
-                basin.Field = parsedField;
+                basin.field = parsedField;
                 newInvalidFields.fieldInvalid = false;
             }
         }
 
-        if (!basin.FlowObservationStationLat) {
+        if (!basin.flowObservationStationLat) {
             newInvalidFields.flowStationLatInvalid = true;
         } else {
-            let parsedLatitude = parseFloat(basin.FlowObservationStationLat);
+            let parsedLatitude = parseFloat(basin.flowObservationStationLat);
             if (parsedLatitude === NaN) {newInvalidFields.flowStationLatInvalid = true;}
             else {
                 newInvalidFields.flowStationLatInvalid = false;
-                basin.FlowObservationStationLat = parsedLatitude;
+                basin.flowObservationStationLat = parsedLatitude;
             }
         }
 
-        if (!basin.FlowObservationStationLong) {
+        if (!basin.flowObservationStationLong) {
             newInvalidFields.flowStationLongInvalid = true;
         } else {
-            let parsedLongitude = parseFloat(basin.Field);
+            let parsedLongitude = parseFloat(basin.field);
             if (parsedLongitude === NaN) {newInvalidFields.flowStationLongInvalid = true;}
             else {
-                basin.Field = parsedLongitude;
+                basin.field = parsedLongitude;
                 newInvalidFields.flowStationLongInvalid = false;
             }
         }
@@ -132,7 +135,10 @@ class AddBasinModal extends React.Component {
                         title: !this.props.selectedBasin ? "Added Basin" : "Saved Basin",
                         text: `${!this.props.selectedBasin ? "Added" : "Saved"} ${data.basinName} successfully!`,
                         icon: "success"
-                    }).then(() => this.dismissModal());
+                    }).then(() => {
+                        this.props.onSave();
+                        this.dismissModal();
+                    });
                 });
             } else {
                 Swal.fire({

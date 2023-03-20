@@ -1,6 +1,7 @@
 import React from "react";
 import BasinsRemote from "./flux/BasinsRemote";
 import AddBasinModal from "./Actions/AddBasinModal";
+import PermissionsModal from "./Actions/PermissionsModal";
 import Swal from "sweetalert2";
 
 class Basins extends React.Component {
@@ -14,7 +15,8 @@ class Basins extends React.Component {
       showAddBasinModal: false,
       savedBasin: false,
       selectedBasin: null,
-      editingBasin: false
+      editingBasin: false,
+      editingPermissions: false
     };
   }
 
@@ -57,13 +59,22 @@ class Basins extends React.Component {
     this.setState({editingBasin: !this.state.editingBasin});
   }
 
+  togglePermissionsModal = () => {
+    this.setState({editingPermissions: !this.state.editingPermissions});
+  }
+
   onSaveBasin = () => {
     this.setState({savedBasin: true})
   }
 
   editBasin = (basin) => {
-    this.setState({selectedBasin: basin});
-    this.toggleEditBasinModal();
+    this.setState({selectedBasin: basin}, () => {
+      this.toggleEditBasinModal();
+    });
+  }
+
+  changePermissions = (basin) => {
+    this.setState({selectedBasin: basin}, () => this.togglePermissionsModal());
   }
 
   deleteBasin = (basin) => {
@@ -77,11 +88,13 @@ class Basins extends React.Component {
     }).then((result) => {
       if (result.isConfirmed) {
         BasinsRemote.deleteBasin(basin).then(response => {
-          Swal.fire({
-            title: "Deleted Basin",
-            text: `Deleted ${basin.basinName} successfully!`,
-            icon: "success"
-          }).then(() => this.refreshData());
+          response.json().then(result => {
+            Swal.fire({
+              title: "Deleted Basin",
+              text: `Deleted ${result['basinName']} successfully!`,
+              icon: "success"
+            }).then(() => this.refreshData());
+          });
         }).catch(err => {
           Swal.fire({
             title: "Error Deleting Basin",
@@ -104,17 +117,19 @@ class Basins extends React.Component {
         </thead>
         <tbody>
           {this.state.basins.map(basin =>
-            <tr key={basin.Id}>
-              <td>{basin.BasinName}</td>
-              <td>{basin.FlowStationNo}</td>
-              <td>{basin.FlowObservationStationLat}</td>
-              <td>{basin.FlowObservationStationLong}</td>
-              <td>{basin.Field}</td>
-              <td>{basin.Description.length > 40 ? basin.Description.substring(0, 40)+"..." : basin.Description}</td>
+            <tr key={basin.id}>
+              <td>{basin.basinName}</td>
+              <td>{basin.flowStationNo}</td>
+              <td>{basin.flowObservationStationLat}</td>
+              <td>{basin.flowObservationStationLong}</td>
+              <td>{basin.field}</td>
+              <td>{basin.description.length > 40 ? basin.description.substring(0, 40)+"..." : basin.description}</td>
               <td>
                 <div style={{display: "flex", justifyContent: "space-around"}}>
                   <button type="button" className="btn btn-primary"
                     onClick={(e) => { this.editBasin(basin) }}>Edit</button>
+                  <button type="button" className="btn btn-secondary"
+                    onClick={(e) => { this.changePermissions(basin) }}>Permissions</button>
                   <button type="button" className="btn btn-danger"
                     onClick={(e) => { this.deleteBasin(basin) }}>Delete</button>
                 </div>
@@ -151,6 +166,14 @@ class Basins extends React.Component {
           showModal={this.state.editingBasin}
           onDismiss={this.toggleEditBasinModal}
           onSave={this.onSaveBasin}
+          selectedBasin={this.state.selectedBasin}
+        />
+      }
+      {
+        this.state.editingPermissions && <PermissionsModal
+          showModal={this.state.editingPermissions}
+          onDismiss={this.togglePermissionsModal}
+          onSave={() => this.refreshData()}
           selectedBasin={this.state.selectedBasin}
         />
       }

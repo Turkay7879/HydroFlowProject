@@ -2,17 +2,18 @@ using HydroFlowProject.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Runtime.InteropServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<SqlServerDbContext>(options =>
 {
-    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
     }
-    else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("MacDockerConnection"));
     }

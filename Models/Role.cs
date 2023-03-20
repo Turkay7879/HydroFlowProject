@@ -6,6 +6,8 @@
 
         public string RoleDescription { get; set; } = null!;
 
+        public string RoleValue { get; set; } = null!;
+
         public virtual ICollection<UserRole> UserRoles { get; } = new List<UserRole>();
     }
 }

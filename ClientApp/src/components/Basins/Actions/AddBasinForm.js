@@ -51,7 +51,7 @@ class AddBasinForm extends React.Component {
                         name="BasinName"
                         type="text"
                         invalid={this.state.basinNameInvalid}
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.BasinName : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.basinName : ""}
                         onChange={(e) => this.props.setBasin('BasinName', e.target.value)}
                     />
                 </FormGroup>
@@ -62,7 +62,7 @@ class AddBasinForm extends React.Component {
                         name="FlowStationNo"
                         type="text"
                         invalid={this.state.flowStationNoInvalid}
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.FlowStationNo : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowStationNo : ""}
                         onChange={(e) => this.props.setBasin('FlowStationNo', e.target.value)}
                     />
                 </FormGroup>
@@ -73,7 +73,7 @@ class AddBasinForm extends React.Component {
                         name="FlowObservationStationLat"
                         type="text"
                         invalid={this.state.flowStationLatInvalid}
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.FlowObservationStationLat : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowObservationStationLat : ""}
                         onChange={(e) => this.props.setBasin('FlowObservationStationLat', e.target.value)}
                     />
                 </FormGroup>
@@ -84,7 +84,7 @@ class AddBasinForm extends React.Component {
                         name="FlowObservationStationLong"
                         type="text"
                         invalid={this.state.flowStationLongInvalid}
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.FlowObservationStationLong : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowObservationStationLong : ""}
                         onChange={(e) => this.props.setBasin('FlowObservationStationLong', e.target.value)}
                     />
                 </FormGroup>
@@ -95,7 +95,7 @@ class AddBasinForm extends React.Component {
                         name="Field"
                         type="text"
                         invalid={this.state.fieldInvalid}
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.Field : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.field : ""}
                         onChange={(e) => this.props.setBasin('Field', e.target.value)}
                     />
                 </FormGroup>
@@ -105,7 +105,7 @@ class AddBasinForm extends React.Component {
                         id="addBasinFormDescription"
                         name="Description"
                         type="text"
-                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.Description : ""}
+                        defaultValue={this.state.selectedBasin ? this.state.selectedBasin.description : ""}
                         onChange={(e) => this.props.setBasin('Description', e.target.value)}
                     />
                 </FormGroup>
