@@ -27,24 +27,24 @@ class Basins extends React.Component {
   componentDidUpdate() {
     if (this.state.savedBasin) {
       this.refreshData();
-      this.setState({savedBasin: false});
+      this.setState({ savedBasin: false });
     }
   }
 
   refreshData = async () => {
     BasinsRemote.getAllBasins()
       .then((response) => {
-        response.json().then(data => {
-          this.setState({ 
-            loadingBasins: false, 
-            basins: data,
-            selectedBasin: null
+        if (response.ok) {
+          response.json().then(data => {
+            this.setState({
+              loadingBasins: false,
+              basins: data,
+              selectedBasin: null
+            });
           });
-        });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.setState({ loadingBasins: false });
+        } else {
+          this.setState({ loadingBasins: false });
+        }
       });
   }
 
@@ -56,25 +56,25 @@ class Basins extends React.Component {
   }
 
   toggleEditBasinModal = () => {
-    this.setState({editingBasin: !this.state.editingBasin});
+    this.setState({ editingBasin: !this.state.editingBasin });
   }
 
   togglePermissionsModal = () => {
-    this.setState({editingPermissions: !this.state.editingPermissions});
+    this.setState({ editingPermissions: !this.state.editingPermissions });
   }
 
   onSaveBasin = () => {
-    this.setState({savedBasin: true})
+    this.setState({ savedBasin: true })
   }
 
   editBasin = (basin) => {
-    this.setState({selectedBasin: basin}, () => {
+    this.setState({ selectedBasin: basin }, () => {
       this.toggleEditBasinModal();
     });
   }
 
   changePermissions = (basin) => {
-    this.setState({selectedBasin: basin}, () => this.togglePermissionsModal());
+    this.setState({ selectedBasin: basin }, () => this.togglePermissionsModal());
   }
 
   deleteBasin = (basin) => {
@@ -104,7 +104,7 @@ class Basins extends React.Component {
         });
       }
     });
-    
+
   }
 
   getBody() {
@@ -112,7 +112,7 @@ class Basins extends React.Component {
       <table className="table table-striped" aria-labelledby="tableLabel">
         <thead>
           <tr>
-            { this.tableColumns.map(col => <th key={col}>{col}</th>) }
+            {this.tableColumns.map(col => <th key={col}>{col}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -123,9 +123,9 @@ class Basins extends React.Component {
               <td>{basin.flowObservationStationLat}</td>
               <td>{basin.flowObservationStationLong}</td>
               <td>{basin.field}</td>
-              <td>{basin.description.length > 40 ? basin.description.substring(0, 40)+"..." : basin.description}</td>
+              <td>{basin.description.length > 40 ? basin.description.substring(0, 40) + "..." : basin.description}</td>
               <td>
-                <div style={{display: "flex", justifyContent: "space-around"}}>
+                <div style={{ display: "flex", justifyContent: "space-around" }}>
                   <button type="button" className="btn btn-primary"
                     onClick={(e) => { this.editBasin(basin) }}>Edit</button>
                   <button type="button" className="btn btn-secondary"
@@ -144,15 +144,15 @@ class Basins extends React.Component {
   render() {
     return <>
       <div style={{ display: "flex", justifyContent: "end" }}>
-         <button type="button" className="btn btn-primary"
-            onClick={() => { this.toggleAddBasinModal() }}>
-              Add Basin
-          </button>
+        <button type="button" className="btn btn-primary"
+          onClick={() => { this.toggleAddBasinModal() }}>
+          Add Basin
+        </button>
       </div>
       {
         this.state.loadingBasins ? <p className="fs-1">Loading Basins...</p> :
-        !this.state.basins ? <p className="fs-1">No Basin Found</p> :
-        this.getBody()
+          !this.state.basins ? <p className="fs-1">No Basin Found</p> :
+            this.getBody()
       }
       {
         this.state.showAddBasinModal && <AddBasinModal

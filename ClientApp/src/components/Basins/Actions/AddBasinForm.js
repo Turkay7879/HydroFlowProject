@@ -18,9 +18,9 @@ class AddBasinForm extends React.Component {
     componentDidMount() {
         if (this.props.selectedBasin) {
             this.setState({ selectedBasin: this.props.selectedBasin }, () => {
-                this.setState({loading: false});
+                this.setState({ loading: false });
             });
-        } else { this.setState({loading: false}); }
+        } else { this.setState({ loading: false }); }
     }
 
     componentDidUpdate() {
@@ -43,7 +43,7 @@ class AddBasinForm extends React.Component {
 
     render() {
         return <>
-            { !this.state.loading && <Form>
+            {!this.state.loading && <Form>
                 <FormGroup>
                     <Label for="addBasinFormName">Basin Name</Label>
                     <Input
@@ -52,7 +52,7 @@ class AddBasinForm extends React.Component {
                         type="text"
                         invalid={this.state.basinNameInvalid}
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.basinName : ""}
-                        onChange={(e) => this.props.setBasin('BasinName', e.target.value)}
+                        onChange={(e) => this.props.setBasin('basinName', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
@@ -63,7 +63,7 @@ class AddBasinForm extends React.Component {
                         type="text"
                         invalid={this.state.flowStationNoInvalid}
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowStationNo : ""}
-                        onChange={(e) => this.props.setBasin('FlowStationNo', e.target.value)}
+                        onChange={(e) => this.props.setBasin('flowStationNo', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
@@ -74,7 +74,7 @@ class AddBasinForm extends React.Component {
                         type="text"
                         invalid={this.state.flowStationLatInvalid}
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowObservationStationLat : ""}
-                        onChange={(e) => this.props.setBasin('FlowObservationStationLat', e.target.value)}
+                        onChange={(e) => this.props.setBasin('flowObservationStationLat', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
@@ -85,7 +85,7 @@ class AddBasinForm extends React.Component {
                         type="text"
                         invalid={this.state.flowStationLongInvalid}
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.flowObservationStationLong : ""}
-                        onChange={(e) => this.props.setBasin('FlowObservationStationLong', e.target.value)}
+                        onChange={(e) => this.props.setBasin('flowObservationStationLong', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
@@ -96,7 +96,7 @@ class AddBasinForm extends React.Component {
                         type="text"
                         invalid={this.state.fieldInvalid}
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.field : ""}
-                        onChange={(e) => this.props.setBasin('Field', e.target.value)}
+                        onChange={(e) => this.props.setBasin('field', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
@@ -106,10 +106,10 @@ class AddBasinForm extends React.Component {
                         name="Description"
                         type="text"
                         defaultValue={this.state.selectedBasin ? this.state.selectedBasin.description : ""}
-                        onChange={(e) => this.props.setBasin('Description', e.target.value)}
+                        onChange={(e) => this.props.setBasin('description', e.target.value)}
                     />
                 </FormGroup>
-            </Form> }
+            </Form>}
         </>
     }
 }
