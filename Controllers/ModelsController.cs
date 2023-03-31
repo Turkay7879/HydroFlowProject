@@ -14,7 +14,6 @@ namespace HydroFlowProject.Controllers
 {
     [ApiController]
     [Route("api/[controller]/")]
-
     public class ModelsController : Controller
     {
         private readonly SqlServerDbContext _context;
@@ -34,25 +33,42 @@ namespace HydroFlowProject.Controllers
               : "";
         }
 
-        // POST: Save new Model
+        // POST: Save new model
         [HttpPost]
         [Route("saveModel")]
-        public async Task<ActionResult<Model>> SaveModel([FromBody] Model Model)
+        public async Task<ActionResult<Model>> SaveModel([FromBody] Model model)
         {
-            await _context.Models.AddAsync(Model);
-            int added = await _context.SaveChangesAsync();
-            if (added > 0)
+            var toUpdate = await _context.Models.FindAsync(model.Id);
+            if (toUpdate == null)
             {
-                return Ok(Model);
+                await _context.Models.AddAsync(model);
+            }
+            else
+            {
+                _context.Models.Entry(toUpdate).CurrentValues.SetValues(model);
+            }
+
+            int added = await _context.SaveChangesAsync();
+            if (added > 0 || toUpdate != null)
+            {
+                return Ok(model);
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
-
-
-        //
-        //
-        // : Delete a model
+        /*  // DELETE: Delete a model
+        [HttpDelete]
+        [Route("deleteModel")]
+        public async Task<ActionResult<Model>> DeleteModel([FromBody] Model model)
+        {
+            _context.Models.Remove(model);
+            int result = await _context.SaveChangesAsync();
+            if (result > 0)
+            {
+                return Ok(model);
+            }
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }*/
+        // DELETE: Delete a model
         [HttpDelete]
         [Route("deleteModel")]
         public async Task<ActionResult<Model>> DeleteModel([FromBody] Model model)
@@ -65,6 +81,5 @@ namespace HydroFlowProject.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
     }
 }

@@ -1,43 +1,158 @@
-﻿import React, { Component } from 'react';
-import AddModelWizard from './AddModelWizard';
+﻿import React from "react";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import Swal from "sweetalert2";
+import ModelsRemote from "../flux/ModelsRemote";
+import AddModelForm from "./AddModelForm";
 
-class AddModelModal extends Component {
+class AddModelModal extends React.Component {
+
     constructor(props) {
         super(props);
+
         this.state = {
-            showModal: false
+            showModal: false,
+            model: {
+                Name: "",
+                Title: "",
+                CreateDate: new Date(),
+                ModelFile: null,
+                ModelPermissionId: 0,
+            },
+            formInvalidFields: {
+                NameInvalid: false,
+                titleInvalid: false,
+                modelFileInvalid: false,
+                modelPermissionIdInvalid: false
+            }
+        };
+    }
+
+
+
+    componentDidMount() {
+        if (this.props.selectedModel !== null && this.props.selectedModel !== undefined) {
+            this.setState({ model: this.props.selectedModel }, () => {
+                this.setState({ showModal: this.props.showModal });
+            });
+        } else {
+            this.setState({ showModal: this.props.showModal });
         }
     }
 
-    openModal = () => {
-        this.setState({ showModal: true });
+
+    getModalHeader = () => {
+        return <ModalHeader>
+            Add Model
+        </ModalHeader>
     }
 
-    closeModal = () => {
-        this.setState({ showModal: false });
+    getModalBody = () => {
+        return <ModalBody>
+            <AddModelForm setModel={(property, value) => {
+                let newModel = this.state.model;
+                newModel[property] = value
+                this.setState({ model: newModel });
+            }} selectedModel={this.state.model} {...this.state.formInvalidFields} />
+        </ModalBody>
     }
 
-    handleSubmit = () => {
-        // Form submit işlemleri
-        this.closeModal();
+    getModalFooter = () => {
+        return <ModalFooter>
+            <button type="button" className="btn btn-primary"
+                onClick={this.checkModel}>Save Model</button>
+            <button type="button" className="btn btn-secondary"
+                onClick={this.dismissModal}>Close</button>
+        </ModalFooter>
     }
+
+    dismissModal = () => {
+        this.setState({ showModal: false }, () => this.props.onDismiss());
+    }
+
+    checkModel = () => {
+        let model = this.state.model;
+        let newInvalidFields = this.state.formInvalidFields;
+        let trimmedName = model.Name.trim();
+        model.Name = trimmedName;
+        newInvalidFields.NameInvalid = trimmedName === "";
+        let trimmedTitle = model.Title.trim();
+        model.Title = trimmedTitle;
+        newInvalidFields.titleInvalid = trimmedTitle === "";
+
+        /////Modelfile checki düzenlenecek 
+        let trimmedModelFile = model.ModelFile.trim();
+        model.ModelFile = trimmedModelFile;
+        newInvalidFields.modelFileInvalid = trimmedModelFile === "";
+      
+          if (!model.ModelPermissionId) {
+              newInvalidFields.modelPermissionIdInvalid = true;
+          } else {
+              let parsedModelPermissionId = parseInt(model.ModelPermissionId);
+              if (isNaN(parsedModelPermissionId)) {
+                  newInvalidFields.modelPermissionIdInvalid = true;
+              } else {
+                  model.ModelPermissionId = parsedModelPermissionId;
+                  newInvalidFields.modelPermissionIdInvalid = false;
+              }
+  
+          }
+        if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid ||
+            newInvalidFields.modelPermissionIdInvalid || newInvalidFields.modelFileInvalid) {
+            this.setState({ formInvalidFields: newInvalidFields });
+            return Swal.fire({
+                title: "Incorrect Form Fields",
+                text: "Please fill the required fields correctly to save new basin!",
+                icon: "warning"
+            });
+        }
+
+        this.saveModel(model);
+    }
+
+    saveModel = (model) => {
+        const base64ModelFile = btoa(String.fromCharCode.apply(null, new Uint8Array(model.ModelFile))); // ModelFile özelliğinin base64 kodlaması yapılıyor
+        let createDate = model.CreateDate ? model.CreateDate.toISOString() : new Date().toISOString(); // Değişken tanımı yapılıyor
+        return ModelsRemote.saveModel({
+            Id: model.Id,
+            Name: model.Name,
+            Title: model.Title,
+            CreateDate: createDate, // Değişken kullanılıyor
+            ModelFile: base64ModelFile, // base64 kodlaması yapılmış ModelFile özelliği kullanılıyor
+            ModelPermissionId: model.ModelPermissionId
+        })
+            .then(response => {
+                console.log("Model saved successfully!");
+                console.log(response);
+                Swal.fire({
+                    title: !this.props.selectedModel ? "Added Model" : "Saved Model",
+                    text: `${!this.props.selectedModel ? "Added" : "Saved"} ${model.Name} successfully!`,
+                    icon: "success"
+                }).then(() => {
+                    this.props.onSave();
+                    this.dismissModal();
+                });
+            })
+            .catch(error => {
+                console.error("Error saving model:", error);
+                Swal.fire({
+                    title: "Save Failed",
+                    text: "An error occurred while saving model!",
+                    icon: "error"
+                });
+            });
+    }
+
+
+
 
     render() {
-        const { showModal } = this.state;
-
-        return (
-            <div>
-                <button onClick={this.openModal}>Add Model</button>
-                {showModal && (
-                    <div className="modal">
-                        <div className="modal-content">
-                            <span className="close" onClick={this.closeModal}>&times;</span>
-                            <AddModelWizard onSubmit={this.handleSubmit} />
-                        </div>
-                    </div>
-                )}
-            </div>
-        );
+        return <>
+            <Modal isOpen={this.state.showModal}>
+                {this.getModalHeader()}
+                {this.getModalBody()}
+                {this.getModalFooter()}
+            </Modal>
+        </>
     }
 }
 

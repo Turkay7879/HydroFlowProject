@@ -1,8 +1,8 @@
 ﻿import React, { Component } from 'react';
-import { Modal, Form, Button } from 'react-bootstrap';
 import ModelsRemote from "./flux/ModelsRemote";
 import "./Models.css";
 import Swal from "sweetalert2";
+import AddModelModal from "./Actions/AddModelModal";
 
 class Models extends Component {
     constructor(props) {
@@ -11,21 +11,32 @@ class Models extends Component {
         this.state = {
             loadingModels: true,
             models: [],
-            showModal: false
+            showAddModelModal: false,
+            savedModel: false,
+            selectedModel: null,
+            editingModel: false
         };
 
-        this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission ID'];
+        this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission Id'];
     }
 
     componentDidMount() {
         this.refreshData();
     }
 
+    componentDidUpdate() {
+        if (this.state.savedModel) {
+            this.refreshData();
+            this.setState({ savedModel: false });
+        }
+    }
+
+
     refreshData = async () => {
         ModelsRemote.getAllModels()
             .then((response) => {
                 response.json().then(data => {
-                    this.setState({ loadingModels: false, models: data });
+                    this.setState({ loadingModels: false, models: data, selectedModel: null });
                 });
             })
             .catch((error) => {
@@ -34,19 +45,26 @@ class Models extends Component {
             });
     }
 
-    handleOpenModal = () => {
-        this.setState({ showModal: true });
-    };
+    toggleAddModelModal = () => {
+        this.setState({
+            savedModel: false,
+            showAddModelModal: !this.state.showAddModelModal
+        });
+    }
+    toggleEditModelModal = () => {
+        this.setState({ editingModel: !this.state.editingModel });
 
-    handleCloseModal = () => {
-        this.setState({ showModal: false });
-    };
+    }
 
-    handleSubmit = (event) => {
-        // form submit olayı burada gerçekleşecek
-        event.preventDefault();
-        this.handleCloseModal();
-    };
+    onSaveModel = () => {
+        this.setState({ savedModel: true })
+    }
+
+    editModel = (model) => {
+        this.setState({ selectedModel: model }, () => {
+            this.toggleEditModelModal();
+        });
+    }
     deleteModel = (model) => {
         Swal.fire({
             title: 'Confirm Deletion',
@@ -62,7 +80,11 @@ class Models extends Component {
                         title: "Deleted Model",
                         text: `Deleted ${model.Name} successfully!`,
                         icon: "success"
-                    }).then(() => this.refreshData());
+                    }).then(() => {
+                        // Remove the deleted model from the models array in the state
+                        const models = this.state.models.filter(m => m.Id !== model.Id);
+                        this.setState({ models });
+                    });
                 }).catch(err => {
                     Swal.fire({
                         title: "Error Deleting Model",
@@ -76,105 +98,67 @@ class Models extends Component {
 
     getBody() {
         return (
-            <div className="table-responsive">
-                <table className="table table-hover" aria-labelledby="tableLabel">
-                    <thead>
-                        <tr>
-                            {this.tableColumns.map(col => <th key={col}>{col}</th>)}
+            <table className="table table-striped" aria-labelledby="tableLabel">
+                <thead>
+                    <tr>
+                        {this.tableColumns.map(col => <th key={col}>{col}</th>)}
+                    </tr>
+                </thead>
+                <tbody>
+                    {this.state.models.map(model =>
+                        <tr key={model.Id}>
+                            <td>{model.Name}</td>
+                            <td>{model.Title}</td>
+                            <td>{new Date(model.CreateDate).toLocaleString()}</td>
+
+                            <td>{model.ModelFile}</td>
+                            <td>{model.ModelPermissionId}</td>
+                            <td>
+                                <div style={{ display: "flex", justifyContent: "space-around" }}>
+                                    <button type="button" className="btn btn-primary"
+                                        onClick={(e) => { this.editModel(model) }}>Edit</button>
+                                    <button type="button" className="btn btn-danger"
+                                        onClick={(e) => { this.deleteModel(model) }}>Delete</button>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {this.state.models.map(model =>
-                            <tr key={model.Id}>
-                                <td>{model.Name}</td>
-                                <td>{model.Title}</td>
-                                <td>{model.CreateDate}</td>
-                                <td>{model.ModelFile}</td>
-                                <td>{model.ModelPermissionId}</td>
-                                <td>
-                                    <Button variant="primary" onClick={() => this.handleEditModel(model)}>Edit</Button>
-                                    <button type="button" className="btn btn-danger" onClick={(e) => { this.deleteModel(model) }}>Delete</button>
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        );
-    };
-
-    render() {
-        return (
-            <div className="models-container">
-                <Button onClick={this.handleOpenModal}>Add Model</Button>
-                <Modal show={this.state.showModal} onHide={this.handleCloseModal}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Add New Model</Modal.Title>
-                    </Modal.Header>
-                    <Modal.Body>
-                        <Form onSubmit={this.handleSubmit}>
-                            <Form.Group controlId="formName">
-                                <Form.Label>Name:</Form.Label>
-                                <Form.Control type="text" placeholder="Enter name" />
-                            </Form.Group>
-
-                            <Form.Group controlId="formTitle">
-                                <Form.Label>Title:</Form.Label>
-                                <Form.Control type="text" placeholder="Enter title" />
-                            </Form.Group>
-
-                            <Form.Group controlId="formCreateDate">
-                                <Form.Label>Create Date:</Form.Label>
-                                <Form.Control type="text" placeholder="Enter create date" />
-                            </Form.Group>
-
-                            <Form.Group controlId="formModelFile">
-                                <Form.Label>Model File:</Form.Label>
-                                <Form.Control type="text" placeholder="Enter model file" />
-                            </Form.Group>
-
-                            <Form.Group controlId="formModelPermissionId">
-                                <Form.Label>Model Permission ID:</Form.Label>
-                                <Form.Control type="text" placeholder="Enter model permission ID" />
-                            </Form.Group>
-
-                            <Button variant="primary" type="submit">
-                                Save
-                            </Button>
-                        </Form>
-                    </Modal.Body>
-                </Modal>
-
-                {this.state.loadingModels ? <p className="fs-1">Loading Models...</p> :
-                    !this.state.models ? <p className="fs-1">No Model Found</p> :
-                        <div className="table-responsive">
-                            <table className="table table-hover" aria-labelledby="tableLabel">
-                                <thead>
-                                    <tr>
-                                        {this.tableColumns.map(col => <th key={col}>{col}</th>)}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.state.models.map(model => (
-                                        <tr key={model.Id}>
-                                            <td>{model.Name}</td>
-                                            <td>{model.Title}</td>
-                                            <td>{model.CreateDate}</td>
-                                            <td>{model.ModelFile}</td>
-                                            <td>{model.ModelPermissionId}</td>
-                                            <td>
-                                                <Button variant="primary" onClick={() => this.handleEditModel(model)}>Edit</Button>
-                                                <button type="button" className="btn btn-danger"
-                                                    onClick={(e) => { this.deleteModel(model) }}>Delete</button>                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-
-                        </div>
-                }
-            </div>
+                    )}
+                </tbody>
+            </table>
         );
     }
+
+    render() {
+        return <>
+            <div style={{ display: "flex", justifyContent: "end" }}>
+                <button type="button" className="btn btn-primary"
+                    onClick={() => { this.toggleAddModelModal() }}>
+                    Add Model
+                </button>
+            </div>
+            {
+                this.state.loadingModels ? <p className="fs-1">Loading Models...</p> :
+                    !this.state.models ? <p className="fs-1">No Model Found</p> :
+                        this.getBody()
+            }
+            {
+                this.state.showAddModelModal && <AddModelModal
+                    showModal={this.state.showAddModelModal}
+                    onDismiss={this.toggleAddModelModal}
+                    onSave={this.onSaveModel}
+                />
+            }
+            {
+                this.state.editingModel && <AddModelModal
+                    showModal={this.state.editingModel}
+                    onDismiss={this.toggleEditModelModal}
+                    onSave={this.onSaveModel}
+                    selectedModel={this.state.selectedModel}
+                />
+            }
+        </>;
+    }
 }
+
+
 export default Models; 

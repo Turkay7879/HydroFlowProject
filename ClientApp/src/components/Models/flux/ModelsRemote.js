@@ -5,19 +5,32 @@ const ModelsRemote = {
         let requestUrl = RemoteRequestURLs.MODEL_GET_ALL_MODELS;
         return await fetch(requestUrl);
     },
+
+
     saveModel: async (payload) => {
-        let requestUrl = RemoteRequestURLs.MODEL_SAVE_NEW_MODEL;
-        return await fetch(requestUrl, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(payload)
-        });
-    },
-  
+        try {
+            let requestUrl = RemoteRequestURLs.MODEL_SAVE_NEW_MODEL;
+            const response = await fetch(requestUrl, {
+                method: "POST",
+                mode: "cors",
+                headers: {
+                    "Content-Type": "application/json",
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    ,
+
+   
     deleteModel: async (payload) => {
         let requestUrl = RemoteRequestURLs.MODEL_DELETE_MODEL;
         return await fetch(requestUrl, {
@@ -29,22 +42,7 @@ const ModelsRemote = {
             },
             body: JSON.stringify(payload)
         });
-    },
-
-
-   
-      addModel: async (formData) => {
-        const requestUrl = RemoteRequestURLs.MODEL_SAVE_NEW_MODEL;
-        const response = await fetch(requestUrl, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(formData)
-        });
-        return response;
     }
 };
+
 export default ModelsRemote;

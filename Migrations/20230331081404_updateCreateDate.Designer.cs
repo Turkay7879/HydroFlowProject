@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HydroFlowProject.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230320164819_SqlServerMigration3")]
-    partial class SqlServerMigration3
+    [Migration("20230331081404_updateCreateDate")]
+    partial class updateCreateDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,11 +170,10 @@ namespace HydroFlowProject.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte[]>("CreateDate")
+                    b.Property<DateTime?>("CreateDate")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("ModelFile")
                         .IsRequired()

@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace HydroFlowProject.Migrations
 {
     /// <inheritdoc />
-    public partial class SqlServerMigration1 : Migration
+    public partial class updateCreateDate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,7 +37,7 @@ namespace HydroFlowProject.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Title = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    CreateDate = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false),
+                    CreateDate = table.Column<DateTime>(type: "datetime2", rowVersion: true, nullable: true),
                     ModelFile = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
                     ModelPermissionId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -51,7 +52,8 @@ namespace HydroFlowProject.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleDescription = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    RoleDescription = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    RoleValue = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -69,7 +71,7 @@ namespace HydroFlowProject.Migrations
                     CorporationName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Email = table.Column<string>(type: "varchar(75)", unicode: false, maxLength: 75, nullable: false),
                     Password = table.Column<byte[]>(type: "varbinary(256)", maxLength: 256, nullable: false),
-                    PasswordSalt = table.Column<byte[]>(type: "varbinary(256)", maxLength: 256, nullable: false)
+                    PasswordSalt = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {

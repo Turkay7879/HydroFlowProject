@@ -167,11 +167,10 @@ namespace HydroFlowProject.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<byte[]>("CreateDate")
+                    b.Property<DateTime?>("CreateDate")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("datetime2");
 
                     b.Property<byte[]>("ModelFile")
                         .IsRequired()
