@@ -32,12 +32,13 @@ class AddModelForm extends React.Component {
         if (this.state.modelFileInvalid !== this.props.modelFileInvalid) {
             this.setState({ modelFileInvalid: this.props.modelFileInvalid });
         }
-        if (this.state.modelPermissionIDInvalid !== this.props.modelPermissionIDInvalid) {
-            this.setState({ modelPermissionIDInvalid: this.props.modelPermissionIDInvalid });
-        }
+        // if (this.state.modelPermissionIDInvalid !== this.props.modelPermissionIDInvalid) {
+        //     this.setState({ modelPermissionIDInvalid: this.props.modelPermissionIDInvalid });
+        // }
     }
 
     render() {
+        console.log(this.state.selectedModel)
         return <>
             {!this.state.loading && <Form>
                 <FormGroup>
@@ -47,7 +48,7 @@ class AddModelForm extends React.Component {
                         name="Name"
                         type="text"
                         invalid={this.state.modelNameInvalid}
-                        //defaultValue={this.state.selectedModel ? this.state.selectedModel.Name : ""}
+                        defaultValue={this.state.selectedModel ? this.state.selectedModel.Name : ""}
                         onChange={(e) => this.props.setModel('Name', e.target.value)}
                     />
                 </FormGroup>
@@ -58,23 +59,30 @@ class AddModelForm extends React.Component {
                         name="Title"
                         type="text"
                         invalid={this.state.titleInvalid}
-                        // defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
+                        defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
                         onChange={(e) => this.props.setModel('Title', e.target.value)}
                     />
                 </FormGroup>
                 <FormGroup>
-                    <Label for="addModelFormModelFile">ModelFile</Label>
+                    <Label for="addModelFormModelFile">Model File</Label>
                     <Input
                         id="addModelFormModelFile"
                         name="ModelFile"
-                        type="text"
+                        type="file"
                         invalid={this.state.titleInvalid}
+                        disabled={!(this.state.selectedModel && this.state.selectedModel.Name === "")}
                         // defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
-                        onChange={(e) => this.props.setModel('ModelFile', e.target.value)}
+                        onChange={(e) => {
+                            let reader = new FileReader();
+                            reader.readAsDataURL(e.target.files[0]);
+                            reader.onload = (evt) => {
+                                this.props.setModel('ModelFile', evt.target.result.substring(23))
+                            }
+                        }}
                     />
                 </FormGroup>
 
-                <FormGroup>
+                {/* <FormGroup>
                     <Label for="addModelFormmodelPermissionID">modelPermissionID </Label>
                     <Input
                         id="addModelFormmodelPermissionID"
@@ -84,7 +92,7 @@ class AddModelForm extends React.Component {
                         value={this.state.selectedModel ? this.state.selectedModel.ModelPermissionId : ""}
                         onChange={(e) => this.props.setModel('ModelPermissionId', e.target.value)}
                     />
-                </FormGroup>
+                </FormGroup> */}
 
 
 

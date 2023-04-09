@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HydroFlowProject.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230331081404_updateCreateDate")]
-    partial class updateCreateDate
+    [Migration("20230409154916_ModelDateHasDefaultVar")]
+    partial class ModelDateHasDefaultVar
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -173,6 +173,7 @@ namespace HydroFlowProject.Migrations
                     b.Property<DateTime?>("CreateDate")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP")
                         .HasColumnType("datetime2");
 
                     b.Property<byte[]>("ModelFile")

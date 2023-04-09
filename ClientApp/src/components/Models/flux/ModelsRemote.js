@@ -42,6 +42,19 @@ const ModelsRemote = {
             },
             body: JSON.stringify(payload)
         });
+    },
+
+    downloadModelData: async (payload) => {
+        let requestUrl = RemoteRequestURLs.MODEL_DOWNLOAD_MODEL_DATA;
+        return await fetch(requestUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
     }
 };
 

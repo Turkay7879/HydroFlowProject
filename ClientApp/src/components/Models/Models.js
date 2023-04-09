@@ -3,6 +3,7 @@ import ModelsRemote from "./flux/ModelsRemote";
 import "./Models.css";
 import Swal from "sweetalert2";
 import AddModelModal from "./Actions/AddModelModal";
+import { Buffer } from 'buffer';
 
 class Models extends Component {
     constructor(props) {
@@ -65,7 +66,7 @@ class Models extends Component {
             this.toggleEditModelModal();
         });
     }
-    deleteModel = (model) => {
+    deleteModel = (id) => {
         Swal.fire({
             title: 'Confirm Deletion',
             text: `Continue deleting selected Model?`,
@@ -75,17 +76,18 @@ class Models extends Component {
             confirmButtonText: "Delete"
         }).then((result) => {
             if (result.isConfirmed) {
-                ModelsRemote.deleteModel(model).then(response => {
+                ModelsRemote.deleteModel(id).then(response => response.json().then(model => {
                     Swal.fire({
                         title: "Deleted Model",
-                        text: `Deleted ${model.Name} successfully!`,
+                        text: `Deleted model successfully!`,
                         icon: "success"
                     }).then(() => {
                         // Remove the deleted model from the models array in the state
                         const models = this.state.models.filter(m => m.Id !== model.Id);
                         this.setState({ models });
+                        this.refreshData();
                     });
-                }).catch(err => {
+                })).catch(err => {
                     Swal.fire({
                         title: "Error Deleting Model",
                         text: err,
@@ -94,6 +96,20 @@ class Models extends Component {
                 });
             }
         });
+    }
+
+    downloadModelData = (id) => {
+        ModelsRemote.downloadModelData(id).then(response => response.json().then(model => {
+            let data = model.modelFile;
+            console.log(data)
+            const bytes = Buffer.from(data, 'base64')
+            const blob = new Blob([bytes])
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "data.csv"; // Uploaded model should be csv as well. Check this later on
+            link.click();
+            link.remove();
+        }))
     }
 
     getBody() {
@@ -111,14 +127,21 @@ class Models extends Component {
                             <td>{model.Title}</td>
                             <td>{new Date(model.CreateDate).toLocaleString()}</td>
 
-                            <td>{model.ModelFile}</td>
+                            <td>
+                                <button 
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={() => this.downloadModelData(model.Id)}>
+                                        Download Model Data
+                                    </button>
+                            </td>
                             <td>{model.ModelPermissionId}</td>
                             <td>
                                 <div style={{ display: "flex", justifyContent: "space-around" }}>
                                     <button type="button" className="btn btn-primary"
                                         onClick={(e) => { this.editModel(model) }}>Edit</button>
                                     <button type="button" className="btn btn-danger"
-                                        onClick={(e) => { this.deleteModel(model) }}>Delete</button>
+                                        onClick={(e) => { this.deleteModel(model.Id) }}>Delete</button>
                                 </div>
                             </td>
                         </tr>

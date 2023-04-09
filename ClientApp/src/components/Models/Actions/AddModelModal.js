@@ -14,7 +14,7 @@ class AddModelModal extends React.Component {
             model: {
                 Name: "",
                 Title: "",
-                CreateDate: new Date(),
+                CreateDate: null,
                 ModelFile: null,
                 ModelPermissionId: 0,
             },
@@ -79,25 +79,21 @@ class AddModelModal extends React.Component {
         model.Title = trimmedTitle;
         newInvalidFields.titleInvalid = trimmedTitle === "";
 
-        /////Modelfile checki düzenlenecek 
-        let trimmedModelFile = model.ModelFile.trim();
-        model.ModelFile = trimmedModelFile;
-        newInvalidFields.modelFileInvalid = trimmedModelFile === "";
+        newInvalidFields.modelFileInvalid = model.ModelFile === undefined;
       
-          if (!model.ModelPermissionId) {
-              newInvalidFields.modelPermissionIdInvalid = true;
-          } else {
-              let parsedModelPermissionId = parseInt(model.ModelPermissionId);
-              if (isNaN(parsedModelPermissionId)) {
-                  newInvalidFields.modelPermissionIdInvalid = true;
-              } else {
-                  model.ModelPermissionId = parsedModelPermissionId;
-                  newInvalidFields.modelPermissionIdInvalid = false;
-              }
+        // if (!model.ModelPermissionId) {
+        //       newInvalidFields.modelPermissionIdInvalid = true;
+        //   } else {
+        //       let parsedModelPermissionId = parseInt(model.ModelPermissionId);
+        //       if (isNaN(parsedModelPermissionId)) {
+        //           newInvalidFields.modelPermissionIdInvalid = true;
+        //       } else {
+        //           model.ModelPermissionId = parsedModelPermissionId;
+        //           newInvalidFields.modelPermissionIdInvalid = false;
+        //       }
   
-          }
-        if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid ||
-            newInvalidFields.modelPermissionIdInvalid || newInvalidFields.modelFileInvalid) {
+        //   }
+        if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid) {
             this.setState({ formInvalidFields: newInvalidFields });
             return Swal.fire({
                 title: "Incorrect Form Fields",
@@ -110,16 +106,18 @@ class AddModelModal extends React.Component {
     }
 
     saveModel = (model) => {
-        const base64ModelFile = btoa(String.fromCharCode.apply(null, new Uint8Array(model.ModelFile))); // ModelFile özelliğinin base64 kodlaması yapılıyor
-        let createDate = model.CreateDate ? model.CreateDate.toISOString() : new Date().toISOString(); // Değişken tanımı yapılıyor
-        return ModelsRemote.saveModel({
-            Id: model.Id,
+        //const base64ModelFile = btoa(String.fromCharCode.apply(null, new Uint8Array(model.ModelFile))); // ModelFile özelliğinin base64 kodlaması yapılıyor
+        //let createDate = model.CreateDate ? model.CreateDate.toISOString() : new Date().toISOString(); // Değişken tanımı yapılıyor
+        let modelToSave = {
             Name: model.Name,
             Title: model.Title,
-            CreateDate: createDate, // Değişken kullanılıyor
-            ModelFile: base64ModelFile, // base64 kodlaması yapılmış ModelFile özelliği kullanılıyor
-            ModelPermissionId: model.ModelPermissionId
-        })
+            //CreateDate: createDate, // Değişken kullanılıyor
+            ModelFile: model.ModelFile, // base64 kodlaması yapılmış ModelFile özelliği kullanılıyor
+            ModelPermissionId: 0
+        }
+        if (model.Id && model.Id !== undefined) { modelToSave.Id = model.Id }
+
+        return ModelsRemote.saveModel(modelToSave)
             .then(response => {
                 console.log("Model saved successfully!");
                 console.log(response);
