@@ -16,6 +16,7 @@ namespace HydroFlowProject.Data
         public virtual DbSet<BasinUserPermission> BasinUserPermissions { get; set; }
         public virtual DbSet<Model> Models { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
+        public virtual DbSet<Session> Sessions { get; set; }
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<UserModel> UserModels { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
@@ -102,6 +103,25 @@ namespace HydroFlowProject.Data
                 entity.HasKey(e => e.Id).HasName("PK__Roles__3214EC0700EF73EB");
 
                 entity.Property(e => e.RoleDescription).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<Session>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__Sessions__PrimaryKey");
+                entity.HasOne(e => e.User).WithMany(p => p.UserSessions)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.ClientCascade)
+                    .HasConstraintName("FK_User_Session");
+                entity.Property(e => e.SessionId).HasMaxLength(64).IsRequired();
+                entity.Property(e => e.SessionCreateDate)
+                    .IsRowVersion()
+                    .IsConcurrencyToken()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                entity.Property(e => e.SessionExpireDate)
+                    .IsRowVersion()
+                    .IsConcurrencyToken()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP + 3");
+                entity.Property(e => e.SessionIsValid).IsRequired();
             });
 
             modelBuilder.Entity<User>(entity =>

@@ -38,12 +38,15 @@ namespace HydroFlowProject.Controllers
         public async Task<ActionResult<User>> SaveUser([FromBody] UserViewModel userViewModel)
         {
             User user = userViewModel.toUser();
+            int newId;
             if (user.Id == 0)
             {
                 await _context.Users.AddAsync(user);
+                newId = user.Id;
             }
             else
             {
+                newId = user.Id;
                 var toUpdate = await _context.Users.FindAsync(user.Id);
                 _context.Users.Entry(toUpdate).CurrentValues.SetValues(user);
             }
@@ -53,6 +56,8 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+
+            userViewModel.Id = newId;
             return StatusCode(StatusCodes.Status200OK, userViewModel);
         }
 

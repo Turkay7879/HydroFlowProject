@@ -1,5 +1,5 @@
 ﻿using HydroFlowProject.Models;
-using System;
+using HydroFlowProject.Utilities;
 
 namespace HydroFlowProject.ViewModels
 {
@@ -32,6 +32,7 @@ namespace HydroFlowProject.ViewModels
 
         public User toUser()
         {
+            var credentials = PasswordManager.HashPassword(Password);
             User user = new User();
             if(Id != -1)
             {
@@ -41,8 +42,8 @@ namespace HydroFlowProject.ViewModels
             user.Surname = Surname;
             user.CorporationName = CorporationName;
             user.Email = Email;
-            user.Password = new byte[3];
-            user.PasswordSalt = new byte[3];
+            user.Password = credentials["password"];
+            user.PasswordSalt = credentials["salt"];
             return user;
         }
     }

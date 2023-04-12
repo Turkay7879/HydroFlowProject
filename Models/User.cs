@@ -22,6 +22,8 @@
 
         public virtual ICollection<UserRole> UserRoles { get; } = new List<UserRole>();
 
+        public virtual ICollection<Session> UserSessions { get; } = new List<Session>();
+
         public virtual ICollection<UserUserPermission> UserUserPermissionPermittedUsers { get; } = new List<UserUserPermission>();
 
         public virtual ICollection<UserUserPermission> UserUserPermissionUsers { get; } = new List<UserUserPermission>();
