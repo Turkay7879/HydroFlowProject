@@ -80,7 +80,7 @@ public class SessionController : Controller
             return StatusCode(StatusCodes.Status302Found);
         }
         
-        var foundSession = await _context.Sessions.FindAsync(session.SessionId);
+        var foundSession = _context.Sessions.ToList().Find(s => s.SessionId == sentSessionId);
         if (foundSession == null)
         {
             return StatusCode(StatusCodes.Status500InternalServerError);
@@ -101,7 +101,7 @@ public class SessionController : Controller
     [Route("loginUser")]
     public async Task<ActionResult<SessionViewModel>> LoginUser([FromBody] UserLoginViewModel user)
     {
-        var foundUser = await _context.Users.FindAsync(user.Email);
+        var foundUser = _context.Users.ToList().Find(u => u.Email == user.Email);
         if (foundUser == null)
         {
             return StatusCode(StatusCodes.Status404NotFound, user);

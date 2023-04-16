@@ -15,6 +15,11 @@ const RemoteRequestURLs = {
   MODEL_SAVE_NEW_MODEL: "/api/models/saveModel",
   MODEL_DELETE_MODEL: "/api/models/deleteModel",
   MODEL_DOWNLOAD_MODEL_DATA: "/api/models/downloadModelData",
+  
+  // Session Requests
+  SESSION_LOGIN_USER: "/api/session/loginUser",
+  SESSION_LOGOUT_USER: "/api/session/logoutUser",
+  SESSION_VALIDATE: "/api/session/validateSession",
 };
 
 export default RemoteRequestURLs;

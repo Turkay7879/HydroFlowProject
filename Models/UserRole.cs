@@ -10,7 +10,7 @@ namespace HydroFlowProject.Models
 
         public int RoleId { get; set; }
 
-        public byte[] UserRoleDate { get; set; } = null!;
+        public DateTime? UserRoleDate { get; set; }
 
         public virtual Role Role { get; set; } = null!;
 

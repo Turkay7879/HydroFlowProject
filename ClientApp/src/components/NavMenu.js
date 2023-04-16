@@ -39,8 +39,14 @@ export class NavMenu extends Component {
               <NavItem>
                 <NavLink tag={Link} className="text-dark" to={Routes.UsersAdminPanel.route}>Users</NavLink>
               </NavItem>
-            <NavItem>
+              <NavItem>
                 <NavLink tag={Link} className="text-dark" to={Routes.ModelsAdminPanel.route}>Models</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink tag={Link} className={"text-dark"} to={Routes.LoginPage.route}>Login</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink tag={Link} className={"text-dark"} to={Routes.RegisterPage.route}>Register</NavLink>
               </NavItem>
             </ul>
           </Collapse>
