@@ -52,7 +52,7 @@ class AddModelModal extends React.Component {
                 let newModel = this.state.model;
                 newModel[property] = value
                 this.setState({ model: newModel });
-            }} selectedModel={this.state.model} {...this.state.formInvalidFields} />
+            }} selectedModel={this.state.model} editing={this.state.model.Name !== ""} {...this.state.formInvalidFields} />
         </ModalBody>
     }
 

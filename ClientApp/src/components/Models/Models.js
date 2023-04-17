@@ -4,6 +4,9 @@ import "./Models.css";
 import Swal from "sweetalert2";
 import AddModelModal from "./Actions/AddModelModal";
 import { Buffer } from 'buffer';
+import SessionsRemote from "../Constants/flux/remote/SessionsRemote";
+import {Navigate} from "react-router-dom";
+import NotAllowedPage from "../Common/NotAllowedPage";
 
 class Models extends Component {
     constructor(props) {
@@ -15,23 +18,65 @@ class Models extends Component {
             showAddModelModal: false,
             savedModel: false,
             selectedModel: null,
-            editingModel: false
+            editingModel: false,
+            validSessionPresent: false,
+            authorizedToView: false,
+            loadingPage: true
         };
 
         this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission Id'];
     }
 
     componentDidMount() {
-        this.refreshData();
+        this.checkPermissions();
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.savedModel) {
             this.refreshData();
             this.setState({ savedModel: false });
         }
+        if (!prevState.validSessionPresent && !prevState.authorizedToView &&
+            this.state.validSessionPresent && this.state.authorizedToView) {
+            this.refreshData();
+        }
     }
 
+    checkPermissions = () => {
+        let session = window.localStorage.getItem("hydroFlowSession");
+        if (session !== null) {
+            SessionsRemote.validateSession(session, (status) => {
+                if (status) {
+                    this.setState({ validSessionPresent: true }, () => {
+                        let sessionData = JSON.parse(session);
+                        this.setState({
+                            authorizedToView: sessionData && sessionData.allowedRole && sessionData.allowedRole === "sysadmin",
+                            loadingPage: false
+                        }, () => this.refreshData())
+                    });
+                } else {
+                    window.localStorage.removeItem("hydroFlowSession");
+                    SessionsRemote.logoutUser(session).then(response => {
+                        Swal.fire({
+                            title: "Session Expired",
+                            text: `Your session has expired. Login required for this page.`,
+                            icon: "warning"
+                        }).then(() => {
+                            this.setState({
+                                loadingPage: false,
+                                validSessionPresent: false
+                            });
+                        });
+                    });
+                }
+            });
+        } else {
+            this.setState({ 
+                loadingPage: false,
+                validSessionPresent: false
+            });
+        }
+    }
 
     refreshData = async () => {
         ModelsRemote.getAllModels()
@@ -152,7 +197,9 @@ class Models extends Component {
     }
 
     render() {
-        return <>
+        return this.state.loadingPage ? <></>
+            : !this.state.validSessionPresent ? <Navigate to={"/login"}/>
+                : !this.state.authorizedToView ? <NotAllowedPage/> : <>
             <div style={{ display: "flex", justifyContent: "end" }}>
                 <button type="button" className="btn btn-primary"
                     onClick={() => { this.toggleAddModelModal() }}>

@@ -38,12 +38,23 @@ namespace HydroFlowProject.Controllers
         public async Task<ActionResult<User>> SaveUser([FromBody] UserViewModel userViewModel)
         {
             User user = userViewModel.toUser();
+            var foundUser = _context.Users.ToList().Find(u => u.Email == user.Email);
+            if (foundUser != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, userViewModel);
+            }
+            
+            int newId;
+            var newUserRole = new UserRole();
+            var userRoles = _context.Roles.ToList();
+            var regularUserRole = userRoles.Find(role => role.RoleValue == "user");
             if (user.Id == 0)
             {
                 await _context.Users.AddAsync(user);
             }
             else
             {
+                newId = user.Id;
                 var toUpdate = await _context.Users.FindAsync(user.Id);
                 _context.Users.Entry(toUpdate).CurrentValues.SetValues(user);
             }
@@ -53,6 +64,17 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+
+            var addedUser = _context.Users.ToList().Find(u => u.Email == user.Email);
+            if (addedUser == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, userViewModel);
+            }
+            
+            newUserRole.UserId = addedUser.Id;
+            newUserRole.RoleId = regularUserRole!.Id;
+            await _context.UserRoles.AddAsync(newUserRole);
+            await _context.SaveChangesAsync();
             return StatusCode(StatusCodes.Status200OK, userViewModel);
         }
 

@@ -1,0 +1,15 @@
+﻿.loginFormDiv {
+    display: flex;
+    justify-content: center;
+    margin-top: 5rem;
+}
+
+.loginFormDiv > form {
+    width: 60%;
+}
+
+.loginButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
