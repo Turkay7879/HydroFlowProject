@@ -58,12 +58,23 @@ public class SessionController : Controller
             };
         }
 
+        var userRoleId = _context.UserRoles.ToList().Find(ur => ur.UserId == userId);
+        if (userRoleId == null)
+        {
+            return new SessionViewModel
+            {
+                SessionId = ""
+            };
+        }
+
+        var userRole = await _context.Roles.FindAsync(userRoleId.RoleId);
         return new SessionViewModel
         {
             SessionId = session.SessionId,
             SessionIsValid = session.SessionIsValid,
             SessionCreateDate = session.SessionCreateDate,
-            SessionExpireDate = session.SessionExpireDate
+            SessionExpireDate = session.SessionExpireDate,
+            AllowedRole = userRole!.RoleValue
         };
     }
 
@@ -83,7 +94,7 @@ public class SessionController : Controller
         var foundSession = _context.Sessions.ToList().Find(s => s.SessionId == sentSessionId);
         if (foundSession == null)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return StatusCode(StatusCodes.Status302Found);
         }
         
         if (!foundSession.SessionIsValid || (foundSession.SessionIsValid && DateTime.Compare(currentDate, (DateTime)foundSession.SessionExpireDate!) > 0))
@@ -121,7 +132,7 @@ public class SessionController : Controller
     [Route("logoutUser")]
     public async Task<ActionResult<SessionViewModel>> LogoutUser([FromBody] SessionViewModel session)
     {
-        var foundSession = await _context.Sessions.FindAsync(session.SessionId);
+        var foundSession = _context.Sessions.ToList().Find(s => s.SessionId == session.SessionId);
         if (foundSession == null)
         {
             return StatusCode(StatusCodes.Status404NotFound, session);

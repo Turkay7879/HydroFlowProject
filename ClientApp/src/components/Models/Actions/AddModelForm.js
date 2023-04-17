@@ -11,7 +11,7 @@ class AddModelForm extends React.Component {
             showModal: false,
             savedModel: false,
             selectedModel: null,
-            editingModel: false
+            editingModal: false
         };
     }
     componentDidMount() {
@@ -20,6 +20,9 @@ class AddModelForm extends React.Component {
                 this.setState({ loading: false });
             });
         } else { this.setState({ loading: false }); }
+        if (this.props.editing) {
+            this.setState({ editingModal: true });
+        }
     }
 
     componentDidUpdate() {
@@ -70,7 +73,7 @@ class AddModelForm extends React.Component {
                         name="ModelFile"
                         type="file"
                         invalid={this.state.titleInvalid}
-                        disabled={!(this.state.selectedModel && this.state.selectedModel.Name === "")}
+                        disabled={this.state.editingModal}
                         // defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
                         onChange={(e) => {
                             let reader = new FileReader();

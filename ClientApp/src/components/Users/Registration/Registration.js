@@ -1,9 +1,10 @@
 import React from "react";
-import {Form, FormGroup, Input, Label} from "reactstrap";
+import {Form, FormGroup, Input, Label, Button, Spinner} from "reactstrap";
 import {Navigate} from "react-router-dom";
 import UsersRemote from "../flux/UsersRemote";
 import "../styles/Register.css";
 import SessionsRemote from "../../Constants/flux/remote/SessionsRemote";
+import Swal from "sweetalert2";
 
 class Registration extends React.Component {
     constructor(props) {
@@ -15,27 +16,39 @@ class Registration extends React.Component {
             email: null,
             password: null,
             confirmPassword: null,
-            validSessionPresent: false
+            validSessionPresent: false,
+            registering: false
         }
     }
     
     componentDidMount() {
         let session = window.localStorage.getItem("hydroFlowSession");
-        SessionsRemote.validateSession(session, (status) => status ? this.setState({ validSessionPresent: true }) : null);
+        if (session !== null) {
+            SessionsRemote.validateSession(session, (status) => 
+                status ? this.setState({ validSessionPresent: true }) : null);
+        }
     }
 
     register = () => {
-        if (!this.state.password || !this.state.confirmPassword || this.state.password !== this.state.confirmPassword) {
-            // Alert about password mismatch
-            return;
-        }
         if (!this.state.name || this.state.name.trim().length === 0 ||
             !this.state.surname || this.state.surname.trim().length === 0 ||
             !this.state.corporationName || this.state.corporationName.trim().length === 0 ||
             !this.state.email || this.state.email.trim().length === 0 ||
-            !this.state.password || this.state.name.trim().length === 0) {
-            // Alert about empty fields
-            return;
+            !this.state.password || this.state.name.trim().length === 0 ||
+            !this.state.confirmPassword || this.state.confirmPassword.trim().length === 0) {
+            return Swal.fire({
+                title: "Empty Fields",
+                text: "Please make sure to fill all registration form fields!",
+                icon: "warning"
+            });
+        }
+
+        if (this.state.password !== this.state.confirmPassword) {
+            return Swal.fire({
+                title: "Password Mismatch",
+                text: "Make sure to type the same password for confirm password field!",
+                icon: "warning"
+            });
         }
         
         let userToRegister = {
@@ -45,28 +58,30 @@ class Registration extends React.Component {
             Email: this.state.email,
             Password: this.state.password
         };
-        UsersRemote.saveUser(userToRegister).then(response => {
-           if (response.status !== 200) {
-               // Alert about failed save
-           } else {
-               SessionsRemote.loginUser({
-                   Email: userToRegister.Email,
-                   Password: userToRegister.Password
-               }).then(response => {
-                   if (response.status === 404) {
-                       console.log("failed to save user in previous request")
-                   } else if (response.status === 403) {
-                       console.log("something went wrong with password checking")
-                   } else if (response.status === 500) {
-                       console.log("error, credentials are approved, but could not create session")
-                   } else if (response.status === 200) {
-                       response.json().then(sessionData => {
-                           window.localStorage.setItem("hydroFlowSession", JSON.stringify(sessionData));
-                           // Registration Success! Inform user, then redirect to home page
-                       })
-                   }
-               })
-           }
+        this.setState({ registering: true }, () => {
+            UsersRemote.saveUser(userToRegister).then(response => {
+                if (response.status !== 200) {
+                    this.setState({ registering: false }, () => {
+                        Swal.fire({
+                            title: "Failed to Register",
+                            text: "Registration failed. Please try again!",
+                            icon: "error"
+                        });
+                    });
+                } else {
+                    SessionsRemote.loginUser({
+                        Email: userToRegister.Email,
+                        Password: userToRegister.Password
+                    }, (result) => {
+                        if (result) {
+                            this.setState({ 
+                                validSessionPresent: true,
+                                registering: false
+                            });
+                        }
+                    })
+                }
+            });
         });
     }
 
@@ -145,12 +160,21 @@ class Registration extends React.Component {
                     </Form>
                 </div>
                 <div className={"registerButton"}>
-                    <button
-                        type="button"
-                        className="btn btn-primary"
-                        onClick={this.register}>
-                        Register
-                    </button>
+                    {
+                        this.state.registering ? <Button color="primary" disabled>
+                            <Spinner size="sm">
+                                Loading...
+                            </Spinner>
+                            <span>
+                                {' '} Registering
+                            </span>
+                        </Button> : <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={this.register}>
+                            Register
+                        </button>
+                    }
                 </div>
             </>
         );

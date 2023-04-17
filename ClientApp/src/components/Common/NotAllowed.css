@@ -1,0 +1,26 @@
+﻿.container-notallowed {
+    display: flex;
+    justify-content: center;
+}
+
+.not-allowed-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 50px;
+}
+
+.not-allowed-container > img {
+    width: 256px;
+    align-self: center;
+}
+
+.not-allowed-container > h2 {
+    margin-top: 50px;
+}
+
+.go-home-btn {
+    width: 200px;
+    margin-top: 25px;
+    align-self: center;
+}
