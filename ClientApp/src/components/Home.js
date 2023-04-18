@@ -1,5 +1,7 @@
-import React, { Component } from 'react';
-import ModelCalculation from './ABCD_Model/ModelCalculation';
+import React, {Component} from 'react';
+import LineChart from './Charts/LineChart';
+import ModelCalculation from "./ABCD_Model/ModelCalculation";
+
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -7,7 +9,8 @@ export class Home extends Component {
     render() {
         return (
             <div>
-                <ModelCalculation />
+                <ModelCalculation/>
+                <LineChart/>
             </div>
         );
     }
