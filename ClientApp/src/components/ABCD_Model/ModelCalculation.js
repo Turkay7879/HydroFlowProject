@@ -87,13 +87,16 @@ class ModelCalculation extends React.Component {
             let paramB = [];
             let paramC = [];
             let paramD = [];
-
+            //////////
+           
             //burayı internette gördüğüm için bu şekilde kendim veri seti vererek rmse ve nse hesaplanıyor burayı hocaya sorduğumda doğru dedi ama güvenemedim yine araştırırız.
             //bu dizilerin aralığını hoca toplantıda söyledi.
             paramA.push(0.1, 0.2, 0.3,0.4,0.5,0.6);///1 den küçük
             paramB.push(4, 5, 6, 7, 8, 9);//1 den büyük 100-200
             paramC.push(0.1, 0.5, 0.3, 0.14, 0.5, 0.6);//1 den küçük
             paramD.push(0.7, 0.5, 0.6, 0.7, 0.18, 0.9);//1 den küçük
+            ///////////////
+            
             console.log('paramA', paramA);
             ////calibrasyon 
             const calibratedValues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
@@ -101,6 +104,8 @@ class ModelCalculation extends React.Component {
             paramB = calibratedValues.paramB;
             paramC = calibratedValues.paramC;
             paramD = calibratedValues.paramD;
+
+
             console.log('paramA',paramA);
 
             for (let i = 1; i < T.length; i++) {
@@ -163,12 +168,20 @@ class ModelCalculation extends React.Component {
     }
 
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
+        let paramAA = [];
+        let paramBB = [];
+        let paramCC = [];
+        let paramDD = [];
+        paramAA.push(0.5, 0.6, 0.7, 0.8, 0.5, 0.6);///1 den küçük
+        paramBB.push(45, 50, 60, 7, 8, 9);//1 den büyük 100-200
+        paramCC.push(0.10, 0.58, 0.3, 0.14, 0.5, 0.65);//1 den küçük
+        paramDD.push(0.7, 0.5, 0.69, 0.7, 0.189, 0.99);//1 den küçük
         const rmse = this.calculateRMSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("RMSE value: ", rmse);
         const nse = this.calculateNSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("NSE value: ", nse);
         let calibratedValues = {};
-        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, rmse, nse);
+        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD,  0.01,  1000,  1e-5);
         console.log("Calibrated values: ", calibratedValues.paramA);
         return calibratedValues;      
     }
@@ -229,68 +242,61 @@ class ModelCalculation extends React.Component {
 
         return 1 - (sumSquare / actualSumSquare); 
     }
-    ///burası yanlış tamamen istersen sil buranın içine grandyan search ile optimize etmeye çalışıcaz.
-    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, rmse, nse) {
-        let lowestRMSE = rmse;
-        let highestNSE = nse;
-        let paramA = predictedA;
-        let paramB = predictedB;
-        let paramC = predictedC;
-        let paramD = predictedD;
-        let calibratedValues = {};
+    ///burada predict değerleri günceller acaba actual array üzerinde mi bir güncelleme yapılıyor? .
+    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate = 0.01, epochs = 1000, tolerance = 1e-5) {
+        let paramA = [...predictedA];
+        let paramB = [...predictedB];
+        let paramC = [...predictedC];
+        let paramD = [...predictedD];
 
-        for (let i = 0; i < 100; i++) {
-            for (let j = 0; j < predictedA.length; j++) {
-                paramA[j] = predictedA[j] + Math.random() * 0.1 - 0.05;    // A parametresini rasgele değiştir 
-            }
-            for (let k = 0; k < predictedB.length; k++) {
-                paramB[k] = predictedB[k] + Math.random() * 0.2 - 0.1;    // B parametresini rasgele değiştir 
-            }
-            for (let l = 0; l < predictedC.length; l++) {
-                paramC[l] = predictedC[l] + Math.random() * 0.3 - 0.15;    // C parametresini rasgele değiştir 
-            }
-            for (let m = 0; m < predictedD.length; m++) {
-                paramD[m] = predictedD[m] + Math.random() * 0.4 - 0.2;    // D parametresini rasgele değiştir 
-            } 
+        const n = predictedA.length;
 
+        let rmse = Infinity;
+        for (let epoch = 0; epoch < epochs; epoch++) {
+            let gradA = 0;
+            let gradB = 0;
+            let gradC = 0;
+            let gradD = 0;
 
-            // Yeni parametrelerle tekrar hesapla 
-            let rmseNew = 0;
-            for (let l = 0; l < predictedA.length; l++) {
-                rmseNew += (paramA[l] - actualA[l]) ** 2;
-                rmseNew += (paramB[l] - actualB[l]) ** 2;
-                rmseNew += (paramC[l] - actualC[l]) ** 2;
-                rmseNew += (paramD[l] - actualD[l]) ** 2;
+            for (let i = 0; i < n; i++) {
+                const errorA = paramA[i] - actualA[i];
+                const errorB = paramB[i] - actualB[i];
+                const errorC = paramC[i] - actualC[i];
+                const errorD = paramD[i] - actualD[i];
 
-                // ... 
-            }
-            const nseNew = this.calculateNSE(paramA, actualA, paramB, actualB, paramC, actualC, paramD, actualD);
-
-            // Yeni parametrelerle hesaplanan sonuçları kontrol et 
-            if (rmseNew < lowestRMSE) {
-                lowestRMSE = rmseNew;
-                highestNSE = nseNew;
-                calibratedValues = { paramA, paramB, paramC, paramD, rmse: lowestRMSE, nse: highestNSE };
+                gradA += 2 * errorA;
+                gradB += 2 * errorB;
+                gradC += 2 * errorC;
+                gradD += 2 * errorD;
             }
 
-            if (rmseNew === lowestRMSE && nseNew > highestNSE) {
-                highestNSE = nseNew;
-                calibratedValues = { paramA, paramB, paramC, paramD, rmse: lowestRMSE, nse: highestNSE };
+            gradA /= n;
+            gradB /= n;
+            gradC /= n;
+            gradD /= n;
+
+            paramA = paramA.map(a => a - learningRate * gradA);
+            paramB = paramB.map(b => b - learningRate * gradB);
+            paramC = paramC.map(c => c - learningRate * gradC);
+            paramD = paramD.map(d => d - learningRate * gradD);
+
+            rmse = Math.sqrt((1 / n) * paramA.reduce((acc, a, i) => acc + Math.pow(a - actualA[i], 2), 0)
+                + (1 / n) * paramB.reduce((acc, b, i) => acc + Math.pow(b - actualB[i], 2), 0)
+                + (1 / n) * paramC.reduce((acc, c, i) => acc + Math.pow(c - actualC[i], 2), 0)
+                + (1 / n) * paramD.reduce((acc, d, i) => acc + Math.pow(d - actualD[i], 2), 0));
+            console.log("rmse optimizeggg:", rmse, paramA);
+
+            if (rmse < tolerance) {
+                break;
             }
+            console.log("grad A:", gradA, gradB);
 
-           ////console.log(calibratedValues.paramA); //  paramA
-           //// console.log(calibratedValues.paramB); // paramB
-           //// console.log(calibratedValues.paramC); //  paramC
-           //// console.log(calibratedValues.paramD); // paramD
-
-           //// console.log("Root mean square error: ", calibratedValues.rmse);
-           //// console.log("Nash-Sutcliffe efficiency: ", calibratedValues.nse);
         }
+        console.log("rmse optimize:", rmse, paramA);
+        console.log("rmse optimize:", rmse, paramB);
 
-        return calibratedValues;
+        return { paramA, paramB, paramC, paramD, rmse };
     }
- 
-   
 
     render() {
         const { showResult, result } = this.state;
