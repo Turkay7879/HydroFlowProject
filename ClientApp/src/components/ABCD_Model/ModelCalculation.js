@@ -51,6 +51,7 @@ class ModelCalculation extends React.Component {
 
             // Tarihleri Date objesine dönüştür 
             const T = [];
+            const dates =[];
             for (let i = 0; i < columnData.Tarih.length; i++) {
                 T.push(new Date(columnData.Tarih[i]));
             }
@@ -73,7 +74,6 @@ class ModelCalculation extends React.Component {
             const GDt = [];
             const Qmodelt = [];
 
-
             ////calibrasyon 
 
             // Parametreleri tanımlayın 
@@ -88,7 +88,7 @@ class ModelCalculation extends React.Component {
             let paramC = [];
             let paramD = [];
             //////////
-           
+
             //burayı internette gördüğüm için bu şekilde kendim veri seti vererek rmse ve nse hesaplanıyor burayı hocaya sorduğumda doğru dedi ama güvenemedim yine araştırırız.
             //bu dizilerin aralığını hoca toplantıda söyledi.
             paramA.push(0.1, 0.2, 0.3,0.4,0.5,0.6);///1 den küçük
@@ -96,7 +96,7 @@ class ModelCalculation extends React.Component {
             paramC.push(0.1, 0.5, 0.3, 0.14, 0.5, 0.6);//1 den küçük
             paramD.push(0.7, 0.5, 0.6, 0.7, 0.18, 0.9);//1 den küçük
             ///////////////
-            
+
             console.log('paramA', paramA);
             ////calibrasyon 
             const calibratedValues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
@@ -161,6 +161,27 @@ class ModelCalculation extends React.Component {
                     GDt,
                     Qmodelt
                 }
+            }, () => {
+                let result = {
+                    type1: "Observed Streamflow",
+                    actualValues: Obsmm.filter(value => value),
+                    type2: "Simulated Streamflow",
+                    qModelValues: Qmodelt.filter(value => value),
+                    date: [1991, 1992, 1993, 1994, 1995, 1996] //FIXME
+                };
+
+                //const sampleArr = []
+                //for (let i = 0; i < Obsmm.length; i++) {
+                //   sampleArr[i] = [Obsmm[i], Qmodelt[i]]
+                //}
+                //FIXME
+                let scatterResult = {
+                    //samples: sampleArr
+                    samples: [[1,2]]
+                }
+                console.log("result", result)
+                this.props.onOptimizationFinished(result);
+                //this.props.onCalibrationScatter(scatterResult);
             });
         };
 
@@ -183,7 +204,7 @@ class ModelCalculation extends React.Component {
         let calibratedValues = {};
         calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD,  0.01,  1000,  1e-5);
         console.log("Calibrated values: ", calibratedValues.paramA);
-        return calibratedValues;      
+        return calibratedValues;
     }
     average(actualA, actualB, actualC, actualD) {
         let sum = 0;
@@ -197,7 +218,7 @@ class ModelCalculation extends React.Component {
 
         return sum / (actualA.length * 4);
     }
-   
+
     calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD ) {
 
         console.log("predictedA:", predictedA);
@@ -240,7 +261,7 @@ class ModelCalculation extends React.Component {
             actualSumSquare += (actualD[j] - actualMean) ** 2;
         }
 
-        return 1 - (sumSquare / actualSumSquare); 
+        return 1 - (sumSquare / actualSumSquare);
     }
     ///burada predict değerleri günceller acaba actual array üzerinde mi bir güncelleme yapılıyor? .
     optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate = 0.01, epochs = 1000, tolerance = 1e-5) {
