@@ -7,6 +7,10 @@ const AppRoutes = [
     element: <Home />,
   },
   {
+    path: Routes.OptimizationPage.route,
+    element: Routes.OptimizationPage.component,
+  },
+  {
     path: Routes.BasinsAdminPanel.route,
     element: Routes.BasinsAdminPanel.component,
   },

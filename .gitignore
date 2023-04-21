@@ -233,4 +233,5 @@ _Pvt_Extensions
 
 # Ignore local application settings
 appsettings.json
+ClientApp/package-lock.json
 appsettings.Development.json
