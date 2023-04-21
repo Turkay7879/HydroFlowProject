@@ -26,297 +26,281 @@ class ModelCalculation extends React.Component {
 
         reader.onload = (e) => {
             const binaryData = e.target.result;
-            const workbook = read(binaryData, { type: "binary" });
-            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            const data = utils.sheet_to_json(worksheet, { header: 1 });
+            const data = this.convertData(binaryData);
 
-            // Sütun adlarını alın 
-            const headers = data[0];
-
-            // Veri sütunlarını bir dizi olarak gruplandırın 
-            const columnData = {};
-            headers.forEach((header) => {
-                columnData[header] = [];
-            });
-
-            // Verileri ilgili sütuna ekleyin 
-            for (let i = 1; i < data.length; i++) {
-                const row = data[i];
-                headers.forEach((header, index) => {
-                    columnData[header].push(row[index]);
-                });
-            }
-
-            console.log(columnData);
-
-            // Tarihleri Date objesine dönüştür 
-            const T = [];
-            const dates =[];
-            for (let i = 0; i < columnData.Tarih.length; i++) {
-                T.push(new Date(columnData.Tarih[i]));
-            }
-            const G = columnData['G(t)'];
-
-            const P = columnData.P;
-            const PET = columnData.PET;
-            const Obsmm = columnData.Obsmm;
-            const S = columnData['S(t)'];
-
-            const A = columnData.A;
-            const B = columnData.B;
-            const C = columnData.C;
-            const D = columnData.D;
-
-            const Et = [];
-            const DRt = [];
-            const GRt = [];
-            const Gt = [];
-            const GDt = [];
-            const Qmodelt = [];
-
-            ////calibrasyon 
-
-            // Parametreleri tanımlayın 
-            const actualA = columnData.A;
-            const actualB = columnData.B;
-            const actualC = columnData.C;
-            const actualD = columnData.D;
-            console.log('ActualA',actualA);
-            // Tahmin edilen parametreleri tanımlayın 
-            let paramA = [];
-            let paramB = [];
-            let paramC = [];
-            let paramD = [];
-            //////////
-
-            //burayı internette gördüğüm için bu şekilde kendim veri seti vererek rmse ve nse hesaplanıyor burayı hocaya sorduğumda doğru dedi ama güvenemedim yine araştırırız.
-            //bu dizilerin aralığını hoca toplantıda söyledi.
-            paramA.push(0.1, 0.2, 0.3,0.4,0.5,0.6);///1 den küçük
-            paramB.push(4, 5, 6, 7, 8, 9);//1 den büyük 100-200
-            paramC.push(0.1, 0.5, 0.3, 0.14, 0.5, 0.6);//1 den küçük
-            paramD.push(0.7, 0.5, 0.6, 0.7, 0.18, 0.9);//1 den küçük
-            ///////////////
-
-            console.log('paramA', paramA);
-            ////calibrasyon 
-            const calibratedValues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
-            paramA = calibratedValues.paramA;
-            paramB = calibratedValues.paramB;
-            paramC = calibratedValues.paramC;
-            paramD = calibratedValues.paramD;
-
-
-            console.log('paramA',paramA);
-
-            for (let i = 1; i < T.length; i++) {
-                // Adım 1 
-                const Wt = S[i - 1] + P[i];
-                console.log('Wt:', Wt);
-
-                // Adım 2
-
-                //Step 2 Yt=(Wt+B)/(2A)‐SQRT(((Wt+B)/(2A))^2‐B*Wt/A)
-                const Yt = (Wt + B[i]) / (2 * A[i]) - Math.sqrt(Math.pow((Wt + B[i]) / (2 * A[i]), 2) - (B[i] * Wt) / A[i]);
-
-                console.log(Yt, Wt, B, A); // Check the values of Yt, Wt, B, and A
-                console.log('Yt:', Yt);
-                console.log('Wt:', Wt);
-                console.log('B:', B[i]);
-                console.log('A:', A[i]);
-
-                console.log('Et:', Et[i]);
-                // Adım 3
-                Et[i] = Yt * (1 - Math.exp(-PET[i] / B[i]))
-                console.log('Et:', Et[i]);
-
-                // Adım 4
-                DRt[i] = ((1 - C[i]) * (Wt - Yt));
-                console.log('DRt:', DRt[i]);
-
-                // Adım 5
-                GRt[i] = (C[i] * (Wt - Yt));
-                console.log('GRt:', GRt[i]);
-
-                Gt[i] = G[i];
-
-                // Adım 7
-                GDt[i] = (D[i] * G[i]);
-                console.log('GDt:', GDt[i]);
-
-                // Adım 8
-                Qmodelt[i] = (DRt[i] + GDt[i]);
-                console.log('Qmodelt:', Qmodelt[i]);
-            }
+            const result = this.calculateResult(data);
             this.setState({
                 showResult: true,
-                result: {
-                    T,
-                    P,
-                    PET,
-                    Obsmm,
-                    Et,
-                    DRt,
-                    GRt,
-                    G,
-                    GDt,
-                    Qmodelt
-                }
+                result
             }, () => {
+                let Obsmm = this.state.result.Obsmm;
+                let Qmodelt = this.state.result.Qmodelt;
+                let T = this.state.result.T.map(modelDate => modelDate.split(".").at(2))
+                console.log(`orig size: ${Obsmm.length}\toptimize size: ${Qmodelt.length}`)
+
                 let result = {
                     type1: "Observed Streamflow",
                     actualValues: Obsmm.filter(value => value),
                     type2: "Simulated Streamflow",
                     qModelValues: Qmodelt.filter(value => value),
-                    date: [1991, 1992, 1993, 1994, 1995, 1996] //FIXME
+                    date: T
                 };
 
-                //const sampleArr = []
-                //for (let i = 0; i < Obsmm.length; i++) {
-                //   sampleArr[i] = [Obsmm[i], Qmodelt[i]]
-                //}
-                //FIXME
-                let scatterResult = {
-                    //samples: sampleArr
-                    samples: [[1,2]]
+                let originalObservations = [...Obsmm];
+                originalObservations.shift();
+                let optimizedResults = Qmodelt.filter(res => res);
+
+
+                const sampleArr = []
+                for (let i = 0; i < originalObservations.length; i++) {
+                    let data = []
+                    data.push(Math.trunc(originalObservations.at(i)))
+                    data.push(Math.trunc(optimizedResults.at(i)))
+                    sampleArr.push(data)
                 }
-                console.log("result", result)
+
+                let scatterResult = {
+                    samples: sampleArr
+                }
                 this.props.onOptimizationFinished(result);
-                //this.props.onCalibrationScatter(scatterResult);
+                this.props.onCalibrationScatter(scatterResult);
             });
         };
 
         reader.readAsBinaryString(file);
     }
 
+    // Veri dönüşümü işlemleri
+    convertData = (binaryData) => {
+        const workbook = read(binaryData, { type: "binary" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = utils.sheet_to_json(worksheet, { header: 1 });
+
+        const headers = data[0];
+        const columnData = {};
+        headers.forEach((header) => {
+            columnData[header] = [];
+        });
+
+        for (let i = 1; i < data.length; i++) {
+            const row = data[i];
+            headers.forEach((header, index) => {
+                columnData[header].push(row[index]);
+            });
+        }
+
+        ////tarih
+        const T = [];
+        for (let i = 0; i < columnData.Tarih.length; i++) {
+            let dateInt = columnData.Tarih[i];
+            const excelSerialDate = new Date(Date.UTC(1899, 11, 30));
+            const excelSerialDay = Math.floor(dateInt);
+            const jsDate = new Date(excelSerialDate.getTime() + (excelSerialDay * 86400000));
+            const day = ('0' + jsDate.getDate()).slice(-2);
+            const month = ('0' + (jsDate.getMonth() + 1)).slice(-2);
+            const year = jsDate.getFullYear();
+
+            const formattedDate = day + '.' + month + '.' + year;
+            T.push(formattedDate);
+        }
+
+        return {
+            T,
+            P: columnData.P,
+            PET: columnData.PET,
+            Obsmm: columnData.Obsmm,
+            G: columnData['G(t)'],
+            S: columnData['S(t)'],
+            A: columnData.A,
+            B: columnData.B,
+            C: columnData.C,
+            D: columnData.D
+        };
+    }
+
+    // Hesaplama işlemleri
+    calculateResult = (data) => {
+        const { T, P, PET, Obsmm, G, S, A, B, C, D } = data;
+
+        const Et = [];
+        const DRt = [];
+        const GRt = [];
+        const Gt = [];
+        const GDt = [];
+        const Qmodelt = [];
+
+        const actualA = A;
+        const actualB = B;
+        const actualC = C;
+        const actualD = D;
+
+        // Parametre tahmini işlemleri
+        let predictionArray = this.createPredictionArray();
+        let paramA = predictionArray.A;
+        let paramB= predictionArray.B;
+        let paramC = predictionArray.C;
+        let paramD = predictionArray.D;
+
+        ////calibrasyon
+        const calibratedvalues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
+
+        for (let i = 1; i < T.length; i++) {
+            // Adım 1
+            const Wt = S[i - 1] + P[i];
+            //Step 2 Yt=(Wt+B)/(2A)‐SQRT(((Wt+B)/(2A))^2‐B*Wt/A)
+            const Yt = (Wt + B[0]) / (2 * A[0]) - Math.sqrt(Math.pow((Wt + B[0]) / (2 * A[0]), 2) - (B[0] * Wt) / A[0]);
+            // Adım 3
+            Et[i] = Yt * (1 - Math.exp(-PET[i] / B[0]))
+
+            // Adım 4
+            DRt[i] = ((1 - C[0]) * (Wt - Yt));
+
+            // Adım 5
+            GRt[i] = (C[0] * (Wt - Yt));
+
+            Gt[i] = G[i];
+
+            // Adım 7
+            GDt[i] = (D[0] * G[i]);
+
+            // Adım 8
+            Qmodelt[i] = (DRt[i] + GDt[i]);
+        }
+        return {
+            T,
+            P,
+            PET,
+            Obsmm,
+            Et,
+            DRt,
+            GRt,
+            G,
+            GDt,
+            Qmodelt
+        };
+    }
+
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
-        let paramAA = [];
-        let paramBB = [];
-        let paramCC = [];
-        let paramDD = [];
-        paramAA.push(0.5, 0.6, 0.7, 0.8, 0.5, 0.6);///1 den küçük
-        paramBB.push(45, 50, 60, 7, 8, 9);//1 den büyük 100-200
-        paramCC.push(0.10, 0.58, 0.3, 0.14, 0.5, 0.65);//1 den küçük
-        paramDD.push(0.7, 0.5, 0.69, 0.7, 0.189, 0.99);//1 den küçük
         const rmse = this.calculateRMSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("RMSE value: ", rmse);
         const nse = this.calculateNSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("NSE value: ", nse);
         let calibratedValues = {};
-        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD,  0.01,  1000,  1e-5);
-        console.log("Calibrated values: ", calibratedValues.paramA);
+        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01, 0.5);
         return calibratedValues;
     }
     average(actualA, actualB, actualC, actualD) {
         let sum = 0;
 
-        for (let i = 0; i < actualA.length; i++) {
+        for (let i = 0; i < 1; i++) {
             sum += actualA[i];
             sum += actualB[i];
             sum += actualC[i];
             sum += actualD[i];
         }
 
-        return sum / (actualA.length * 4);
+        return sum / (1 * 4);
     }
-
-    calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD ) {
-
-        console.log("predictedA:", predictedA);
-        console.log("actualA:", actualA);
-        console.log("predictedB:", predictedB);
-        console.log("actualB:", actualB);
-        console.log("predictedC:", predictedC);
-        console.log("actualC:", actualC);
-        console.log("predictedD:", predictedD);
-        console.log("actualD:", actualD);
+    calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
 
         let sumSquare = 0.0;
-        for (let i = 0; i < predictedA.length; i++) {
-            sumSquare += (predictedA[i] - actualA[i]) ** 2;
-            sumSquare += (predictedB[i] - actualB[i]) ** 2;
-            sumSquare += (predictedC[i] - actualC[i]) ** 2;
-            sumSquare += (predictedD[i] - actualD[i]) ** 2;
-        }
-        const n = predictedA.length;
-        console.log("sumSquare:", sumSquare);
-        console.log("n:", n);
-        return Math.sqrt(sumSquare / n);
+        sumSquare += (predictedA[0] - actualA[0]) ** 2;
+        sumSquare += (predictedB[0] - actualB[0]) ** 2;
+        sumSquare += (predictedC[0] - actualC[0]) ** 2;
+        sumSquare += (predictedD[0] - actualD[0]) ** 2;
+
+        const n = 4;
+        const meanSquare = sumSquare / n;
+        const rmse = Math.sqrt(meanSquare);
+        return rmse;
     }
 
+
+    createPredictionArray() {
+        const predictionArray = {
+            A: [],
+            B: [],
+            C: [],
+            D: [],
+        };
+
+        predictionArray.A.push(0.5);
+        predictionArray.B.push(250);
+        predictionArray.C.push(0.49);
+        predictionArray.D.push(0.51);
+
+        return predictionArray;
+    }
     calculateNSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
         let sumSquare = 0.0;
         let actualSumSquare = 0.0;
 
-        for (let i = 0; i < predictedA.length; i++) {
-            sumSquare += (predictedA[i] - actualA[i]) ** 2;
-            sumSquare += (predictedB[i] - actualB[i]) ** 2;
-            sumSquare += (predictedC[i] - actualC[i]) ** 2;
-            sumSquare += (predictedD[i] - actualD[i]) ** 2;
-        }
-        const actualMean = this.average(actualA, actualB, actualC, actualD);
-        for (let j = 0; j < actualA.length; j++) {
-            actualSumSquare += (actualA[j] - actualMean) ** 2;
-            actualSumSquare += (actualB[j] - actualMean) ** 2;
-            actualSumSquare += (actualC[j] - actualMean) ** 2;
-            actualSumSquare += (actualD[j] - actualMean) ** 2;
-        }
+        sumSquare += (predictedA[0] - actualA[0]) ** 2;
+        sumSquare += (predictedB[0] - actualB[0]) ** 2;
+        sumSquare += (predictedC[0] - actualC[0]) ** 2;
+        sumSquare += (predictedD[0] - actualD[0]) ** 2;
+
+        const actualMean = (actualA[0] + actualB[0] + actualC[0] + actualD[0]) / 4.0;
+        actualSumSquare += (actualA[0] - actualMean) ** 2;
+        actualSumSquare += (actualB[0] - actualMean) ** 2;
+        actualSumSquare += (actualC[0] - actualMean) ** 2;
+        actualSumSquare += (actualD[0] - actualMean) ** 2;
 
         return 1 - (sumSquare / actualSumSquare);
     }
-    ///burada predict değerleri günceller acaba actual array üzerinde mi bir güncelleme yapılıyor? .
-    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate = 0.01, epochs = 1000, tolerance = 1e-5) {
-        let paramA = [...predictedA];
-        let paramB = [...predictedB];
-        let paramC = [...predictedC];
-        let paramD = [...predictedD];
+    calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
+        var error = predictedB[0] - actualB[0];
+        var partialDerivative = 2 * error;
+        return partialDerivative;
+    }
 
-        const n = predictedA.length;
+    calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
+        var error = predictedC[0] - actualC[0];
+        var partialDerivative = 2 * error;
+        return partialDerivative;
+    }
 
-        let rmse = Infinity;
-        for (let epoch = 0; epoch < epochs; epoch++) {
-            let gradA = 0;
-            let gradB = 0;
-            let gradC = 0;
-            let gradD = 0;
+    calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
+        var error = predictedD[0] - actualD[0];
+        var partialDerivative = 2 * error;
+        return partialDerivative;
+    }
 
-            for (let i = 0; i < n; i++) {
-                const errorA = paramA[i] - actualA[i];
-                const errorB = paramB[i] - actualB[i];
-                const errorC = paramC[i] - actualC[i];
-                const errorD = paramD[i] - actualD[i];
+    calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
+        var error = predictedA[0] - actualA[0];
+        var partialDerivative = 2 * error;
+        return partialDerivative;
+    }
 
-                gradA += 2 * errorA;
-                gradB += 2 * errorB;
-                gradC += 2 * errorC;
-                gradD += 2 * errorD;
-            }
 
-            gradA /= n;
-            gradB /= n;
-            gradC /= n;
-            gradD /= n;
+    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
+        var currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+        let upperLimit = targetRMSE+0.1;
+        let lowerLimit = targetRMSE - 0.1;
 
-            paramA = paramA.map(a => a - learningRate * gradA);
-            paramB = paramB.map(b => b - learningRate * gradB);
-            paramC = paramC.map(c => c - learningRate * gradC);
-            paramD = paramD.map(d => d - learningRate * gradD);
+        while (currentRMSE > targetRMSE || currentRMSE >= upperLimit || currentRMSE <= lowerLimit) {
+            // A, B, C ve D değerlerini güncelle
+            predictedA[0] = predictedA[0] - learningRate * this.calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            predictedB[0] = predictedB[0] - learningRate * this.calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            predictedC[0] = predictedC[0] - learningRate * this.calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            predictedD[0] = predictedD[0] - learningRate * this.calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
 
-            rmse = Math.sqrt((1 / n) * paramA.reduce((acc, a, i) => acc + Math.pow(a - actualA[i], 2), 0)
-                + (1 / n) * paramB.reduce((acc, b, i) => acc + Math.pow(b - actualB[i], 2), 0)
-                + (1 / n) * paramC.reduce((acc, c, i) => acc + Math.pow(c - actualC[i], 2), 0)
-                + (1 / n) * paramD.reduce((acc, d, i) => acc + Math.pow(d - actualD[i], 2), 0));
-            console.log("rmse optimizeggg:", rmse, paramA);
+            // RMSE değerini hesapla
+            currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
 
-            if (rmse < tolerance) {
-                break;
-            }
-            console.log("grad A:", gradA, gradB);
-
+            // lowerLimit ve upperLimit değerlerini güncelle
+            lowerLimit = currentRMSE - 0.1;
+            upperLimit = currentRMSE + 0.1;
         }
-        console.log("rmse optimize:", rmse, paramA);
-        console.log("rmse optimize:", rmse, paramB);
-
-        return { paramA, paramB, paramC, paramD, rmse };
+        console.log("rmse", currentRMSE)
+        console.log("predictedA:", predictedA[0]);
+        console.log("actualA:", actualA[0]);
+        console.log("predictedB:", predictedB[0]);
+        console.log("actualB:", actualB[0]);
+        console.log("predictedC:", predictedC[0]);
+        console.log("actualC:", actualC[0]);
+        console.log("predictedD:", predictedD[0]);
+        console.log("actualD:", actualD[0]);
     }
 
     render() {
@@ -329,34 +313,35 @@ class ModelCalculation extends React.Component {
                     <div>
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Tarih</th>
-                                    <th>P</th>
-                                    <th>PET</th>
-                                    <th>Obsmm</th>
-                                    <th>Et</th>
-                                    <th>DRt</th>
-                                    <th>GRt</th>
-                                    <th>G </th>
-                                    <th>GDt</th>
-                                    <th>Qmodelt</th>
-                                </tr>
+                            <tr>
+                                <th>Tarih</th>
+                                <th>P</th>
+                                <th>PET</th>
+                                <th>Obsmm</th>
+                                <th>Et</th>
+                                <th>DRt</th>
+                                <th>GRt</th>
+                                <th>G </th>
+                                <th>GDt</th>
+                                <th>Qmodelt</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                {result.T.map((value, index) => (
-                                    <tr key={index}>
-                                        <td>{value.toLocaleDateString()}</td>
-                                        <td>{result.P[index]}</td>
-                                        <td>{result.PET[index]}</td>
-                                        <td>{result.Obsmm[index]}</td>
-                                        <td>{result.Et[index]}</td>
-                                        <td>{result.DRt[index]}</td>
-                                        <td>{result.GRt[index]}</td>
-                                        <td>{result.G[index]} </td>
-                                        <td>{result.GDt[index]}</td>
-                                        <td>{result.Qmodelt[index]}</td>
-                                    </tr>
-                                ))}
+                            { /*
+                                result.T.map((date, index) => (
+                                <tr key={index}>
+                                    <td>{date}</td>
+                                    <td>{result.P[index]}</td>
+                                    <td>{result.PET[index]}</td>
+                                    <td>{result.Obsmm[index]}</td>
+                                    <td>{result.Et[index]}</td>
+                                    <td>{result.DRt[index]}</td>
+                                    <td>{result.GRt[index]}</td>
+                                    <td>{result.G[index]} </td>
+                                    <td>{result.GDt[index]}</td>
+                                    <td>{result.Qmodelt[index]}</td>
+                                </tr>
+                            ))*/}
                             </tbody>
                         </table>
                     </div>
