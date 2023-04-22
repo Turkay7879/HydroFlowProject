@@ -100,6 +100,13 @@ export class NavMenu extends Component {
             <NavItem>
               <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
             </NavItem>
+			{
+				this.state.validSessionPresent ? <>
+					<NavItem>
+						<NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Optimization</NavLink>
+					</NavItem>
+				</> : <></>
+			}
             {
               (this.state.validSessionPresent && this.state.authorizedForAdminPanels) ?
                   <>
