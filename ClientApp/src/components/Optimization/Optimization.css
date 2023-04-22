@@ -17,6 +17,21 @@
     font-weight: 600;
 }
 
+.model-selector {
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.model-actions {
+    display: flex;
+}
+
+.add-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 2.5rem;
+}
+
 .optimizations-container {
     display: flex;
 }

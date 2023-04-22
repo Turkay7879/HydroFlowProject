@@ -106,14 +106,12 @@ class AddModelModal extends React.Component {
     }
 
     saveModel = (model) => {
-        //const base64ModelFile = btoa(String.fromCharCode.apply(null, new Uint8Array(model.ModelFile))); // ModelFile özelliğinin base64 kodlaması yapılıyor
-        //let createDate = model.CreateDate ? model.CreateDate.toISOString() : new Date().toISOString(); // Değişken tanımı yapılıyor
         let modelToSave = {
             Name: model.Name,
             Title: model.Title,
-            //CreateDate: createDate, // Değişken kullanılıyor
-            ModelFile: model.ModelFile, // base64 kodlaması yapılmış ModelFile özelliği kullanılıyor
-            ModelPermissionId: 0
+            ModelFile: model.ModelFile,
+            ModelPermissionId: 0,
+            SessionId: (JSON.parse(window.localStorage.getItem("hydroFlowSession"))).sessionId
         }
         if (model.Id && model.Id !== undefined) { modelToSave.Id = model.Id }
 
@@ -139,10 +137,7 @@ class AddModelModal extends React.Component {
                 });
             });
     }
-
-
-
-
+    
     render() {
         return <>
             <Modal isOpen={this.state.showModal}>

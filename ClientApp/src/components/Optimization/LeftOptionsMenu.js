@@ -18,10 +18,20 @@ class LeftOptionsMenu extends React.Component {
         this.setState({
             selectedModel: this.props.selectedModel,
             modelingType: this.props.modelingType,
-            parameters: this.props.parameters
+            parameters: this.props.parameters,
+            isRunning: this.props.isOptimizationRunning
         });
     }
     
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.selectedModel !== this.props.selectedModel) {
+            this.setState({selectedModel: this.props.selectedModel});
+        }
+        if (prevProps.isOptimizationRunning !== this.props.isOptimizationRunning) {
+            this.setState({ isRunning: this.props.isOptimizationRunning });
+        }
+    }
+
     updateParameterValue = (stateValue, newValue) => {
         let parameters = this.state.parameters;
         parameters[stateValue] = newValue;
@@ -29,7 +39,7 @@ class LeftOptionsMenu extends React.Component {
     }
     
     onClickOptimize = () => {
-        this.setState({ runningOptimization: true });
+        this.props.onStartOptimize()
     }
     
     onClickSave = () => {
@@ -134,22 +144,22 @@ class LeftOptionsMenu extends React.Component {
                         <div className={"optimize-button"}>
                             <Button
                                 color="primary"
-                                disabled={this.state.runningOptimization}
+                                disabled={this.state.isRunning || !this.state.selectedModel}
                                 onClick={this.onClickOptimize}>
                                 {
-                                    !this.state.runningOptimization
+                                    !this.state.isRunning
                                         ? <PlayCircleOutline/>
                                         : <Spinner size={"sm"}/>
                                 }
                                 <span>
-                                    {` ${!this.state.runningOptimization ? 'Optimize' : 'Optimizing'}`}
+                                    {` ${!this.state.isRunning ? 'Optimize' : 'Optimizing'}`}
                                 </span>
                             </Button>
                         </div>
                         <div className={"save-button"}>
                             <Button
                                 color="success"
-                                disabled={this.state.runningOptimization}
+                                disabled={this.state.isRunning || !this.state.selectedModel}
                                 onClick={this.onClickSave}>
                                 <SaveOutlined/>
                                 <span>

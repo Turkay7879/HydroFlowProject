@@ -15,6 +15,8 @@ namespace HydroFlowProject.ViewModels
         public string ModelFile { get; set; } = null!;
 
         public int ModelPermissionId { get; set; }
+        
+        public string? SessionId { get; set; }
 
         public Model ToModel()
         {
@@ -24,7 +26,7 @@ namespace HydroFlowProject.ViewModels
                 Name = Name,
                 Title = Title,
                 CreateDate = null,
-                ModelFile = Convert.FromBase64String(ModelFile),
+                ModelFile = Convert.FromBase64String(ModelFile.Substring(55)),
                 ModelPermissionId = ModelPermissionId
             };
             return model;

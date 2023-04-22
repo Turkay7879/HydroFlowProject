@@ -45,7 +45,7 @@ namespace HydroFlowProject.Controllers
                         Name = model.Name,
                         Id = model.Id,
                         Title = model.Title,
-                        ModelFile = new byte[0],
+                        ModelFile = Array.Empty<byte>(),
                         ModelPermissionId = model.ModelPermissionId,
                         CreateDate = model.CreateDate
                     };
@@ -63,6 +63,7 @@ namespace HydroFlowProject.Controllers
         {
             Model model = modelVM.ToModel();
             var toUpdate = await _context.Models.FindAsync(model.Id);
+            var id = -1;
             if (toUpdate == null)
             {
                 await _context.Models.AddAsync(model);
@@ -70,17 +71,38 @@ namespace HydroFlowProject.Controllers
             else
             {
                 _context.Models.Entry(toUpdate).CurrentValues.SetValues(model);
+                id = model.Id;
             }
 
             int added = await _context.SaveChangesAsync();
-            if (added > 0 || toUpdate != null)
+            id = model.Id;
+            if (toUpdate == null && added == 0)
             {
-                return Ok(model);
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+            
+            if (added > 0)
+            {
+                var userSession = _context.Sessions.ToList().Find(s => s.SessionId == modelVM.SessionId);
+                if (userSession == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError);
+                }
+                
+                await _context.UserModels.AddAsync(new UserModel
+                {
+                    UserId = userSession.UserId,
+                    ModelId = id
+                });
+                await _context.SaveChangesAsync();
+            }
 
-        // POST: Save new model
+            modelVM.Id = id;
+            modelVM.ModelFile = "";
+            modelVM.SessionId = "";
+            return Ok(modelVM);
+        }
+        
         [HttpPost]
         [Route("downloadModelData")]
         public async Task<ActionResult<ModelViewModel>> DownloadModelData([FromBody] int Id)
@@ -94,20 +116,7 @@ namespace HydroFlowProject.Controllers
             modelVM.ModelFile = Convert.ToBase64String(foundModel.ModelFile);
             return Ok(modelVM);
         }
-
-        /*  // DELETE: Delete a model
-        [HttpDelete]
-        [Route("deleteModel")]
-        public async Task<ActionResult<Model>> DeleteModel([FromBody] Model model)
-        {
-            _context.Models.Remove(model);
-            int result = await _context.SaveChangesAsync();
-            if (result > 0)
-            {
-                return Ok(model);
-            }
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }*/
+        
         // DELETE: Delete a model
         [HttpDelete]
         [Route("deleteModel")]
@@ -126,6 +135,38 @@ namespace HydroFlowProject.Controllers
                 return Ok(modelToDelete);
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+
+        [HttpPost]
+        [Route("getModelsOfUser")]
+        public async Task<ActionResult<ModelViewModel>> GetModelsOfUser([FromBody] SessionViewModel session)
+        {
+            var userSession = _context.Sessions.ToList().Find(s => s.SessionId == session.SessionId);
+            if (userSession == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            var userModels = _context.UserModels.ToList().FindAll(um => um.UserId == userSession.UserId);
+            if (userModels.Count == 0)
+            {
+                return Ok(Array.Empty<ModelViewModel>());
+            }
+
+            var modelList = new ArrayList();
+            foreach (var um in userModels)
+            {
+                var model = await _context.Models.FindAsync(um.ModelId);
+                modelList.Add(new ModelViewModel {
+                    Id = model!.Id,
+                    Name = model.Name,
+                    Title = model.Title,
+                    ModelFile = "",
+                    ModelPermissionId = model.ModelPermissionId
+                });
+            }
+
+            return Ok(modelList);
         }
     }
 }

@@ -1,7 +1,5 @@
-﻿
-import React from 'react';
+﻿import React from 'react';
 import { read, utils } from 'xlsx';
-
 
 class ModelCalculation extends React.Component {
 
@@ -11,68 +9,65 @@ class ModelCalculation extends React.Component {
         result: {},
         Qmodelt: []
     }
-
-    // Dosya yükleme işlemleri 
-    handleFileUpload = (event) => {
-        const files = event.target.files;
-
-        if (files.length === 0) {
-            console.error("No file selected");
-            return;
+    
+    componentDidMount() {
+        this.setState({ modelData: this.props.modelData });
+    }
+    
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.modelData !== this.props.modelData) {
+            this.setState({ modelData: this.props.modelData });
         }
+        if (prevProps.isOptimizationStarted !== this.props.isOptimizationStarted) {
+            this.setState({ isOptimizationStarted: this.props.isOptimizationStarted });
+        }
+    }
 
-        const reader = new FileReader();
-        const file = files[0];
+    startOperations = () => {
+        const data = this.convertData(this.state.modelData);
+        const result = this.calculateResult(data);
+        this.setState({
+            showResult: true,
+            result
+        }, () => {
+            let Obsmm = this.state.result.Obsmm;
+            let Qmodelt = this.state.result.Qmodelt;
+            let T = this.state.result.T.map(modelDate => modelDate.split(".").at(2))
+            console.log(`orig size: ${Obsmm.length}\toptimize size: ${Qmodelt.length}`)
 
-        reader.onload = (e) => {
-            const binaryData = e.target.result;
-            const data = this.convertData(binaryData);
+            let result = {
+                type1: "Observed Streamflow",
+                actualValues: Obsmm.filter(value => value),
+                type2: "Simulated Streamflow",
+                qModelValues: Qmodelt.filter(value => value),
+                date: T
+            };
 
-            const result = this.calculateResult(data);
-            this.setState({
-                showResult: true,
-                result
-            }, () => {
-                let Obsmm = this.state.result.Obsmm;
-                let Qmodelt = this.state.result.Qmodelt;
-                let T = this.state.result.T.map(modelDate => modelDate.split(".").at(2))
-                console.log(`orig size: ${Obsmm.length}\toptimize size: ${Qmodelt.length}`)
+            let originalObservations = [...Obsmm];
+            originalObservations.shift();
+            let optimizedResults = Qmodelt.filter(res => res);
+            
+            const sampleArr = []
+            for (let i = 0; i < originalObservations.length; i++) {
+                let data = []
+                data.push(Math.trunc(originalObservations.at(i)))
+                data.push(Math.trunc(optimizedResults.at(i)))
+                sampleArr.push(data)
+            }
 
-                let result = {
-                    type1: "Observed Streamflow",
-                    actualValues: Obsmm.filter(value => value),
-                    type2: "Simulated Streamflow",
-                    qModelValues: Qmodelt.filter(value => value),
-                    date: T
-                };
-
-                let originalObservations = [...Obsmm];
-                originalObservations.shift();
-                let optimizedResults = Qmodelt.filter(res => res);
-
-
-                const sampleArr = []
-                for (let i = 0; i < originalObservations.length; i++) {
-                    let data = []
-                    data.push(Math.trunc(originalObservations.at(i)))
-                    data.push(Math.trunc(optimizedResults.at(i)))
-                    sampleArr.push(data)
-                }
-
-                let scatterResult = {
-                    samples: sampleArr
-                }
-                this.props.onOptimizationFinished(result);
-                this.props.onCalibrationScatter(scatterResult);
-            });
-        };
-
-        reader.readAsBinaryString(file);
+            let scatterResult = {
+                samples: sampleArr
+            }
+            this.props.onOptimizationFinished(result);
+            this.props.onCalibrationScatter(scatterResult);
+        });
+        
+        return <></>
     }
 
     // Veri dönüşümü işlemleri
-    convertData = (binaryData) => {
-        const workbook = read(binaryData, { type: "binary" });
+    convertData = (modelData) => {
+        const workbook = read(modelData, { type: "base64" });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = utils.sheet_to_json(worksheet, { header: 1 });
 
@@ -214,8 +209,7 @@ class ModelCalculation extends React.Component {
         const rmse = Math.sqrt(meanSquare);
         return rmse;
     }
-
-
+    
     createPredictionArray() {
         const predictionArray = {
             A: [],
@@ -271,8 +265,7 @@ class ModelCalculation extends React.Component {
         var partialDerivative = 2 * error;
         return partialDerivative;
     }
-
-
+    
     optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
         var currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
         let upperLimit = targetRMSE+0.1;
@@ -304,50 +297,9 @@ class ModelCalculation extends React.Component {
     }
 
     render() {
-        const { showResult, result } = this.state;
-
-        return (
-            <div>
-                <input type="file" onChange={this.handleFileUpload} />
-                {showResult && (
-                    <div>
-                        <table>
-                            <thead>
-                            <tr>
-                                <th>Tarih</th>
-                                <th>P</th>
-                                <th>PET</th>
-                                <th>Obsmm</th>
-                                <th>Et</th>
-                                <th>DRt</th>
-                                <th>GRt</th>
-                                <th>G </th>
-                                <th>GDt</th>
-                                <th>Qmodelt</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            { /*
-                                result.T.map((date, index) => (
-                                <tr key={index}>
-                                    <td>{date}</td>
-                                    <td>{result.P[index]}</td>
-                                    <td>{result.PET[index]}</td>
-                                    <td>{result.Obsmm[index]}</td>
-                                    <td>{result.Et[index]}</td>
-                                    <td>{result.DRt[index]}</td>
-                                    <td>{result.GRt[index]}</td>
-                                    <td>{result.G[index]} </td>
-                                    <td>{result.GDt[index]}</td>
-                                    <td>{result.Qmodelt[index]}</td>
-                                </tr>
-                            ))*/}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
-        );
+        return <>
+            { this.state.isOptimizationStarted && this.startOperations() }
+        </>
     }
 }
 export default ModelCalculation;
