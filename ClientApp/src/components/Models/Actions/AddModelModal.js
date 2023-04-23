@@ -2,6 +2,7 @@
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import Swal from "sweetalert2";
 import ModelsRemote from "../flux/ModelsRemote";
+import BasinsRemote from "../../Basins/flux/BasinsRemote";
 import AddModelForm from "./AddModelForm";
 
 class AddModelModal extends React.Component {
@@ -17,13 +18,16 @@ class AddModelModal extends React.Component {
                 CreateDate: null,
                 ModelFile: null,
                 ModelPermissionId: 0,
+                BasinId: 0
             },
             formInvalidFields: {
                 NameInvalid: false,
                 titleInvalid: false,
                 modelFileInvalid: false,
-                modelPermissionIdInvalid: false
-            }
+                modelPermissionIdInvalid: false,
+                basinInvalid: false
+            },
+            availableBasins: null
         };
     }
 
@@ -32,13 +36,24 @@ class AddModelModal extends React.Component {
     componentDidMount() {
         if (this.props.selectedModel !== null && this.props.selectedModel !== undefined) {
             this.setState({ model: this.props.selectedModel }, () => {
-                this.setState({ showModal: this.props.showModal });
+                this.setState({ showModal: this.props.showModal }, () => this.getBasinList());
             });
         } else {
-            this.setState({ showModal: this.props.showModal });
+            this.setState({ showModal: this.props.showModal }, () => this.getBasinList());
         }
     }
 
+    getBasinList = () => {
+        BasinsRemote.getAllBasins().then(response => {
+            if (response.status === 404) {
+                // Ask to add a basin first
+            } else {
+                response.json().then(basinList => {
+                    this.setState({ availableBasins: basinList });
+                })
+            }
+        })
+    }
 
     getModalHeader = () => {
         return <ModalHeader>
@@ -48,11 +63,16 @@ class AddModelModal extends React.Component {
 
     getModalBody = () => {
         return <ModalBody>
-            <AddModelForm setModel={(property, value) => {
-                let newModel = this.state.model;
-                newModel[property] = value
-                this.setState({ model: newModel });
-            }} selectedModel={this.state.model} editing={this.state.model.Name !== ""} {...this.state.formInvalidFields} />
+            <AddModelForm 
+                setModel={(property, value) => {
+                    let newModel = this.state.model;
+                    newModel[property] = value
+                    this.setState({ model: newModel });
+                }} 
+                selectedModel={this.state.model} 
+                basinList={this.state.availableBasins}
+                editing={this.state.model.Name !== ""}
+                {...this.state.formInvalidFields} />
         </ModalBody>
     }
 
@@ -80,6 +100,7 @@ class AddModelModal extends React.Component {
         newInvalidFields.titleInvalid = trimmedTitle === "";
 
         newInvalidFields.modelFileInvalid = model.ModelFile === undefined;
+        newInvalidFields.basinInvalid = model.BasinId === 0;
       
         // if (!model.ModelPermissionId) {
         //       newInvalidFields.modelPermissionIdInvalid = true;
@@ -93,7 +114,7 @@ class AddModelModal extends React.Component {
         //       }
   
         //   }
-        if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid) {
+        if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid || newInvalidFields.basinInvalid) {
             this.setState({ formInvalidFields: newInvalidFields });
             return Swal.fire({
                 title: "Incorrect Form Fields",
@@ -111,7 +132,8 @@ class AddModelModal extends React.Component {
             Title: model.Title,
             ModelFile: model.ModelFile,
             ModelPermissionId: 0,
-            SessionId: (JSON.parse(window.localStorage.getItem("hydroFlowSession"))).sessionId
+            SessionId: (JSON.parse(window.localStorage.getItem("hydroFlowSession"))).sessionId,
+            BasinId: model.BasinId
         }
         if (model.Id && model.Id !== undefined) { modelToSave.Id = model.Id }
 

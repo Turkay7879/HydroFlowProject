@@ -59,7 +59,7 @@ namespace HydroFlowProject.Controllers
         // POST: Save new model
         [HttpPost]
         [Route("saveModel")]
-        public async Task<ActionResult<Model>> SaveModel([FromBody] ModelViewModel modelVM)
+        public async Task<ActionResult<ModelViewModel>> SaveModel([FromBody] ModelViewModel modelVM)
         {
             Model model = modelVM.ToModel();
             var toUpdate = await _context.Models.FindAsync(model.Id);
@@ -89,11 +89,36 @@ namespace HydroFlowProject.Controllers
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 }
                 
+                var parameters = new List<ModelParameter>
+                {
+                    new ModelParameter{Model_Id = id, Model_Param = 1f, Model_Param_Name = "a"},
+                    new ModelParameter{Model_Id = id, Model_Param = 5f, Model_Param_Name = "b"},
+                    new ModelParameter{Model_Id = id, Model_Param = 0.5f, Model_Param_Name = "c"},
+                    new ModelParameter{Model_Id = id, Model_Param = 0.1f, Model_Param_Name = "d"},
+                    new ModelParameter{Model_Id = id, Model_Param = 2f, Model_Param_Name = "initialSt"},
+                    new ModelParameter{Model_Id = id, Model_Param = 2f, Model_Param_Name = "initialGt"},
+                };
+                
                 await _context.UserModels.AddAsync(new UserModel
                 {
                     UserId = userSession.UserId,
                     ModelId = id
                 });
+
+                await _context.BasinModels.AddAsync(new BasinModel
+                {
+                    BasinId = modelVM.BasinId,
+                    ModelId = id
+                });
+
+                await _context.ModelModelTypes.AddAsync(new ModelModelType
+                {
+                    Model_Type_Id = 1,
+                    Model_Id = id
+                });
+
+                await _context.ModelParameters.AddRangeAsync(parameters);
+                
                 await _context.SaveChangesAsync();
             }
 
@@ -101,6 +126,35 @@ namespace HydroFlowProject.Controllers
             modelVM.ModelFile = "";
             modelVM.SessionId = "";
             return Ok(modelVM);
+        }
+
+        [HttpPost]
+        [Route("getModelParameters")]
+        public ActionResult<ModelParameterViewModel> GetModelParameters([FromBody] int ModelId)
+        {
+            var parameters = _context.ModelParameters.ToList().FindAll(p => p.Model_Id == ModelId);
+            var modelingTypeId = _context.ModelModelTypes.ToList().Find(mt => mt.Model_Id == ModelId);
+            var modelingType = _context.BalanceModelTypes.Find(modelingTypeId!.Model_Type_Id);
+            var modelParameters = new ModelParameterViewModel
+            {
+                Parameters = parameters,
+                ModelingType = modelingType!.ModelType_Definition
+            };
+            return Ok(modelParameters);
+        }
+
+        [HttpPost]
+        [Route("saveModelParameters")]
+        public async Task<ActionResult<ModelParameterViewModel>> SaveModelParameters([FromBody] List<ModelParameterSaveViewModel> paramList)
+        {
+            foreach (var parameter in paramList)
+            {
+                var parameterFromDb = await _context.ModelParameters.FindAsync(parameter.Parameter_Id);
+                _context.ModelParameters.Entry(parameterFromDb!).CurrentValues.SetValues(parameter);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok(paramList);
         }
         
         [HttpPost]

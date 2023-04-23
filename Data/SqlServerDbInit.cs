@@ -7,8 +7,7 @@ namespace HydroFlowProject.Data
         public static void Initialize(SqlServerDbContext context) 
         {
             context.Database.EnsureCreated();
-
-            // Initialize Roles
+            
             if (!context.Roles.Any())
             {
                 Role roleSystemAdmin = new Role();
@@ -31,6 +30,36 @@ namespace HydroFlowProject.Data
                 rolePaidUserLv1.RoleValue = "userpaid1";
                 context.Roles.Add(rolePaidUserLv1);
 
+                context.SaveChanges();
+            }
+
+            if (!context.BalanceModelTypes.Any())
+            {
+                var abcdBalanceModel = new BalanceModelType();
+                abcdBalanceModel.ModelType_Definition = "ABCD";
+                context.BalanceModelTypes.Add(abcdBalanceModel);
+
+                context.SaveChanges();
+            }
+
+            if (!context.Basins.Any())
+            {
+                var seferihisarBasin = new Basin();
+                seferihisarBasin.BasinName = "Seferihisar-D06A024";
+                seferihisarBasin.Description = "Seferihisar Barajı";
+                seferihisarBasin.Field = 90;
+                seferihisarBasin.FlowStationNo = "D06A024";
+                seferihisarBasin.FlowObservationStationLat = 38.217250;
+                seferihisarBasin.FlowObservationStationLong = 26.883868;
+
+                var seferihisarBasinPermissions = new BasinPermission();
+                seferihisarBasinPermissions.BasinId = 1;
+                seferihisarBasinPermissions.BasinPermissionType = false;
+                seferihisarBasinPermissions.BasinSpecPerm = false;
+                seferihisarBasinPermissions.UserSpecPerm = false;
+
+                context.Basins.Add(seferihisarBasin);
+                context.BasinPermissions.Add(seferihisarBasinPermissions);
                 context.SaveChanges();
             }
         }

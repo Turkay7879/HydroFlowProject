@@ -10,11 +10,14 @@ namespace HydroFlowProject.Data
         {
         }
 
+        public virtual DbSet<BalanceModelType> BalanceModelTypes { get; set; }
         public virtual DbSet<Basin> Basins { get; set; }
         public virtual DbSet<BasinModel> BasinModels { get; set; }
         public virtual DbSet<BasinPermission> BasinPermissions { get; set; }
         public virtual DbSet<BasinUserPermission> BasinUserPermissions { get; set; }
         public virtual DbSet<Model> Models { get; set; }
+        public virtual DbSet<ModelModelType> ModelModelTypes { get; set; }
+        public virtual DbSet<ModelParameter> ModelParameters { get; set; }
         public virtual DbSet<Role> Roles { get; set; }
         public virtual DbSet<Session> Sessions { get; set; }
         public virtual DbSet<User> Users { get; set; }
@@ -24,6 +27,13 @@ namespace HydroFlowProject.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<BalanceModelType>(entity =>
+            {
+                entity.HasKey(e => e.ModelType_Id).HasName("PK__BalanceModelTypes");
+
+                entity.Property(e => e.ModelType_Definition).HasMaxLength(25).IsRequired();
+            });
+            
             modelBuilder.Entity<Basin>(entity =>
             {
                 entity.HasKey(e => e.Id).HasName("PK__Basins__3214EC071999E5DA");
@@ -96,6 +106,32 @@ namespace HydroFlowProject.Data
                     .IsConcurrencyToken();
                 entity.Property(e => e.Name).HasMaxLength(50);
                 entity.Property(e => e.Title).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<ModelModelType>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__Model__ModelTypes");
+
+                entity.HasOne(e => e.Model).WithMany(m => m.ModelModelTypes)
+                    .HasForeignKey(e => e.Model_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_ModelModelType_Model");
+                entity.HasOne(e => e.BalanceModelType).WithMany(bmt => bmt.ModelModelTypes)
+                    .HasForeignKey(e => e.Model_Type_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_ModelModelType_BalanceModelType");
+            });
+
+            modelBuilder.Entity<ModelParameter>(entity =>
+            {
+                entity.HasKey(e => e.Parameter_Id).HasName("PK__Model_Parameter");
+                
+                entity.HasOne(e => e.Model).WithMany(m => m.ModelParameters)
+                    .HasForeignKey(e => e.Model_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_ModelParameters_Model");
+                entity.Property(e => e.Model_Param).IsRequired();
+                entity.Property(e => e.Model_Param_Name).HasMaxLength(25).IsRequired();
             });
 
             modelBuilder.Entity<Role>(entity =>

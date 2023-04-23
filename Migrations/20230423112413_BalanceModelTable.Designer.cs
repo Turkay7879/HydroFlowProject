@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HydroFlowProject.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230412181328_SessionModel")]
-    partial class SessionModel
+    [Migration("20230423112413_BalanceModelTable")]
+    partial class BalanceModelTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,25 @@ namespace HydroFlowProject.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("HydroFlowProject.Models.BalanceModelType", b =>
+                {
+                    b.Property<int>("ModelType_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ModelType_Id"));
+
+                    b.Property<string>("ModelType_Definition")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("ModelType_Id")
+                        .HasName("PK__BalanceModelTypes");
+
+                    b.ToTable("BalanceModelTypes");
+                });
 
             modelBuilder.Entity("HydroFlowProject.Models.Basin", b =>
                 {
@@ -198,6 +217,57 @@ namespace HydroFlowProject.Migrations
                     b.ToTable("Models");
                 });
 
+            modelBuilder.Entity("HydroFlowProject.Models.ModelModelType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Model_Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Model_Type_Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id")
+                        .HasName("PK__Model__ModelTypes");
+
+                    b.HasIndex("Model_Id");
+
+                    b.HasIndex("Model_Type_Id");
+
+                    b.ToTable("ModelModelTypes");
+                });
+
+            modelBuilder.Entity("HydroFlowProject.Models.ModelParameter", b =>
+                {
+                    b.Property<int>("Parameter_Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Parameter_Id"));
+
+                    b.Property<int>("Model_Id")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Model_Param")
+                        .HasColumnType("real");
+
+                    b.Property<string>("Model_Param_Name")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)");
+
+                    b.HasKey("Parameter_Id")
+                        .HasName("PK__Model_Parameter");
+
+                    b.HasIndex("Model_Id");
+
+                    b.ToTable("ModelParameters");
+                });
+
             modelBuilder.Entity("HydroFlowProject.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -341,11 +411,10 @@ namespace HydroFlowProject.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<byte[]>("UserRoleDate")
+                    b.Property<DateTime?>("UserRoleDate")
                         .IsConcurrencyToken()
-                        .IsRequired()
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id")
                         .HasName("PK__User_Rol__3214EC0729397F40");
@@ -450,6 +519,39 @@ namespace HydroFlowProject.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HydroFlowProject.Models.ModelModelType", b =>
+                {
+                    b.HasOne("HydroFlowProject.Models.Model", "Model")
+                        .WithMany("ModelModelTypes")
+                        .HasForeignKey("Model_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ModelModelType_Model");
+
+                    b.HasOne("HydroFlowProject.Models.BalanceModelType", "BalanceModelType")
+                        .WithMany("ModelModelTypes")
+                        .HasForeignKey("Model_Type_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ModelModelType_BalanceModelType");
+
+                    b.Navigation("BalanceModelType");
+
+                    b.Navigation("Model");
+                });
+
+            modelBuilder.Entity("HydroFlowProject.Models.ModelParameter", b =>
+                {
+                    b.HasOne("HydroFlowProject.Models.Model", "Model")
+                        .WithMany("ModelParameters")
+                        .HasForeignKey("Model_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ModelParameters_Model");
+
+                    b.Navigation("Model");
+                });
+
             modelBuilder.Entity("HydroFlowProject.Models.Session", b =>
                 {
                     b.HasOne("HydroFlowProject.Models.User", "User")
@@ -527,6 +629,11 @@ namespace HydroFlowProject.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("HydroFlowProject.Models.BalanceModelType", b =>
+                {
+                    b.Navigation("ModelModelTypes");
+                });
+
             modelBuilder.Entity("HydroFlowProject.Models.Basin", b =>
                 {
                     b.Navigation("BasinModels");
@@ -539,6 +646,10 @@ namespace HydroFlowProject.Migrations
             modelBuilder.Entity("HydroFlowProject.Models.Model", b =>
                 {
                     b.Navigation("BasinModels");
+
+                    b.Navigation("ModelModelTypes");
+
+                    b.Navigation("ModelParameters");
 
                     b.Navigation("UserModels");
 

@@ -16,6 +16,8 @@ const RemoteRequestURLs = {
   MODEL_DELETE_MODEL: "/api/models/deleteModel",
   MODEL_DOWNLOAD_MODEL_DATA: "/api/models/downloadModelData",
   MODEL_FIND_USER_MODELS: "/api/models/getModelsOfUser",
+  MODEL_GET_PARAMETERS: "/api/models/getModelParameters",
+  MODEL_SAVE_PARAMETERS: "/api/models/saveModelParameters",
   
   // Session Requests
   SESSION_LOGIN_USER: "/api/session/loginUser",

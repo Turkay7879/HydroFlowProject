@@ -1,7 +1,9 @@
 ﻿import React from "react";
-import { Form, FormGroup, Label, Input } from "reactstrap";
-
+import { FormGroup, Label, Input } from "reactstrap";
+import Form from "react-bootstrap/Form";
 class AddModelForm extends React.Component {
+    defaultBasinOption = "Select a basin";
+    
     constructor(props) {
         super(props);
 
@@ -11,7 +13,8 @@ class AddModelForm extends React.Component {
             showModal: false,
             savedModel: false,
             selectedModel: null,
-            editingModal: false
+            editingModal: false,
+            basinList: props.basinList
         };
     }
     componentDidMount() {
@@ -25,7 +28,10 @@ class AddModelForm extends React.Component {
         }
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.basinList !== this.props.basinList) {
+            this.setState({ basinList: this.props.basinList });
+        }
         if (this.state.NameInvalid !== this.props.NameInvalid) {
             this.setState({ NameInvalid: this.props.NameInvalid });
         }
@@ -41,9 +47,8 @@ class AddModelForm extends React.Component {
     }
 
     render() {
-        console.log(this.state.selectedModel)
         return <>
-            {!this.state.loading && <Form>
+            {!this.state.loading && <div>
                 <FormGroup>
                     <Label for="addModelFormName">Model Name</Label>
                     <Input
@@ -65,6 +70,24 @@ class AddModelForm extends React.Component {
                         defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
                         onChange={(e) => this.props.setModel('Title', e.target.value)}
                     />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="basin-selector-id">Basin</Label>
+                    <Form.Select id={"basin-selector-id"} onChange={event => {
+                        let basinAsJson = event.target.value;
+                        if (basinAsJson === this.defaultBasinOption) { this.props.setModel('BasinId', 0); }
+                        else {
+                            const basin = JSON.parse(event.target.value);
+                            this.props.setModel('BasinId', basin.id);
+                        }
+                    }}>
+                        <option>{this.defaultBasinOption}</option>
+                        {
+                            this.state.basinList && this.state.basinList.map((basin, idx) => {
+                                return <option key={`basinNo${idx}`} value={JSON.stringify(basin)}>{basin.basinName}</option>
+                            })
+                        }
+                    </Form.Select>
                 </FormGroup>
                 <FormGroup>
                     <Label for="addModelFormModelFile">Model File</Label>
@@ -100,7 +123,7 @@ class AddModelForm extends React.Component {
 
 
 
-            </Form>}
+            </div>}
         </>
     }
 }

@@ -21,14 +21,8 @@ class Optimization extends React.Component {
             userModels: null,
             modelData: null,
             modelingType: "ABCD",
-            parameters: {
-                initialSoilMoisture: 2,
-                initialGroundWater: 2,
-                a: 1,
-                b: 5,
-                c: 0.5,
-                d: 0.1
-            },
+            parameters: null,
+            origParamList: null,
             errorRates: {
                 rmse: null,
                 nse: null
@@ -106,9 +100,35 @@ class Optimization extends React.Component {
             const dataBase64 = modelData.modelFile;
             this.setState({
                 selectedModel: model,
-                modelData: dataBase64
+                modelData: dataBase64,
+                actualObsmmValues: null,
+                predictedQmodelValues: null,
+                samples: null
             })
-        }))
+        }));
+        OptimizationRemote.getModelParameters(model.id).then(response => response.json().then(parameterData => {
+            const modelingType = parameterData.modelingType;
+            const parameters = this.getParameters(parameterData.parameters, modelingType);
+            this.setState({
+                modelingType: modelingType,
+                parameters: parameters,
+                origParamList: parameterData.parameters
+            });
+        }));
+    }
+    
+    getParameters = (parameters, modelingType) => {
+        if (modelingType === "ABCD") {
+            return {
+                a: (parameters.find(p => p.model_Param_Name === "a")).model_Param,
+                b: (parameters.find(p => p.model_Param_Name === "b")).model_Param,
+                c: (parameters.find(p => p.model_Param_Name === "c")).model_Param,
+                d: (parameters.find(p => p.model_Param_Name === "d")).model_Param,
+                initialSt: (parameters.find(p => p.model_Param_Name === "initialSt")).model_Param,
+                initialGt: (parameters.find(p => p.model_Param_Name === "initialGt")).model_Param
+            };
+        }
+        return null;
     }
     
     runOptimization = () => {
@@ -130,6 +150,7 @@ class Optimization extends React.Component {
                         selectedModel={this.state.selectedModel}
                         modelingType={this.state.modelingType}
                         parameters={this.state.parameters}
+                        originalParameters={this.state.origParamList}
                         onStartOptimize={this.runOptimization}
                         isOptimizationRunning={this.state.runningOptimization}
                     />

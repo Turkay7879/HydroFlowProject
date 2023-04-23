@@ -17,6 +17,8 @@ namespace HydroFlowProject.ViewModels
         public int ModelPermissionId { get; set; }
         
         public string? SessionId { get; set; }
+        
+        public int BasinId { get; set; }
 
         public Model ToModel()
         {

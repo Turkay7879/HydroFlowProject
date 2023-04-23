@@ -23,7 +23,7 @@ export class NavMenu extends Component {
   }
   
   componentDidMount() {
-    let intervalId = setInterval(() => this.checkPermissions(), 2000);
+    let intervalId = setInterval(() => this.checkPermissions(), 500);
     this.setState({ intervalId: intervalId });
   }
   
@@ -35,7 +35,6 @@ export class NavMenu extends Component {
   }
   
   checkPermissions = () => {
-    console.log("check permissions")
     let session = window.localStorage.getItem("hydroFlowSession");
     if (session !== null) {
       SessionsRemote.validateSession(session, (status) => {

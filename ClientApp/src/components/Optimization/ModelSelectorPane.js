@@ -39,7 +39,7 @@ class ModelSelectorPane extends React.Component {
             <>
                 <div className={"model-selector-container"}>
                     {
-                        !this.state.modelList ? <>
+                        (!this.state.modelList || this.state.modelList.length === 0) ? <>
                             <div className={"selected-model"}>
                                 <span>No model found to optimize in your account.</span>
                             </div>

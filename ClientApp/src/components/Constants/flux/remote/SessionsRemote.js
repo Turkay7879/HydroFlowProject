@@ -54,7 +54,6 @@ const SessionsRemote = {
                 console.log("session invalidated!");
                 callback(false);
             } else if (response.status === 200) {
-                console.log("session is valid");
                 callback(true);
             }
         });

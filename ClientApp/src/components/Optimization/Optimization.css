@@ -38,6 +38,7 @@
 
 .main-left-panel {
     width: 25%;
+    height: fit-content;
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
     display: flex;
@@ -48,6 +49,7 @@
 .main-left-panel > h4 {
     text-align: center;
     margin-bottom: 3rem;
+    flex-grow: 1;
 }
 
 .single-slider-container {
@@ -86,6 +88,7 @@
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
     width: 25%;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     padding: 1rem;
