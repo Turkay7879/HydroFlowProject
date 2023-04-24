@@ -139,5 +139,35 @@ namespace HydroFlowProject.Controllers
             await _context.SaveChangesAsync();
             return Ok(basinPermVM);
         }
+
+        [HttpPost]
+        [Route("findModelsOfBasin")]
+        public async Task<ActionResult<ModelViewModel>> FindModelsOfBasin([FromBody] int BasinId)
+        {
+            var modelIdList = _context.BasinModels.ToList().FindAll(bm => bm.BasinId == BasinId);
+            var modelList = new ArrayList();
+
+            if (modelIdList.Count == 0)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, modelList);
+            }
+
+            foreach (var basinModel in modelIdList)
+            {
+                var model = await _context.Models.FindAsync(basinModel.ModelId);
+                modelList.Add(new ModelViewModel
+                {
+                    Id = model!.Id,
+                    Name = model.Name,
+                    Title = model.Title,
+                    ModelFile = "",
+                    ModelPermissionId = model.ModelPermissionId,
+                    SessionId = null,
+                    BasinId = BasinId
+                });
+            }
+
+            return Ok(modelList);
+        }
     }
 }

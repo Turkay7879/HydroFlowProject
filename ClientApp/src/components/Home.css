@@ -1,0 +1,29 @@
+.title-basin {
+    text-align: center;
+}
+
+.title-basin-models {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+.model-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.model-list-item > div > span {
+    font-weight: 600;
+}
+
+.model-info-container > div > span {
+    font-weight: 600;
+}
+
+.model-action-btn-container {
+    display: flex;
+    width: 36%;
+    justify-content: space-between;
+}

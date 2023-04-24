@@ -40,6 +40,18 @@ const BasinsRemote = {
       },
       body: JSON.stringify(payload)
     });
+  },
+  findModelsOfBasin: async (payload) => {
+    let requestUrl = RemoteRequestURLs.BASIN_FIND_MODELS_OF_BASIN;
+    return await fetch(requestUrl, {
+      method: "POST",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
   }
 };
 

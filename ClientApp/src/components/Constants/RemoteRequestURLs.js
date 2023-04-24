@@ -4,6 +4,7 @@ const RemoteRequestURLs = {
   BASIN_SAVE_NEW_BASIN: "/api/basins/saveBasin",
   BASIN_DELETE_BASIN: "/api/basins/deleteBasin",
   BASIN_SAVE_PERMISSIONS: "/api/basins/savePermissions",
+  BASIN_FIND_MODELS_OF_BASIN: "/api/basins/findModelsOfBasin",
 
   //User Requests
   USER_GET_ALL_USERS: "/api/users/getAllUsers",
