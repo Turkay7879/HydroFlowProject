@@ -136,7 +136,9 @@ class AddBasinModal extends React.Component {
                         text: `${!this.props.selectedBasin ? "Added" : "Saved"} ${data.basinName} successfully!`,
                         icon: "success"
                     }).then(() => {
-                        this.props.onSave();
+                        if (this.props.onSave !== null && this.props.onSave !== undefined) {
+                            this.props.onSave();
+                        }
                         this.dismissModal();
                     });
                 });

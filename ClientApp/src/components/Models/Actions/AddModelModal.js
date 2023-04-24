@@ -80,6 +80,8 @@ class AddModelModal extends React.Component {
         return <ModalFooter>
             <button type="button" className="btn btn-primary"
                 onClick={this.checkModel}>Save Model</button>
+            <button type="button" className="btn btn-success"
+                onClick={this.cancelAndOpenBasinModal}>Add New Basin</button>
             <button type="button" className="btn btn-secondary"
                 onClick={this.dismissModal}>Close</button>
         </ModalFooter>
@@ -87,6 +89,10 @@ class AddModelModal extends React.Component {
 
     dismissModal = () => {
         this.setState({ showModal: false }, () => this.props.onDismiss());
+    }
+    
+    cancelAndOpenBasinModal = () => {
+        this.setState({ showModal: false }, () => this.props.onDismiss(true));
     }
 
     checkModel = () => {

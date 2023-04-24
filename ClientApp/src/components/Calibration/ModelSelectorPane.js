@@ -1,6 +1,7 @@
 ﻿import React from "react";
 import Form from "react-bootstrap/Form";
 import AddModelModal from "../Models/Actions/AddModelModal";
+import AddBasinModal from "../Basins/Actions/AddBasinModal";
 import "./Calibration.css";
 
 class ModelSelectorPane extends React.Component {
@@ -9,7 +10,8 @@ class ModelSelectorPane extends React.Component {
         this.state = {
             selectedModel: props.selectedModel,
             modelList: null,
-            showAddModelModal: false
+            showAddModelModal: false,
+            showAddBasinModal: false
         };
     }
     
@@ -26,8 +28,16 @@ class ModelSelectorPane extends React.Component {
         }
     }
 
-    toggleAddModelModal = () => {
-        this.setState({ showAddModelModal: !this.state.showAddModelModal });
+    toggleAddModelModal = (result) => {
+        this.setState({ showAddModelModal: !this.state.showAddModelModal }, () => {
+            if (typeof(result) === "boolean") {
+                this.toggleAddBasinModal();
+            }
+        });
+    }
+    
+    toggleAddBasinModal = () => {
+        this.setState({ showAddBasinModal: !this.state.showAddBasinModal });
     }
     
     onSaveModel = () => {
@@ -83,6 +93,12 @@ class ModelSelectorPane extends React.Component {
                         showModal={this.state.showAddModelModal}
                         onDismiss={this.toggleAddModelModal}
                         onSave={this.onSaveModel}
+                    />
+                }
+                {
+                    this.state.showAddBasinModal && <AddBasinModal
+                        showModal={this.state.showAddBasinModal}
+                        onDismiss={this.toggleAddBasinModal}
                     />
                 }
             </>
