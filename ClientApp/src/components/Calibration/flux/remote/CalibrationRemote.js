@@ -1,6 +1,6 @@
 ﻿import RemoteRequestURLs from "../../../Constants/RemoteRequestURLs";
 
-const OptimizationRemote = {
+const CalibrationRemote = {
     getModelsOfUser: async (payload) => {
         let requestUrl = RemoteRequestURLs.MODEL_FIND_USER_MODELS;
         return await fetch(requestUrl, {
@@ -39,4 +39,4 @@ const OptimizationRemote = {
     }
 };
 
-export default OptimizationRemote;
+export default CalibrationRemote;

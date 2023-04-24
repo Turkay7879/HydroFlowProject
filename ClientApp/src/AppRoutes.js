@@ -7,8 +7,8 @@ const AppRoutes = [
     element: <Home />,
   },
   {
-    path: Routes.OptimizationPage.route,
-    element: Routes.OptimizationPage.component,
+    path: Routes.CalibrationPage.route,
+    element: Routes.CalibrationPage.component,
   },
   {
     path: Routes.BasinsAdminPanel.route,

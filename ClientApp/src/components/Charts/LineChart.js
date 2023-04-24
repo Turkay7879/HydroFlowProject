@@ -11,23 +11,30 @@ class LineChart extends Component {
                     id: "basic-bar"
                 },
                 xaxis: {
-                    //categories: [1991, 1992, 1993, 1994, 1995, 1996]
                     categories: this.props.date
                 }
             },
             series: [
                 {
                     name: this.props.type1,
-                    //data: [30, 40, 45, 50, 49]
                     data: this.props.actual
                 },
                 {
                     name: this.props.type2,
-                    //data: [70, 20, 85, 30, 79]
                     data: this.props.predicted
                 }
             ]
         };
+    }
+    
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.actual !== this.props.actual || prevProps.predicted !== this.props.predicted) {
+            let series = [
+                { name: this.props.type1, data: this.props.actual },
+                { name: this.props.type2, data: this.props.predicted }
+            ]
+            this.setState({ series: series });
+        }
     }
 
     render() {

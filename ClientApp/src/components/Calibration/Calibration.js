@@ -5,13 +5,13 @@ import RightStatisticsMenu from "./RightStatisticsMenu";
 import LineChart from "../Charts/LineChart";
 import ScatterChart from "../Charts/ScatterChart";
 import ModelCalculation from "../ABCD_Model/ModelCalculation";
-import OptimizationRemote from "./flux/remote/OptimizationRemote";
+import CalibrationRemote from "./flux/remote/CalibrationRemote";
 import SessionsRemote from "../Constants/flux/remote/SessionsRemote";
 import Swal from "sweetalert2";
 import {Navigate} from "react-router-dom";
 import ModelsRemote from "../Models/flux/ModelsRemote";
 
-class Optimization extends React.Component {
+class Calibration extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -48,7 +48,7 @@ class Optimization extends React.Component {
                         loadingPage: false
                     }, () => {
                         // Fetch models
-                        OptimizationRemote.getModelsOfUser(session).then(response => {
+                        CalibrationRemote.getModelsOfUser(session).then(response => {
                             if (response.status === 200) {
                                 response.json().then(modelList => {
                                     this.setState({ userModels: modelList });
@@ -84,6 +84,10 @@ class Optimization extends React.Component {
             type2: result.type2,
             predictedQmodelValues: result.qModelValues.map(value => Math.trunc(value)),
             date: result.date.map(value => value),
+            errorRates: {
+                rmse: result.rmse_Calibrate,
+                nse: result.nse_Calibrate
+            },
             runningOptimization: false
         });
     }
@@ -92,6 +96,10 @@ class Optimization extends React.Component {
         this.setState({
             samples: result.samples
         });
+    }
+    
+    onParameterChange = (newParameters) => {
+        this.setState({ parameters: newParameters });
     }
 
     changeSelectedModel = (event) => {
@@ -106,7 +114,7 @@ class Optimization extends React.Component {
                 samples: null
             })
         }));
-        OptimizationRemote.getModelParameters(model.id).then(response => response.json().then(parameterData => {
+        CalibrationRemote.getModelParameters(model.id).then(response => response.json().then(parameterData => {
             const modelingType = parameterData.modelingType;
             const parameters = this.getParameters(parameterData.parameters, modelingType);
             this.setState({
@@ -145,19 +153,21 @@ class Optimization extends React.Component {
                     onSelectModel={(newModel) => this.changeSelectedModel(newModel)}
                 />
                 
-                <div className={"optimizations-container"}>
+                <div className={"calibrations-container"}>
                     <LeftOptionsMenu
                         selectedModel={this.state.selectedModel}
                         modelingType={this.state.modelingType}
                         parameters={this.state.parameters}
                         originalParameters={this.state.origParamList}
                         onStartOptimize={this.runOptimization}
+                        onParameterChange={this.onParameterChange}
                         isOptimizationRunning={this.state.runningOptimization}
                     />
 
-                    <div className={"optimization-output-main-container"}>
+                    <div className={"calibration-output-main-container"}>
                         <ModelCalculation
                             modelData={this.state.modelData}
+                            parameters={this.state.parameters}
                             isOptimizationStarted={this.state.runningOptimization}
                             onOptimizationFinished={this.onOptimizationFinished}
                             onCalibrationScatter={this.onCalibrationScatter}/>
@@ -168,10 +178,11 @@ class Optimization extends React.Component {
                                 type2={this.state.type2}
                                 predicted={this.state.predictedQmodelValues}
                                 date={this.state.date}/>
-                        }{
-                        this.state.samples &&  <ScatterChart
-                            samples={this.state.samples}/>
-                    }
+                        }
+                        {
+                            this.state.samples &&  <ScatterChart
+                                samples={this.state.samples}/>
+                        }
                     </div>
 
                     <RightStatisticsMenu
@@ -183,4 +194,4 @@ class Optimization extends React.Component {
     }
 }
 
-export default Optimization;
+export default Calibration;

@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import Form from "react-bootstrap/Form";
 import AddModelModal from "../Models/Actions/AddModelModal";
-import "./Optimization.css";
+import "./Calibration.css";
 
 class ModelSelectorPane extends React.Component {
     constructor(props) {

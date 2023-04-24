@@ -6,12 +6,11 @@ class ScatterChart extends Component {
         super(props);
 
         this.state = {
-
-            series: [{
-                name: "x-observed y-simulated",
-                data: props.samples
-                //[16.4, 5.4], [21.7, 2], [25.4, 3], [19, 2], [10.9, 1], [13.6, 3.2], [10.9, 7.4], [10.9, 0], [10.9, 8.2], [16.4, 0], [16.4, 1.8], [13.6, 0.3], [13.6, 0], [29.9, 0], [27.1, 2.3], [16.4, 0], [13.6, 3.7], [10.9, 5.2], [16.4, 6.5], [10.9, 0], [24.5, 7.1], [10.9, 0], [8.1, 4.7], [19, 0], [21.7, 1.8], [27.1, 0], [24.5, 0], [27.1, 0], [29.9, 1.5], [27.1, 0.8], [22.1, 2]]
-            },
+            series: [
+                {
+                    name: "x-observed y-simulated",
+                    data: props.samples
+                }
             ],
             options: {
                 chart: {
@@ -37,6 +36,13 @@ class ScatterChart extends Component {
 
 
         };
+    }
+    
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.samples !== this.props.samples) {
+            let series = [{ name: "x-observed y-simulated", data: this.props.samples }];
+            this.setState({ series: series });
+        }
     }
 
     render() {

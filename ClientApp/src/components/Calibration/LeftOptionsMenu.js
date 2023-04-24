@@ -2,8 +2,8 @@
 import Slider from "@mui/material/Slider";
 import {SaveOutlined, PlayCircleOutline} from "@mui/icons-material";
 import {Button, Spinner} from "reactstrap";
-import "./Optimization.css";
-import OptimizationRemote from "./flux/remote/OptimizationRemote";
+import "./Calibration.css";
+import CalibrationRemote from "./flux/remote/CalibrationRemote";
 import Swal from "sweetalert2";
 
 class LeftOptionsMenu extends React.Component {
@@ -47,7 +47,7 @@ class LeftOptionsMenu extends React.Component {
     updateParameterValue = (stateValue, newValue) => {
         let parameters = this.state.parameters;
         parameters[stateValue] = newValue;
-        this.setState({ parameters: parameters });
+        this.setState({ parameters: parameters }, () => this.props.onParameterChange(parameters));
     }
     
     onClickOptimize = () => {
@@ -75,7 +75,7 @@ class LeftOptionsMenu extends React.Component {
             ]
         }
         
-        OptimizationRemote.saveModelParameters(newList).then(response => response.json().then(data => {
+        CalibrationRemote.saveModelParameters(newList).then(response => response.json().then(data => {
             Swal.fire({
                 title: "Save Successfull",
                 text: "Model parameters have been saved!",
@@ -186,7 +186,7 @@ class LeftOptionsMenu extends React.Component {
                     { this.state.parameters && this.getParameterSliders() }
                     
                     <div className={"button-container"}>
-                        <div className={"optimize-button"}>
+                        <div className={"calibrate-button"}>
                             <Button
                                 color="primary"
                                 disabled={this.state.isRunning || !this.state.selectedModel}
@@ -197,7 +197,7 @@ class LeftOptionsMenu extends React.Component {
                                         : <Spinner size={"sm"}/>
                                 }
                                 <span>
-                                    {` ${!this.state.isRunning ? 'Optimize' : 'Optimizing'}`}
+                                    {` ${!this.state.isRunning ? 'Calibrate' : 'Calibrating'}`}
                                 </span>
                             </Button>
                         </div>

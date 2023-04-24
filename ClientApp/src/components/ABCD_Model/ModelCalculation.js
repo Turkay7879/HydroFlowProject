@@ -7,16 +7,23 @@ class ModelCalculation extends React.Component {
     state = {
         showResult: false,
         result: {},
-        Qmodelt: []
+        Qmodelt: [],
+        parameters: null
     }
     
     componentDidMount() {
-        this.setState({ modelData: this.props.modelData });
+        this.setState({ 
+            modelData: this.props.modelData,
+            parameters: this.props.parameters
+        });
     }
     
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.modelData !== this.props.modelData) {
             this.setState({ modelData: this.props.modelData });
+        }
+        if (prevProps.parameters !== this.props.parameters) {
+            this.setState({ parameters: this.props.parameters });
         }
         if (prevProps.isOptimizationStarted !== this.props.isOptimizationStarted) {
             this.setState({ isOptimizationStarted: this.props.isOptimizationStarted });
@@ -33,14 +40,15 @@ class ModelCalculation extends React.Component {
             let Obsmm = this.state.result.Obsmm;
             let Qmodelt = this.state.result.Qmodelt;
             let T = this.state.result.T.map(modelDate => modelDate.split(".").at(2))
-            console.log(`orig size: ${Obsmm.length}\toptimize size: ${Qmodelt.length}`)
 
-            let result = {
+            let resultToReturn = {
                 type1: "Observed Streamflow",
                 actualValues: Obsmm.filter(value => value),
                 type2: "Simulated Streamflow",
                 qModelValues: Qmodelt.filter(value => value),
-                date: T
+                date: T,
+                rmse_Calibrate: this.state.rmse_CalibrateOnly,
+                nse_Calibrate: this.state.nse_CalibrateOnly
             };
 
             let originalObservations = [...Obsmm];
@@ -58,7 +66,7 @@ class ModelCalculation extends React.Component {
             let scatterResult = {
                 samples: sampleArr
             }
-            this.props.onOptimizationFinished(result);
+            this.props.onOptimizationFinished(resultToReturn);
             this.props.onCalibrationScatter(scatterResult);
         });
         
@@ -98,6 +106,13 @@ class ModelCalculation extends React.Component {
             const formattedDate = day + '.' + month + '.' + year;
             T.push(formattedDate);
         }
+        
+        let param_A = [this.state.parameters.a];
+        let param_B = [this.state.parameters.b];
+        let param_C = [this.state.parameters.c];
+        let param_D = [this.state.parameters.d];
+        let param_St = [this.state.parameters.initialSt];
+        let param_Gt = [this.state.parameters.initialGt];
 
         return {
             T,
@@ -106,10 +121,10 @@ class ModelCalculation extends React.Component {
             Obsmm: columnData.Obsmm,
             G: columnData['G(t)'],
             S: columnData['S(t)'],
-            A: columnData.A,
-            B: columnData.B,
-            C: columnData.C,
-            D: columnData.D
+            A: param_A,
+            B: param_B,
+            C: param_C,
+            D: param_D
         };
     }
 
@@ -138,25 +153,31 @@ class ModelCalculation extends React.Component {
 
         ////calibrasyon
         const calibratedvalues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
-
+        const optimized_A = calibratedvalues.predictedA;
+        const optimized_B = calibratedvalues.predictedB;
+        const optimized_C = calibratedvalues.predictedC;
+        const optimized_D = calibratedvalues.predictedD;
+        const final_RMSE = calibratedvalues.currentRMSE;
+        console.log("AAAAAAAA",calibratedvalues)
+        
         for (let i = 1; i < T.length; i++) {
             // Adım 1
             const Wt = S[i - 1] + P[i];
             //Step 2 Yt=(Wt+B)/(2A)‐SQRT(((Wt+B)/(2A))^2‐B*Wt/A)
-            const Yt = (Wt + B[0]) / (2 * A[0]) - Math.sqrt(Math.pow((Wt + B[0]) / (2 * A[0]), 2) - (B[0] * Wt) / A[0]);
+            const Yt = (Wt + optimized_B[0]) / (2 * optimized_A[0]) - Math.sqrt(Math.pow((Wt + optimized_B[0]) / (2 * optimized_A[0]), 2) - (optimized_B[0] * Wt) / optimized_A[0]);
             // Adım 3
-            Et[i] = Yt * (1 - Math.exp(-PET[i] / B[0]))
+            Et[i] = Yt * (1 - Math.exp(-PET[i] / optimized_B[0]))
 
             // Adım 4
-            DRt[i] = ((1 - C[0]) * (Wt - Yt));
+            DRt[i] = ((1 - optimized_C[0]) * (Wt - Yt));
 
             // Adım 5
-            GRt[i] = (C[0] * (Wt - Yt));
+            GRt[i] = (optimized_C[0] * (Wt - Yt));
 
             Gt[i] = G[i];
 
             // Adım 7
-            GDt[i] = (D[0] * G[i]);
+            GDt[i] = (optimized_D[0] * G[i]);
 
             // Adım 8
             Qmodelt[i] = (DRt[i] + GDt[i]);
@@ -171,7 +192,8 @@ class ModelCalculation extends React.Component {
             GRt,
             G,
             GDt,
-            Qmodelt
+            Qmodelt,
+            final_RMSE
         };
     }
 
@@ -180,6 +202,10 @@ class ModelCalculation extends React.Component {
         console.log("RMSE value: ", rmse);
         const nse = this.calculateNSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("NSE value: ", nse);
+        this.setState({
+            rmse_CalibrateOnly: rmse,
+            nse_CalibrateOnly: nse
+        });
         let calibratedValues = {};
         calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01, 0.5);
         return calibratedValues;
@@ -285,15 +311,8 @@ class ModelCalculation extends React.Component {
             lowerLimit = currentRMSE - 0.1;
             upperLimit = currentRMSE + 0.1;
         }
-        console.log("rmse", currentRMSE)
-        console.log("predictedA:", predictedA[0]);
-        console.log("actualA:", actualA[0]);
-        console.log("predictedB:", predictedB[0]);
-        console.log("actualB:", actualB[0]);
-        console.log("predictedC:", predictedC[0]);
-        console.log("actualC:", actualC[0]);
-        console.log("predictedD:", predictedD[0]);
-        console.log("actualD:", actualD[0]);
+
+        return { currentRMSE, predictedA, predictedB, predictedC, predictedD }
     }
 
     render() {

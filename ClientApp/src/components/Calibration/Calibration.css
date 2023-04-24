@@ -32,7 +32,7 @@
     padding-right: 2.5rem;
 }
 
-.optimizations-container {
+.calibrations-container {
     display: flex;
 }
 
@@ -68,7 +68,7 @@
     justify-content: space-evenly;
 }
 
-.optimize-button {
+.calibrate-button {
     align-self: center;
     padding-left: 0.35rem;
     margin-top: 1.75rem;
@@ -79,7 +79,7 @@
     margin-top: 1.75rem;
 }
 
-.optimization-output-main-container {
+.calibration-output-main-container {
     width: 50%;
     border-radius: 10px;
 }

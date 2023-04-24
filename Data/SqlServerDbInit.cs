@@ -53,14 +53,16 @@ namespace HydroFlowProject.Data
                 seferihisarBasin.FlowObservationStationLong = 26.883868;
 
                 var seferihisarBasinPermissions = new BasinPermission();
-                seferihisarBasinPermissions.BasinId = 1;
                 seferihisarBasinPermissions.BasinPermissionType = false;
                 seferihisarBasinPermissions.BasinSpecPerm = false;
                 seferihisarBasinPermissions.UserSpecPerm = false;
-
+                
                 context.Basins.Add(seferihisarBasin);
+                context.SaveChanges();
+                seferihisarBasinPermissions.BasinId = seferihisarBasin.Id;
                 context.BasinPermissions.Add(seferihisarBasinPermissions);
                 context.SaveChanges();
+                
             }
         }
     }
