@@ -1,6 +1,8 @@
 ﻿import React from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import Form from "react-bootstrap/Form";
+import { FormControlLabel, Switch } from '@mui/material';
+
 class AddModelForm extends React.Component {
     defaultBasinOption = "Select a basin";
     
@@ -41,16 +43,13 @@ class AddModelForm extends React.Component {
         if (this.state.modelFileInvalid !== this.props.modelFileInvalid) {
             this.setState({ modelFileInvalid: this.props.modelFileInvalid });
         }
-        // if (this.state.modelPermissionIDInvalid !== this.props.modelPermissionIDInvalid) {
-        //     this.setState({ modelPermissionIDInvalid: this.props.modelPermissionIDInvalid });
-        // }
     }
 
     render() {
         return <>
             {!this.state.loading && <div>
                 <FormGroup>
-                    <Label for="addModelFormName">Model Name</Label>
+                    <Label for="addModelFormName">Simulation Name</Label>
                     <Input
                         id="addModelFormName"
                         name="Name"
@@ -90,14 +89,13 @@ class AddModelForm extends React.Component {
                     </Form.Select>
                 </FormGroup>
                 <FormGroup>
-                    <Label for="addModelFormModelFile">Model File</Label>
+                    <Label for="addModelFormModelFile">Data File</Label>
                     <Input
                         id="addModelFormModelFile"
                         name="ModelFile"
                         type="file"
                         invalid={this.state.titleInvalid}
                         disabled={this.state.editingModal}
-                        // defaultValue={this.state.selectedModel ? this.state.selectedModel.Title : ""}
                         onChange={(e) => {
                             let reader = new FileReader();
                             reader.readAsDataURL(e.target.files[0]);
@@ -107,22 +105,13 @@ class AddModelForm extends React.Component {
                         }}
                     />
                 </FormGroup>
-
-                {/* <FormGroup>
-                    <Label for="addModelFormmodelPermissionID">modelPermissionID </Label>
-                    <Input
-                        id="addModelFormmodelPermissionID"
-                        name="ModelPermissionId"
-                        type="number"
-                        invalid={this.state.modelPermissionIDInvalid}
-                        value={this.state.selectedModel ? this.state.selectedModel.ModelPermissionId : ""}
-                        onChange={(e) => this.props.setModel('ModelPermissionId', e.target.value)}
-                    />
-                </FormGroup> */}
-
-
-
-
+                <FormControlLabel 
+                    control={<Switch
+                        checked={this.state.selectedModel ? this.state.selectedModel.ModelPermissionId === 1 ? true : false : false}
+                        onChange={(e) => this.props.setModel('ModelPermissionId', this.state.selectedModel ? this.state.selectedModel.ModelPermissionId === 1 ? 0 : 1 : 0)}
+                    />} 
+                    label={`Make Simulation ${this.state.selectedModel ? this.state.selectedModel.ModelPermissionId === 1 ? 'Private' : 'Public' : 'Public'}`}
+                />
             </div>}
         </>
     }

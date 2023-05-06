@@ -28,6 +28,18 @@ const UsersRemote = {
             },
             body: JSON.stringify(payload)
         });
+    },
+    givePermissionsToUser: async (payload) => {
+        let requestUrl = RemoteRequestURLs.USER_GIVE_SIMULATION_PERMISSIONS_TO_USER;
+        return await fetch(requestUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
     }
 };
 

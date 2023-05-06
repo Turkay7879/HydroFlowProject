@@ -139,7 +139,7 @@ class AddBasinModal extends React.Component {
                         if (this.props.onSave !== null && this.props.onSave !== undefined) {
                             this.props.onSave();
                         }
-                        this.dismissModal();
+                        this.dismissModal(true);
                     });
                 });
             } else {

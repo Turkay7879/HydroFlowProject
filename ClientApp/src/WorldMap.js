@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import "./WorldMap.css";
 import {Tooltip} from "@mui/material";
 import{
@@ -8,31 +8,6 @@ import{
     Marker,
     ZoomableGroup
 } from "react-simple-maps";
-
-//import Tooltip from 'react-tooltip'
-
-/*const markers = [
-    {
-        markerOffset: 15,
-        name: "Seferihisar",
-        coordinates: [26.883868, 38.21725],
-    },
-    {
-        markerOffset: 15,
-        name: "Melbourne",
-        coordinates: [144.963058, -37.813629],
-    },
-    {
-        markerOffset: 15,
-        name: "Dhaka",
-        coordinates: [90.412521, 23.810331],
-    },
-    {
-        markerOffset: 15,
-        name: "San Francisco",
-        coordinates: [-122.419418, 37.774929],
-    },
-]*/
 
 const geoUrl =
     "https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json"
@@ -50,7 +25,7 @@ function WorldMap(markers, onHoverClick){
                 alignItems: "center",
         }}
         >
-            <h1>Let's build some cool map</h1>
+            <h1>HydroFlow</h1>
             <div style ={{ width: "1000px", borderStyle: "double"}}>
                 <ComposableMap data-tip="">
                   <ZoomableGroup zoom={1}>

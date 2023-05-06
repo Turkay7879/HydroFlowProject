@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import Form from "react-bootstrap/Form";
 import AddModelModal from "../Models/Actions/AddModelModal";
-import AddBasinModal from "../Basins/Actions/AddBasinModal";
+import GivePermissionToUserModal from "./SimulationPermissions/GivePermissionToUserModal";
 import "./Calibration.css";
 
 class ModelSelectorPane extends React.Component {
@@ -11,7 +11,7 @@ class ModelSelectorPane extends React.Component {
             selectedModel: props.selectedModel,
             modelList: null,
             showAddModelModal: false,
-            showAddBasinModal: false
+            showGivePermissionModal: false
         };
     }
     
@@ -29,15 +29,11 @@ class ModelSelectorPane extends React.Component {
     }
 
     toggleAddModelModal = (result) => {
-        this.setState({ showAddModelModal: !this.state.showAddModelModal }, () => {
-            if (typeof(result) === "boolean") {
-                this.toggleAddBasinModal();
-            }
-        });
+        this.setState({ showAddModelModal: !this.state.showAddModelModal });
     }
-    
-    toggleAddBasinModal = () => {
-        this.setState({ showAddBasinModal: !this.state.showAddBasinModal });
+
+    togglePermissionToUserModal = () => {
+        this.setState({ showGivePermissionModal: !this.state.showGivePermissionModal });
     }
     
     onSaveModel = () => {
@@ -66,6 +62,17 @@ class ModelSelectorPane extends React.Component {
                                 <span>Selected Model: {this.state.selectedModel ? this.state.selectedModel.name : ""}</span>
                             </div>
                             <div className={"model-actions"}>
+                                {
+                                    this.state.selectedModel && this.state.selectedModel.modelPermissionId === 1 && 
+                                    <div className={"give-permission-button"}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-success"
+                                            onClick={this.togglePermissionToUserModal}>
+                                            Give Permission to a User
+                                        </button>
+                                    </div>
+                                }
                                 <div className={"model-selector"}>
                                     <Form.Select id={"model-selector-id"} onChange={this.props.onSelectModel}>
                                         <option>Select a model</option>
@@ -96,9 +103,10 @@ class ModelSelectorPane extends React.Component {
                     />
                 }
                 {
-                    this.state.showAddBasinModal && <AddBasinModal
-                        showModal={this.state.showAddBasinModal}
-                        onDismiss={this.toggleAddBasinModal}
+                    this.state.showGivePermissionModal && <GivePermissionToUserModal
+                        showModal={this.state.showGivePermissionModal}
+                        onDismiss={this.togglePermissionToUserModal}
+                        selectedModel={this.state.selectedModel}
                     />
                 }
             </>

@@ -56,6 +56,10 @@ namespace HydroFlowProject.Controllers
             {
                 newId = user.Id;
                 var toUpdate = await _context.Users.FindAsync(user.Id);
+                if (toUpdate == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, userViewModel);
+                }
                 _context.Users.Entry(toUpdate).CurrentValues.SetValues(user);
             }
 
@@ -92,5 +96,54 @@ namespace HydroFlowProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
+        [HttpPost]
+        [Route("givePermissionsToUser")]
+        public async Task<ActionResult<UserUserPermissionViewModel>> GivePermissionsToUser([FromBody] UserUserPermissionViewModel permissionViewModel)
+        {
+            var currentUser = await _context.Users.FindAsync(permissionViewModel.UserId);
+            var permittedUser = _context.Users.ToList().Find(u => u.Email == permissionViewModel.PermittedUserMail);
+
+            if (currentUser == null || permittedUser == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            if (!permissionViewModel.PermData && !permissionViewModel.PermDownload && !permissionViewModel.PermSimulation)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            var permission = _context.UserUserPermissions.ToList().Find(p => p.UserId == currentUser.Id && p.PermittedUserId == permittedUser.Id && p.ModelId == permissionViewModel.ModelId);
+            var updateExistingPermission = false;
+            if (permission != null) 
+            {
+                updateExistingPermission = true;
+                var tempPermission = await _context.UserUserPermissions.FindAsync(permission.Id);
+                tempPermission!.PermData = permissionViewModel.PermData;
+                tempPermission!.PermDownload = permissionViewModel.PermDownload;
+                tempPermission!.PermSimulation = permissionViewModel.PermSimulation;
+            }
+            else 
+            {
+                permission = new UserUserPermission
+                {
+                    ModelId = permissionViewModel.ModelId,
+                    UserId = currentUser.Id,
+                    PermittedUserId = permittedUser.Id,
+                    PermData = permissionViewModel.PermData,
+                    PermDownload = permissionViewModel.PermDownload,
+                    PermSimulation = permissionViewModel.PermSimulation
+                };
+                await _context.UserUserPermissions.AddAsync(permission);
+            } 
+
+            int result = await _context.SaveChangesAsync();
+            if (!updateExistingPermission && result == 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
+            return Ok(permission);
+        }
     }
 }

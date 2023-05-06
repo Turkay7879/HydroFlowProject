@@ -88,7 +88,7 @@ namespace HydroFlowProject.Controllers
             } else
             {
                 var permission = _context.BasinPermissions.FirstOrDefault(p => p.BasinId == basin.Id);
-                permission.BasinPermissionType = basinVM.BasinPerm;
+                permission!.BasinPermissionType = basinVM.BasinPerm;
                 permission.BasinSpecPerm = basinVM.BasinSpecPerm;
                 permission.UserSpecPerm = basinVM.UserSpecPerm;
             }
@@ -142,9 +142,10 @@ namespace HydroFlowProject.Controllers
 
         [HttpPost]
         [Route("findModelsOfBasin")]
-        public async Task<ActionResult<ModelViewModel>> FindModelsOfBasin([FromBody] int BasinId)
+        public async Task<ActionResult<ModelViewModel>> FindModelsOfBasin([FromBody] RestrictedBasinModelsViewModel payload)
         {
-            var modelIdList = _context.BasinModels.ToList().FindAll(bm => bm.BasinId == BasinId);
+            var isUserHasValidSession = _context.Sessions.ToList().Find(s => s.SessionId == payload.SessionId && s.SessionIsValid == true) != null;
+            var modelIdList = _context.BasinModels.ToList().FindAll(bm => bm.BasinId == payload.BasinId);
             var modelList = new ArrayList();
 
             if (modelIdList.Count == 0)
@@ -155,16 +156,34 @@ namespace HydroFlowProject.Controllers
             foreach (var basinModel in modelIdList)
             {
                 var model = await _context.Models.FindAsync(basinModel.ModelId);
-                modelList.Add(new ModelViewModel
+                var isUserEligibleToViewModel = false;
+                if (model.ModelPermissionId == 0)
                 {
-                    Id = model!.Id,
-                    Name = model.Name,
-                    Title = model.Title,
-                    ModelFile = "",
-                    ModelPermissionId = model.ModelPermissionId,
-                    SessionId = null,
-                    BasinId = BasinId
-                });
+                    isUserEligibleToViewModel = true;
+                }
+                else if (isUserHasValidSession && model.ModelPermissionId == 1) 
+                {
+                    var isUserHasPermissionToViewModel = _context.UserUserPermissions.ToList().Find(uup => uup.ModelId == model.Id && uup.PermittedUserId == payload.UserId);
+                    var isUserCreatedModel = _context.UserModels.ToList().Find(um => um.UserId == payload.UserId && um.ModelId == model.Id);
+                    if (isUserHasPermissionToViewModel != null || isUserCreatedModel != null)
+                    {
+                        isUserEligibleToViewModel = true;
+                    }
+                }
+
+                if (isUserEligibleToViewModel)
+                {
+                    modelList.Add(new ModelViewModel
+                    {
+                        Id = model!.Id,
+                        Name = model.Name,
+                        Title = model.Title,
+                        ModelFile = "",
+                        ModelPermissionId = model.ModelPermissionId,
+                        SessionId = null,
+                        BasinId = payload.BasinId
+                    });
+                }
             }
 
             return Ok(modelList);

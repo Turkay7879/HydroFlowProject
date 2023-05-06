@@ -10,6 +10,7 @@ const RemoteRequestURLs = {
   USER_GET_ALL_USERS: "/api/users/getAllUsers",
   USER_SAVE_NEW_USER: "/api/users/saveUser",
   USER_DELETE_USER: "/api/users/deleteUser",
+  USER_GIVE_SIMULATION_PERMISSIONS_TO_USER: "/api/users/givePermissionsToUser",
 
   //Model Requests
   MODEL_GET_ALL_MODELS: "/api/models/getAllModels",

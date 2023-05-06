@@ -1,6 +1,7 @@
 import WorldMap from "../WorldMap";
 import BasinsRemote from "./Basins/flux/BasinsRemote";
 import {Component} from "react";
+import AddBasinModal from "./Basins/Actions/AddBasinModal";
 import BasinDetailsModal from "./Basins/Actions/BasinDetailsModal";
 
 export class Home extends Component {
@@ -12,7 +13,8 @@ export class Home extends Component {
             markers: [],
             basins: [],
             models: [],
-            showBasinDetails: false
+            showBasinDetails: false,
+            addBasin: false
         };
     }
 
@@ -44,9 +46,22 @@ export class Home extends Component {
     }
 
     displayModelsInBasins = (basinId) => {
-        BasinsRemote.findModelsOfBasin(basinId).then(response => {
+        let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
+        let userId = 0;
+        let sessionId = '';
+
+        if (session != null && session !== undefined) {
+            userId = session.sessionUserId;
+            sessionId = session.sessionId;
+        }
+
+        let payload = {
+            SessionId: sessionId,
+            UserId: userId,
+            BasinId: basinId
+        };
+        BasinsRemote.findModelsOfBasin(payload).then(response => {
             response.json().then(modelList => {
-                console.log("models found for this basin", modelList);
                 this.setState({
                     basin: this.state.basins.find(b => b.id === basinId),
                     models: modelList
@@ -59,17 +74,40 @@ export class Home extends Component {
         this.setState({ showBasinDetails: !this.state.showBasinDetails });
     }
 
+    toggleAddBasinModal = () => {
+        this.setState({ addBasin: !this.state.addBasin });
+    }
+
     render() {
         return (
-          <>
-              { this.state.markers.length > 0 ? WorldMap(this.state.markers, this.displayModelsInBasins) : <></> }
-              { this.state.showBasinDetails && <BasinDetailsModal
-                showModal={this.state.showBasinDetails}
-                onDismiss={this.toggleShowBasinDetailModal}
-                basin={this.state.basin}
-                models={this.state.models}
-              /> }
-          </>
+            <>
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                    <span style={{ marginRight: '1rem' }}> Don't see the basin you are looking for? </span>
+                    <button type="button" className="btn btn-primary" disabled={window.localStorage.getItem("hydroFlowSession") === null}
+                        onClick={this.toggleAddBasinModal}>Add Basin</button>
+                </div>
+                { this.state.markers.length > 0 ? WorldMap(this.state.markers, this.displayModelsInBasins) : <></> }
+                { this.state.showBasinDetails && <BasinDetailsModal
+                    showModal={this.state.showBasinDetails}
+                    onDismiss={this.toggleShowBasinDetailModal}
+                    basin={this.state.basin}
+                    models={this.state.models}
+                    /> 
+                }
+                {
+                    this.state.addBasin && <AddBasinModal
+                        showModal={this.state.addBasin}
+                        onDismiss={(result) => {
+                            if (result && result === true) {
+                                this.toggleAddBasinModal();
+                                window.location.reload();
+                            } else {
+                                this.toggleAddBasinModal();
+                            } 
+                        }}
+                    />
+                }
+            </>
         );
     }
 }

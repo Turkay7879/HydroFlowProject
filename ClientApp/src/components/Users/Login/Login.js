@@ -64,6 +64,7 @@ class Login extends React.Component {
                                 type="email"
                                 required={true}
                                 defaultValue={this.state.email ? this.state.email : ""}
+                                onKeyDown={(e) => e.key === 'Enter' && this.login()}
                                 onChange={(e) => this.setState({ email: e.target.value })}
                             />
                         </FormGroup>
@@ -75,6 +76,7 @@ class Login extends React.Component {
                                 type="password"
                                 required={true}
                                 defaultValue={this.state.password ? this.state.password : ""}
+                                onKeyDown={(e) => e.key === 'Enter' && this.login()}
                                 onChange={(e) => this.setState({ password: e.target.value })}
                             />
                         </FormGroup>

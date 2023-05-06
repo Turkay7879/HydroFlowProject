@@ -24,7 +24,6 @@ class AddModelModal extends React.Component {
                 NameInvalid: false,
                 titleInvalid: false,
                 modelFileInvalid: false,
-                modelPermissionIdInvalid: false,
                 basinInvalid: false
             },
             availableBasins: null
@@ -80,8 +79,6 @@ class AddModelModal extends React.Component {
         return <ModalFooter>
             <button type="button" className="btn btn-primary"
                 onClick={this.checkModel}>Save Model</button>
-            <button type="button" className="btn btn-success"
-                onClick={this.cancelAndOpenBasinModal}>Add New Basin</button>
             <button type="button" className="btn btn-secondary"
                 onClick={this.dismissModal}>Close</button>
         </ModalFooter>
@@ -89,10 +86,6 @@ class AddModelModal extends React.Component {
 
     dismissModal = () => {
         this.setState({ showModal: false }, () => this.props.onDismiss());
-    }
-    
-    cancelAndOpenBasinModal = () => {
-        this.setState({ showModal: false }, () => this.props.onDismiss(true));
     }
 
     checkModel = () => {
@@ -108,18 +101,6 @@ class AddModelModal extends React.Component {
         newInvalidFields.modelFileInvalid = model.ModelFile === undefined;
         newInvalidFields.basinInvalid = model.BasinId === 0;
       
-        // if (!model.ModelPermissionId) {
-        //       newInvalidFields.modelPermissionIdInvalid = true;
-        //   } else {
-        //       let parsedModelPermissionId = parseInt(model.ModelPermissionId);
-        //       if (isNaN(parsedModelPermissionId)) {
-        //           newInvalidFields.modelPermissionIdInvalid = true;
-        //       } else {
-        //           model.ModelPermissionId = parsedModelPermissionId;
-        //           newInvalidFields.modelPermissionIdInvalid = false;
-        //       }
-  
-        //   }
         if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid || newInvalidFields.basinInvalid) {
             this.setState({ formInvalidFields: newInvalidFields });
             return Swal.fire({
@@ -137,7 +118,7 @@ class AddModelModal extends React.Component {
             Name: model.Name,
             Title: model.Title,
             ModelFile: model.ModelFile,
-            ModelPermissionId: 0,
+            ModelPermissionId: model.ModelPermissionId,
             SessionId: (JSON.parse(window.localStorage.getItem("hydroFlowSession"))).sessionId,
             BasinId: model.BasinId
         }

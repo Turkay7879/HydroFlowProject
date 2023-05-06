@@ -32,6 +32,12 @@
     padding-right: 2.5rem;
 }
 
+.give-permission-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
 .calibrations-container {
     display: flex;
 }

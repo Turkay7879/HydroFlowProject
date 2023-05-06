@@ -71,6 +71,7 @@ public class SessionController : Controller
         return new SessionViewModel
         {
             SessionId = session.SessionId,
+            SessionUserId = userId,
             SessionIsValid = session.SessionIsValid,
             SessionCreateDate = session.SessionCreateDate,
             SessionExpireDate = session.SessionExpireDate,
