@@ -1,8 +1,9 @@
-import WorldMap from "../WorldMap";
+
 import BasinsRemote from "./Basins/flux/BasinsRemote";
 import {Component} from "react";
 import AddBasinModal from "./Basins/Actions/AddBasinModal";
 import BasinDetailsModal from "./Basins/Actions/BasinDetailsModal";
+import WorldMapLeaflet from "../Maps/WorldMapLeaflet/WorldMapLeaflet";
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -30,10 +31,8 @@ export class Home extends Component {
                         let array = [];
                         data.forEach(function(basin) {
                            array.push( {
-                               markerOffset: 15,
-                               name: basin.basinName,
                                basinId: basin.id,
-                               coordinates: [basin.flowObservationStationLong, basin.flowObservationStationLat]
+                               geocode: [basin.flowObservationStationLong, basin.flowObservationStationLat]
                            })
                         });
                         this.setState({
@@ -86,7 +85,7 @@ export class Home extends Component {
                     <button type="button" className="btn btn-primary" disabled={window.localStorage.getItem("hydroFlowSession") === null}
                         onClick={this.toggleAddBasinModal}>Add Basin</button>
                 </div>
-                { this.state.markers.length > 0 ? WorldMap(this.state.markers, this.displayModelsInBasins) : <></> }
+                { this.state.markers.length > 0 ? WorldMapLeaflet(this.state.markers, this.displayModelsInBasins) : <></> }
                 { this.state.showBasinDetails && <BasinDetailsModal
                     showModal={this.state.showBasinDetails}
                     onDismiss={this.toggleShowBasinDetailModal}
