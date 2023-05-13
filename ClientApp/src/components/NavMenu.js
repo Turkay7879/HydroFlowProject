@@ -104,6 +104,9 @@ export class NavMenu extends Component {
 					<NavItem>
 						<NavLink tag={Link} className="text-dark" to={Routes.CalibrationPage.route}>Calibration</NavLink>
 					</NavItem>
+          <NavItem>
+						<NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Optimization</NavLink>
+					</NavItem>
 				</> : <></>
 			}
             {

@@ -24,7 +24,7 @@ class Models extends Component {
             loadingPage: true
         };
 
-        this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission Id'];
+        this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission'];
     }
 
     componentDidMount() {
@@ -81,9 +81,13 @@ class Models extends Component {
     refreshData = async () => {
         ModelsRemote.getAllModels()
             .then((response) => {
-                response.json().then(data => {
-                    this.setState({ loadingModels: false, models: data, selectedModel: null });
-                });
+                if (response.ok) {
+                    response.json().then(data => {
+                        this.setState({ loadingModels: false, models: data, selectedModel: null });
+                    });
+                } else {
+                    this.setState({ loadingModels: false, models: null, selectedModel: null });
+                }
             })
             .catch((error) => {
                 console.log(error);
@@ -151,7 +155,7 @@ class Models extends Component {
             const blob = new Blob([bytes])
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
-            link.download = "data.csv"; // Uploaded model should be csv as well. Check this later on
+            link.download = "data.xlsx";
             link.click();
             link.remove();
         }))
@@ -180,7 +184,7 @@ class Models extends Component {
                                         Download Model Data
                                     </button>
                             </td>
-                            <td>{model.ModelPermissionId}</td>
+                            <td>{model.ModelPermissionId === 1 ? 'Private' : 'Public'}</td>
                             <td>
                                 <div style={{ display: "flex", justifyContent: "space-around" }}>
                                     <button type="button" className="btn btn-primary"

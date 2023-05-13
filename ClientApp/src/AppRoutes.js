@@ -11,6 +11,10 @@ const AppRoutes = [
     element: Routes.CalibrationPage.component,
   },
   {
+    path: Routes.OptimizationPage.route,
+    element: Routes.OptimizationPage.component,
+  },
+  {
     path: Routes.BasinsAdminPanel.route,
     element: Routes.BasinsAdminPanel.component,
   },

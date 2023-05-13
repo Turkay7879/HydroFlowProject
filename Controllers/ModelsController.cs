@@ -12,6 +12,7 @@ using System.Collections;
 using NuGet.Protocol;
 using System.Text;
 using System.Diagnostics;
+using HydroFlowProject.Utilities;
 
 namespace HydroFlowProject.Controllers
 {
@@ -221,6 +222,20 @@ namespace HydroFlowProject.Controllers
             }
 
             return Ok(modelList);
+        }
+
+        [HttpPost]
+        [Route("optimize")]
+        public ActionResult<OptimizationViewModel> Optimize([FromBody] OptimizationViewModel optimizationVM)
+        {
+            var checkModelType = _context.BalanceModelTypes.ToList().Find(bmt => bmt.ModelType_Definition == optimizationVM.Model_Type);
+            if (checkModelType == null)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, optimizationVM);
+            }
+
+            var optimizationResult = ModelOptimization.Optimize(optimizationVM);
+            return Ok(optimizationResult);
         }
     }
 }

@@ -24,6 +24,7 @@ namespace HydroFlowProject.Data
         public virtual DbSet<UserModel> UserModels { get; set; }
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<UserUserPermission> UserUserPermissions { get; set; }
+        public virtual DbSet<UserConsent> UserConsents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -235,6 +236,20 @@ namespace HydroFlowProject.Data
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_User_UserPermission_UserId");
+            });
+
+            modelBuilder.Entity<UserConsent>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__User__Consent");
+
+                entity.ToTable("User_Consents");
+
+                entity.Property(e => e.Consent).IsRequired();
+
+                entity.HasOne(e => e.User).WithMany(u => u.UserConsents)
+                    .HasForeignKey(e => e.User_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_UserConsent_User");
             });
 
             OnModelCreatingPartial(modelBuilder);

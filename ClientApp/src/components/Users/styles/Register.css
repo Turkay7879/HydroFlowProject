@@ -1,4 +1,8 @@
-﻿.registerFormDiv {
+﻿.registerContainer {
+    height: 52rem;
+}
+
+.registerFormDiv {
     display: flex;
     justify-content: center;
     margin-top: 5rem;

@@ -20,6 +20,7 @@ const RemoteRequestURLs = {
   MODEL_FIND_USER_MODELS: "/api/models/getModelsOfUser",
   MODEL_GET_PARAMETERS: "/api/models/getModelParameters",
   MODEL_SAVE_PARAMETERS: "/api/models/saveModelParameters",
+  MODEL_OPTIMIZE: "/api/models/optimize",
   
   // Session Requests
   SESSION_LOGIN_USER: "/api/session/loginUser",

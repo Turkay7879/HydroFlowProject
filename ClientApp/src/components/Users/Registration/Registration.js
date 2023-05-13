@@ -1,5 +1,6 @@
 import React from "react";
 import {Form, FormGroup, Input, Label, Button, Spinner} from "reactstrap";
+import {Checkbox, FormControlLabel} from "@mui/material";
 import {Navigate} from "react-router-dom";
 import UsersRemote from "../flux/UsersRemote";
 import "../styles/Register.css";
@@ -16,6 +17,7 @@ class Registration extends React.Component {
             email: null,
             password: null,
             confirmPassword: null,
+            consentSharing: false,
             validSessionPresent: false,
             registering: false
         }
@@ -56,7 +58,8 @@ class Registration extends React.Component {
             Surname: this.state.surname,
             CorporationName: this.state.corporationName,
             Email: this.state.email,
-            Password: this.state.password
+            Password: this.state.password,
+            Consent: this.state.consentSharing
         };
         this.setState({ registering: true }, () => {
             UsersRemote.saveUser(userToRegister).then(response => {
@@ -87,7 +90,7 @@ class Registration extends React.Component {
 
     render() {
         return this.state.validSessionPresent ? <Navigate to={"/"}/> : (
-            <>
+            <div className="registerContainer">
                 <h1 style={{ textAlign: "center" }}>Register to HydroFlow</h1>
                 <div className={"registerFormDiv"}>
                     <Form>
@@ -157,6 +160,16 @@ class Registration extends React.Component {
                                 onChange={(e) => this.setState({ confirmPassword: e.target.value })}
                             />
                         </FormGroup>
+                        <FormGroup>
+                            <FormControlLabel
+                                label="I consent to share my contact information to be shown in basin details if created a simulation."
+                                control={<Checkbox 
+                                    checked={this.state.consentSharing}
+                                    onChange={() => this.setState({ consentSharing: !this.state.consentSharing })}
+                                    sx={{ '& .MuiSvgIcon-root': { fontSize: 28 } }}
+                                />}
+                            />
+                        </FormGroup>
                     </Form>
                 </div>
                 <div className={"registerButton"}>
@@ -176,7 +189,7 @@ class Registration extends React.Component {
                         </button>
                     }
                 </div>
-            </>
+            </div>
         );
     }
 }

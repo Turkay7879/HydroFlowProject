@@ -4,11 +4,16 @@ import Models from "../Models/Models";
 import Login from "../Users/Login/Login";
 import Registration from "../Users/Registration/Registration";
 import Calibration from "../Calibration/Calibration";
+import Optimization from "../Optimization/Optimization";
 
 const Routes = {
   CalibrationPage: {
     route: "/calibrate",
     component: <Calibration/>,
+  },
+  OptimizationPage: {
+    route: "/optimize",
+    component: <Optimization/>,
   },
   BasinsAdminPanel: {
     route: "/basins",

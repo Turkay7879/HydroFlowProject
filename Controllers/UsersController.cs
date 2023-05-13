@@ -74,6 +74,16 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, userViewModel);
             }
+
+            var userConsent = new UserConsent();
+            userConsent.User_Id = addedUser.Id;
+            userConsent.Consent = userViewModel.Consent;
+            await _context.UserConsents.AddAsync(userConsent);
+            int savedConsent = await _context.SaveChangesAsync();
+            if (savedConsent == 0)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, userViewModel);
+            }
             
             newUserRole.UserId = addedUser.Id;
             newUserRole.RoleId = regularUserRole!.Id;

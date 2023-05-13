@@ -18,6 +18,8 @@ namespace HydroFlowProject.ViewModels
 
         public string Password { get; set; }
 
+        public bool Consent { get; set; }
+
         public UserViewModel fromUser(User user)
         {
             UserViewModel userVM = new UserViewModel();
@@ -27,6 +29,7 @@ namespace HydroFlowProject.ViewModels
             userVM.CorporationName = user.CorporationName;
             userVM.Email = user.Email;
             userVM.Password = "";
+            userVM.Consent = false;
             return userVM;
         }
 

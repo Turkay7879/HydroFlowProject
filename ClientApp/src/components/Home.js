@@ -80,11 +80,12 @@ export class Home extends Component {
     render() {
         return (
             <>
-                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "1.5rem" }}>
                     <span style={{ marginRight: '1rem' }}> Don't see the basin you are looking for? </span>
                     <button type="button" className="btn btn-primary" disabled={window.localStorage.getItem("hydroFlowSession") === null}
                         onClick={this.toggleAddBasinModal}>Add Basin</button>
                 </div>
+                <h1 style={{ textAlign: "center" }}> HydroFlow </h1>
                 { this.state.markers.length > 0 ? WorldMapLeaflet(this.state.markers, this.displayModelsInBasins) : <></> }
                 { this.state.showBasinDetails && <BasinDetailsModal
                     showModal={this.state.showBasinDetails}

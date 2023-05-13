@@ -1,4 +1,5 @@
 ﻿using HydroFlowProject.Models;
+using HydroFlowProject.Utilities;
 
 namespace HydroFlowProject.Data
 {
@@ -7,7 +8,7 @@ namespace HydroFlowProject.Data
         public static void Initialize(SqlServerDbContext context) 
         {
             context.Database.EnsureCreated();
-            
+      
             if (!context.Roles.Any())
             {
                 Role roleSystemAdmin = new Role();
@@ -30,6 +31,42 @@ namespace HydroFlowProject.Data
                 rolePaidUserLv1.RoleValue = "userpaid1";
                 context.Roles.Add(rolePaidUserLv1);
 
+                context.SaveChanges();
+            }
+
+            if (!context.Users.Any())
+            {
+                var credentials = PasswordManager.HashPassword("admin");
+
+                var adminUser = new User
+                {
+                    Name = "admin",
+                    Surname = "admin",
+                    CorporationName = "",
+                    Email = "admin@mail.com",
+                    Password = credentials["password"],
+                    PasswordSalt = credentials["salt"]
+                };
+
+                context.Users.Add(adminUser);
+                context.SaveChanges();
+
+                var adminRole = new UserRole
+                {
+                    UserId = adminUser.Id,
+                    RoleId = 1
+                };
+
+                context.UserRoles.Add(adminRole);
+                context.SaveChanges();
+
+                var adminConsent = new UserConsent
+                {
+                    User_Id = adminUser.Id,
+                    Consent = false
+                };
+
+                context.UserConsents.Add(adminConsent);
                 context.SaveChanges();
             }
 
