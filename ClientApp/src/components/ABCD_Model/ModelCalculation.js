@@ -182,6 +182,33 @@ class ModelCalculation extends React.Component {
             // Adım 8
             Qmodelt[i] = (DRt[i] + GDt[i]);
         }
+        //deviation
+        const deviation_Qmodelt = this.calculateSampleStandardDeviation(Qmodelt);
+        console.log(" Qmodelt deviation", deviation_Qmodelt);
+        const deviation_P = this.calculateSampleStandardDeviation(P);
+        console.log(" P deviation", deviation_P);
+        const deviation_Et = this.calculateSampleStandardDeviation(Et);
+        console.log(" Et deviation", deviation_Et); //Qgözlem Obsmm mi ????
+        const deviation_Obsmm = this.calculateSampleStandardDeviation(Obsmm);
+        console.log(" Obsmm deviation", deviation_Obsmm);
+        ///////Çarpıklık
+        const skewness_Qmodelt = this.calculateSkewness(Qmodelt);
+        console.log(" Qmodelt skewness", skewness_Qmodelt);
+        const skewness_P = this.calculateSkewness(P);
+        console.log(" P skewness", skewness_P); // 0
+        const skewness_Et = this.calculateSkewness(Et);
+        console.log(" Et skewness", skewness_Et); // 0
+        const skewness_Obsmm = this.calculateSkewness(Obsmm);
+        console.log(" Obsmm skewness", skewness_Obsmm); // 0
+        ////Average
+        const average_Qmodelt = this.calculateAverage(Qmodelt);
+        console.log(" Qmodelt deviation", average_Qmodelt);
+        const average_P = this.calculateAverage(P);
+        console.log("Average_P", average_P);
+        const average_Et = this.calculateAverage(Et);
+        console.log(" Et deviation", average_Et); //Qgözlem Obsmm mi ????
+        const average_Obsmm = this.calculateAverage(Obsmm);
+        console.log(" Obsmm deviation", average_Obsmm);
         return {
             T,
             P,
@@ -197,19 +224,80 @@ class ModelCalculation extends React.Component {
         };
     }
 
+
+
+
+    calculateSkewness(numbers) {
+    const n = numbers.length;
+    const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
+    const standardDeviation = this.calculateSampleStandardDeviation(numbers);
+
+    const cubedDiffsSum = numbers.reduce((acc, val) => {
+        const diff = val - mean;
+        return acc + Math.pow(diff, 3);
+    }, 0);
+
+    const skewness = (n / ((n - 1) * (n - 2))) * (cubedDiffsSum / Math.pow(standardDeviation, 3));
+
+    return skewness;
+}
+
+   calculateSampleStandardDeviation(numbers) {
+        const n = numbers.length;
+        const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
+        const squaredDiffs = numbers.reduce((acc, val) => {
+            const diff = val - mean;
+            return acc + diff * diff;
+        }, 0);
+        const variance = squaredDiffs / (n - 1);
+        const standardDeviation = Math.sqrt(variance);
+        return standardDeviation;
+    }
+    //Bias Formula 
+ calculateBias(predictedValue, observedValue) {
+    const bias = ((predictedValue - observedValue) / observedValue) * 100;
+    return bias;
+ }
+  
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
+
+        ///Et, P, Obsmm, Qmodelt
         const rmse = this.calculateRMSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("RMSE value: ", rmse);
         const nse = this.calculateNSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("NSE value: ", nse);
+        const bias = this.calculateBias(paramB, actualB);
+        console.log("bias", bias);
+        const r2 = this.calculateR2(paramB, actualB);
+        console.log("r2", r2);
+
         this.setState({
             rmse_CalibrateOnly: rmse,
             nse_CalibrateOnly: nse
+
         });
         let calibratedValues = {};
-        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01, 0.5);
+        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01);
         return calibratedValues;
     }
+
+  calculateR2(actual, predicted) {
+    const actualMean = actual.reduce((a, b) => a + b, 0) / actual.length;
+    const ssTotal = actual.reduce((a, b) => a + Math.pow((b - actualMean), 2), 0);
+    const ssResidual = actual.reduce((a, b, i) => a + Math.pow((b - predicted[i]), 2), 0);
+    const r2 = 1 - (ssResidual / ssTotal);
+    return r2;
+    }
+
+
+    ///arayüz için 
+     calculateAverage(numbers) {
+    const sum = numbers.reduce((acc, val) => acc + val, 0);
+    const average = sum / numbers.length;
+    return average;
+    }
+   
+
     average(actualA, actualB, actualC, actualD) {
         let sum = 0;
 
@@ -235,6 +323,20 @@ class ModelCalculation extends React.Component {
         const rmse = Math.sqrt(meanSquare);
         return rmse;
     }
+
+    calculateRMSE2(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
+
+        let sumSquare = 0.0;
+        sumSquare += (predictedA - actualA) ** 2;
+        sumSquare += (predictedB - actualB) ** 2;
+        sumSquare += (predictedC - actualC) ** 2;
+        sumSquare += (predictedD - actualD) ** 2;
+
+        const n = 4;
+        const meanSquare = sumSquare / n;
+        const rmse = Math.sqrt(meanSquare);
+        return rmse;
+    }
     
     createPredictionArray() {
         const predictionArray = {
@@ -244,9 +346,9 @@ class ModelCalculation extends React.Component {
             D: [],
         };
 
-        predictionArray.A.push(0.5);
-        predictionArray.B.push(250);
-        predictionArray.C.push(0.49);
+        predictionArray.A.push(0.9);
+        predictionArray.B.push(100);
+        predictionArray.C.push(0.1);
         predictionArray.D.push(0.51);
 
         return predictionArray;
@@ -291,30 +393,63 @@ class ModelCalculation extends React.Component {
         var partialDerivative = 2 * error;
         return partialDerivative;
     }
-    
-    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
-        var currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-        let upperLimit = targetRMSE+0.1;
-        let lowerLimit = targetRMSE - 0.1;
+   optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
+        let currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+        console.log("currentRMSE:", currentRMSE);
 
-        while (currentRMSE > targetRMSE || currentRMSE >= upperLimit || currentRMSE <= lowerLimit) {
+        let delta = Number.MAX_SAFE_INTEGER;
+        let prevDelta = Number.MAX_SAFE_INTEGER;
+        let iteration = 0;
+        const maxIterations = 1000;
+        const deltaThreshold = 0.001;
+        const maxDeltaConvergenceIterations = 10;
+
+        while (delta > deltaThreshold) {
             // A, B, C ve D değerlerini güncelle
-            predictedA[0] = predictedA[0] - learningRate * this.calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            predictedB[0] = predictedB[0] - learningRate * this.calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            predictedC[0] = predictedC[0] - learningRate * this.calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            predictedD[0] = predictedD[0] - learningRate * this.calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const partialDerivativeA = this.calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const partialDerivativeB = this.calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const partialDerivativeC = this.calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const partialDerivativeD = this.calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const newPredictedA = predictedA - learningRate * partialDerivativeA;
+            const newPredictedB = predictedB - learningRate * partialDerivativeB;
+            const newPredictedC = predictedC - learningRate * partialDerivativeC;
+            const newPredictedD = predictedD - learningRate * partialDerivativeD;
 
             // RMSE değerini hesapla
-            currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
+            const newRMSE = this.calculateRMSE2(newPredictedA, newPredictedB, newPredictedC, newPredictedD, actualA, actualB, actualC, actualD);
 
-            // lowerLimit ve upperLimit değerlerini güncelle
-            lowerLimit = currentRMSE - 0.1;
-            upperLimit = currentRMSE + 0.1;
+            // Delta değerini hesapla
+            delta = Math.abs(predictedA - newPredictedA) + Math.abs(predictedB - newPredictedB) + Math.abs(predictedC - newPredictedC) + Math.abs(predictedD - newPredictedD);
+
+            // Eğer delta eşik değerinin altında ise ya da önceki iterasyonlarda delta değeri yeterince azalmışsa optimizasyonu durdur
+            if (delta < deltaThreshold || (iteration > maxDeltaConvergenceIterations && delta >= prevDelta)) {
+                console.log("Optimization converged after " + iteration + "iterations.Delta value: " + delta);
+                break;
+            }    // Yeni parametre değerlerini kaydet
+            predictedA[0] = newPredictedA;
+            predictedB[0] = newPredictedB;
+            predictedC[0] = newPredictedC;
+            predictedD[0] = newPredictedD;
+
+            // RMSE değerini güncelle
+            currentRMSE = newRMSE;
+          //  console.log("currentRMSE:", currentRMSE);
+
+            // Delta değerini kaydet
+            prevDelta = delta;
+
+            iteration++;
+
+            if (iteration >= maxIterations) {
+                console.log("Maximum iterations reached");
+                break;
+            }
         }
 
-        return { currentRMSE, predictedA, predictedB, predictedC, predictedD }
+        console.log("Optimization completed after " + iteration + " iterations. Final RMSE: " + currentRMSE);
+        return { currentRMSE, predictedA, predictedB, predictedC, predictedD };
     }
-
+   
     render() {
         return <>
             { this.state.isOptimizationStarted && this.startOperations() }
