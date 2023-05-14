@@ -25,5 +25,7 @@ namespace HydroFlowProject.Models
         public virtual ICollection<UserModel> UserModels { get; } = new List<UserModel>();
 
         public virtual ICollection<UserUserPermission> UserUserPermissions { get; } = new List<UserUserPermission>();
+
+        public virtual ICollection<SimulationDetails> SimulationDetails { get; } = new List<SimulationDetails>();
     }
 }

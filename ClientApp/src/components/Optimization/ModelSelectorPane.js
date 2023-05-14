@@ -75,7 +75,7 @@ class ModelSelectorPane extends React.Component {
                                 }
                                 <div className={"model-selector"}>
                                     <Form.Select id={"model-selector-id"} onChange={this.props.onSelectModel}>
-                                        <option>Select a simulation</option>
+                                        <option value="SelectModelOption">Select a simulation</option>
                                         {
                                             this.state.modelList.map((model, idx) => {
                                                 return <option key={`modelNo${idx}`} value={JSON.stringify(model)}>{model.name}</option>

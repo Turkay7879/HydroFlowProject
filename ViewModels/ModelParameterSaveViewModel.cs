@@ -2,7 +2,8 @@
 
 public class ModelParameterSaveViewModel
 {
-    public int Parameter_Id { get; set; }
-    
-    public float Model_Param { get; set; }
+    public int User_Id { get; set; }
+    public int Model_Id { get; set; }
+    public string Model_Name { get; set; } = null!;
+    public string Parameter_Map { get; set; } = null!;  
 }

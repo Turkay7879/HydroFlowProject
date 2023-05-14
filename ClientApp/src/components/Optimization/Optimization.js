@@ -103,6 +103,7 @@ class Optimization extends React.Component {
     }
 
     changeSelectedModel = (event) => {
+        if (event.target.value === "SelectModelOption") { return; }
         const model = JSON.parse(event.target.value);
         ModelsRemote.downloadModelData(model.id).then(response => response.json().then(modelData => {
             const dataBase64 = modelData.modelFile;

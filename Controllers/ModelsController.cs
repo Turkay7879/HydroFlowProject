@@ -13,6 +13,8 @@ using NuGet.Protocol;
 using System.Text;
 using System.Diagnostics;
 using HydroFlowProject.Utilities;
+using Newtonsoft.Json;
+using System.Reflection.Metadata;
 
 namespace HydroFlowProject.Controllers
 {
@@ -146,16 +148,55 @@ namespace HydroFlowProject.Controllers
 
         [HttpPost]
         [Route("saveModelParameters")]
-        public async Task<ActionResult<ModelParameterViewModel>> SaveModelParameters([FromBody] List<ModelParameterSaveViewModel> paramList)
+        public async Task<ActionResult<ModelParameterSaveViewModel>> SaveModelParameters([FromBody] ModelParameterSaveViewModel modelParameters)
         {
-            foreach (var parameter in paramList)
+            var relatedUser = await _context.Users.FindAsync(modelParameters.User_Id);
+            var relatedModel = await _context.Models.FindAsync(modelParameters.Model_Id);
+
+            if (relatedUser == null || relatedModel == null) 
             {
-                var parameterFromDb = await _context.ModelParameters.FindAsync(parameter.Parameter_Id);
-                _context.ModelParameters.Entry(parameterFromDb!).CurrentValues.SetValues(parameter);
+                return StatusCode(StatusCodes.Status500InternalServerError, modelParameters);
             }
 
-            await _context.SaveChangesAsync();
-            return Ok(paramList);
+            try
+            {
+                var tempObj = JsonConvert.DeserializeObject<object>(modelParameters.Parameter_Map);
+                var tempJson = JsonConvert.SerializeObject(tempObj);
+                var parameters = JsonConvert.DeserializeObject<Dictionary<int, float>>(tempJson);
+                if (parameters == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, modelParameters);
+                }
+
+                foreach (var (Parameter_Id, Model_Param) in parameters)
+                {
+                    var parameterFromDb = await _context.ModelParameters.FindAsync(Parameter_Id);
+
+                    if (parameterFromDb == null)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, modelParameters);
+                    }
+
+                    parameterFromDb.Model_Param = Model_Param;
+                }
+
+                var simulationDetails = new SimulationDetails
+                {
+                    User_Id = relatedUser.Id,
+                    Model_Id = relatedModel.Id,
+                    Model_Name = relatedModel.Name,
+                    Version = 0
+                };
+                _context.SimulationDetails.Add(simulationDetails);
+
+                await _context.SaveChangesAsync();
+                return Ok(modelParameters);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, modelParameters);
+            }
         }
         
         [HttpPost]

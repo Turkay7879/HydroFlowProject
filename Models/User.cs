@@ -29,5 +29,7 @@
         public virtual ICollection<UserUserPermission> UserUserPermissionUsers { get; } = new List<UserUserPermission>();
 
         public virtual ICollection<UserConsent> UserConsents { get; } = new List<UserConsent>();
+
+        public virtual ICollection<SimulationDetails> SimulationDetails { get; } = new List<SimulationDetails>();
     }
 }

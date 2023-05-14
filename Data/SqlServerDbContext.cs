@@ -25,6 +25,7 @@ namespace HydroFlowProject.Data
         public virtual DbSet<UserRole> UserRoles { get; set; }
         public virtual DbSet<UserUserPermission> UserUserPermissions { get; set; }
         public virtual DbSet<UserConsent> UserConsents { get; set; }
+        public virtual DbSet<SimulationDetails> SimulationDetails { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -251,6 +252,30 @@ namespace HydroFlowProject.Data
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_UserConsent_User");
             });
+
+            modelBuilder.Entity<SimulationDetails>(entity =>
+            {
+                entity.HasKey(e => e.Id).HasName("PK__Simulation__Details");
+
+                entity.ToTable("Simulation_Details");
+
+                entity.Property(e => e.Model_Name).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.Version).IsRequired();
+                entity.Property(e => e.Simulation_Date)
+                    .IsConcurrencyToken()
+                    .IsRowVersion()
+                    .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                entity.HasOne(e => e.User).WithMany(u => u.SimulationDetails)
+                    .HasForeignKey(e => e.User_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_SimulationDetails_Users_UserId");
+                entity.HasOne(e => e.Model).WithMany(m => m.SimulationDetails)
+                    .HasForeignKey(e => e.Model_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_SimulationDetails_Models_ModelId");
+            });
+            modelBuilder.Entity<SimulationDetails>().ToTable(tb => tb.HasTrigger("Trigger_Simulation_Details_Insert"));
 
             OnModelCreatingPartial(modelBuilder);
         }

@@ -56,7 +56,8 @@ class LeftOptionsMenu extends React.Component {
     
     onClickSave = () => {
         let originalList = this.state.originalParamList;
-        let newList = null;
+        let Parameter_Map = new Map();
+
         if (this.state.modelingType === "ABCD") {
             let a = originalList.find(p => p.model_Param_Name === "a")
             let b = originalList.find(p => p.model_Param_Name === "b")
@@ -64,18 +65,23 @@ class LeftOptionsMenu extends React.Component {
             let d = originalList.find(p => p.model_Param_Name === "d")
             let initialSt = originalList.find(p => p.model_Param_Name === "initialSt")
             let initialGt = originalList.find(p => p.model_Param_Name === "initialGt")
-            
-            newList = [
-                { Parameter_Id: a.parameter_Id, Model_Param: this.state.parameters.a },
-                { Parameter_Id: b.parameter_Id, Model_Param: this.state.parameters.b },
-                { Parameter_Id: c.parameter_Id, Model_Param: this.state.parameters.c },
-                { Parameter_Id: d.parameter_Id, Model_Param: this.state.parameters.d },
-                { Parameter_Id: initialSt.parameter_Id, Model_Param: this.state.parameters.initialSt },
-                { Parameter_Id: initialGt.parameter_Id, Model_Param: this.state.parameters.initialGt },
-            ]
+
+            Parameter_Map.set(a.parameter_Id, this.state.parameters.a);
+            Parameter_Map.set(b.parameter_Id, this.state.parameters.b);
+            Parameter_Map.set(c.parameter_Id, this.state.parameters.c);
+            Parameter_Map.set(d.parameter_Id, this.state.parameters.d);
+            Parameter_Map.set(initialSt.parameter_Id, this.state.parameters.initialSt);
+            Parameter_Map.set(initialGt.parameter_Id, this.state.parameters.initialGt);
         }
-        
-        CalibrationRemote.saveModelParameters(newList).then(response => response.json().then(data => {
+
+        let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
+        let payload = {
+            User_Id: session.sessionUserId,
+            Model_Id: this.state.selectedModel.id,
+            Model_Name: this.state.selectedModel.name,
+            Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map))
+        }
+        CalibrationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
                 title: "Save Successfull",
                 text: "Model parameters have been saved!",
