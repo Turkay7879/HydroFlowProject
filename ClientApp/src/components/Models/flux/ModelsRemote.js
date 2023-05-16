@@ -55,6 +55,18 @@ const ModelsRemote = {
             },
             body: JSON.stringify(payload)
         });
+    },
+    getDetailsOfModel: async (payload) => {
+        let requestUrl = RemoteRequestURLs.MODEL_DETAILS_OF_MODEL;
+        return await fetch(requestUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
     }
 };
 

@@ -266,6 +266,68 @@ namespace HydroFlowProject.Controllers
         }
 
         [HttpPost]
+        [Route("getDetailsOfModel")]
+        public async Task<ActionResult<Dictionary<string, object>>> GetDetailsOfModel([FromBody] int modelId)
+        {
+            var model = await _context.Models.FindAsync(modelId);
+            if (model == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, modelId);
+            }
+
+            var resultMap = new Dictionary<string, object>();
+
+            var modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId);
+            var parameterList = new ArrayList();
+            foreach (var param in modelParameters)
+            {
+                var tempMap = new Dictionary<string, object>
+                {
+                    { "parameter", param.Model_Param },
+                    { "name", param.Model_Param_Name }
+                };
+                parameterList.Add(tempMap);
+            }
+
+            var modelTypeId = _context.ModelModelTypes.ToList().Find(mmt => mmt.Model_Id == modelId)!.Model_Type_Id;
+            var modelType = await _context.BalanceModelTypes.FindAsync(modelTypeId);
+
+            resultMap.Add("parameters", parameterList);
+            resultMap.Add("modelType", modelType!.ModelType_Definition);
+
+            var userId = _context.UserModels.ToList().Find(um => um.ModelId == modelId)!.UserId;
+            var user = await _context.Users.FindAsync(userId);
+            var userConsent = _context.UserConsents.ToList().Find(uc => uc.User_Id == userId);
+            var userInfoMap = new Dictionary<string, object>();
+            if (userConsent!.Consent)
+            {
+                userInfoMap.Add("name", user!.Name);
+                userInfoMap.Add("email", user!.Email);
+            }
+            else
+            {
+                userInfoMap.Add("name", "Anonymous");
+                userInfoMap.Add("email", "Anonymous");
+            }
+            resultMap.Add("user", userInfoMap);
+
+            var latestSimulationDetails = _context.SimulationDetails
+                .ToList()
+                .FindAll(details => details.User_Id == user!.Id && details.Model_Id == modelId)
+                .OrderByDescending(details => details.Version)
+                .ElementAt(0);
+            var simulationDetailsMap = new Dictionary<string, object>
+            {
+                { "modelName", latestSimulationDetails.Model_Name },
+                { "version", latestSimulationDetails.Version },
+                { "updateDate", latestSimulationDetails.Simulation_Date! }
+            };
+            resultMap.Add("latestDetails", simulationDetailsMap);
+
+            return Ok(resultMap);
+        }
+
+        [HttpPost]
         [Route("optimize")]
         public ActionResult<OptimizationViewModel> Optimize([FromBody] OptimizationViewModel optimizationVM)
         {

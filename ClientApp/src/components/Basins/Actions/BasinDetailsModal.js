@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import ModelDetailsModal from "../../Models/Actions/ModelDetailsModal";
 import "../../Home.css";
 
 class BasinDetailsModal extends React.Component {
@@ -9,7 +10,9 @@ class BasinDetailsModal extends React.Component {
             showModal: props.showModal,
             basin: props.basin,
             modelList: props.models,
-            sessionPresent: false
+            sessionPresent: false,
+            showModelDetailsModal: false,
+            selectedModel: null
         }
     }
 
@@ -39,19 +42,19 @@ class BasinDetailsModal extends React.Component {
                 <div><span>Area Field (km2): </span>{basin.field}</div>
                 <div><span>Description: </span>{basin.description}</div>
             </div>
-            <div className={"title-basin-models"}><h5>Model List</h5></div>
+            <div className={"title-basin-models"}><h5>Simulation List</h5></div>
             <div className={"model-list-container"}>
                 {
-                    models.length === 0 ? <span> No Model Found for This Basin </span> : models.map((model, idx) => {
+                    models.length === 0 ? <span> No Simulation Found for This Basin </span> : models.map((model, idx) => {
                         return (
                             <div key={`basinModelNo${idx}`} className={"model-list-item"}>
                                 <div>
                                     <span>Name: </span>{model.name}
                                 </div>
                                 <div className={"model-action-btn-container"}>
-                                    <button type="button" className="btn btn-success" disabled={!this.state.sessionPresent}
-                                        onClick={this.showModelDetails}>Details</button>
-                                    <button type="button" className="btn btn-primary" disabled={!this.state.sessionPresent}
+                                    <button type="button" className="btn btn-success" disabled={false}
+                                        onClick={() => this.toggleShowModelDetails(model)}>Details</button>
+                                    <button type="button" className="btn btn-primary" disabled={!this.state.validSessionPresent}
                                         onClick={this.navigateToCalibration}>Calibrate</button>
                                 </div>
                             </div>
@@ -73,8 +76,11 @@ class BasinDetailsModal extends React.Component {
 
     }
 
-    showModelDetails = () => {
-
+    toggleShowModelDetails = (model) => {
+        this.setState({ 
+            showModelDetailsModal: !this.state.showModelDetailsModal,
+            selectedModel: model
+        });
     }
 
     render() {
@@ -85,6 +91,14 @@ class BasinDetailsModal extends React.Component {
                     {this.getModalBody()}
                     {this.getModalFooter()}
                 </Modal>
+
+                {
+                    this.state.showModelDetailsModal && <ModelDetailsModal
+                        showModal={this.state.showModelDetailsModal}
+                        onDismiss={() => this.toggleShowModelDetails(null)}
+                        model={this.state.selectedModel}
+                    />
+                }
             </>
         );
     }
