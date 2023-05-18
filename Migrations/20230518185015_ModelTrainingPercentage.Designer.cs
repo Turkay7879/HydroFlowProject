@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HydroFlowProject.Migrations
 {
     [DbContext(typeof(SqlServerDbContext))]
-    [Migration("20230423112413_BalanceModelTable")]
-    partial class BalanceModelTable
+    [Migration("20230518185015_ModelTrainingPercentage")]
+    partial class ModelTrainingPercentage
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -211,6 +211,9 @@ namespace HydroFlowProject.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int>("Training_Percentage")
+                        .HasColumnType("int");
+
                     b.HasKey("Id")
                         .HasName("PK__Models__3214EC077CF5FEB4");
 
@@ -260,10 +263,15 @@ namespace HydroFlowProject.Migrations
                         .HasMaxLength(25)
                         .HasColumnType("nvarchar(25)");
 
+                    b.Property<int>("User_Id")
+                        .HasColumnType("int");
+
                     b.HasKey("Parameter_Id")
                         .HasName("PK__Model_Parameter");
 
                     b.HasIndex("Model_Id");
+
+                    b.HasIndex("User_Id");
 
                     b.ToTable("ModelParameters");
                 });
@@ -330,6 +338,47 @@ namespace HydroFlowProject.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("HydroFlowProject.Models.SimulationDetails", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Model_Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Model_Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("Simulation_Date")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<int>("User_Id")
+                        .HasColumnType("int");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id")
+                        .HasName("PK__Simulation__Details");
+
+                    b.HasIndex("Model_Id");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("Simulation_Details", null, t =>
+                        {
+                            t.HasTrigger("Trigger_Simulation_Details_Insert");
+                        });
+                });
+
             modelBuilder.Entity("HydroFlowProject.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -371,6 +420,28 @@ namespace HydroFlowProject.Migrations
                         .HasName("PK__Users__3214EC0751F45BF6");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("HydroFlowProject.Models.UserConsent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Consent")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("User_Id")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id")
+                        .HasName("PK__User__Consent");
+
+                    b.HasIndex("User_Id");
+
+                    b.ToTable("User_Consents", (string)null);
                 });
 
             modelBuilder.Entity("HydroFlowProject.Models.UserModel", b =>
@@ -549,7 +620,16 @@ namespace HydroFlowProject.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_ModelParameters_Model");
 
+                    b.HasOne("HydroFlowProject.Models.User", "User")
+                        .WithMany("ModelParameters")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_ModelParameters_User");
+
                     b.Navigation("Model");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("HydroFlowProject.Models.Session", b =>
@@ -560,6 +640,39 @@ namespace HydroFlowProject.Migrations
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired()
                         .HasConstraintName("FK_User_Session");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HydroFlowProject.Models.SimulationDetails", b =>
+                {
+                    b.HasOne("HydroFlowProject.Models.Model", "Model")
+                        .WithMany("SimulationDetails")
+                        .HasForeignKey("Model_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SimulationDetails_Models_ModelId");
+
+                    b.HasOne("HydroFlowProject.Models.User", "User")
+                        .WithMany("SimulationDetails")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_SimulationDetails_Users_UserId");
+
+                    b.Navigation("Model");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HydroFlowProject.Models.UserConsent", b =>
+                {
+                    b.HasOne("HydroFlowProject.Models.User", "User")
+                        .WithMany("UserConsents")
+                        .HasForeignKey("User_Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_UserConsent_User");
 
                     b.Navigation("User");
                 });
@@ -651,6 +764,8 @@ namespace HydroFlowProject.Migrations
 
                     b.Navigation("ModelParameters");
 
+                    b.Navigation("SimulationDetails");
+
                     b.Navigation("UserModels");
 
                     b.Navigation("UserUserPermissions");
@@ -664,6 +779,12 @@ namespace HydroFlowProject.Migrations
             modelBuilder.Entity("HydroFlowProject.Models.User", b =>
                 {
                     b.Navigation("BasinUserPermissions");
+
+                    b.Navigation("ModelParameters");
+
+                    b.Navigation("SimulationDetails");
+
+                    b.Navigation("UserConsents");
 
                     b.Navigation("UserModels");
 

@@ -1,6 +1,7 @@
 import React from 'react'
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import { Buffer } from 'buffer';
+import { Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Paper, Box, CircularProgress } from '@mui/material';
 import Swal from 'sweetalert2';
 import ModelsRemote from '../flux/ModelsRemote';
 
@@ -38,7 +39,7 @@ class ModelDetailsModal extends React.Component {
                     details.userName = detailsData.user.name;
                     details.userMail = detailsData.user.email;
 
-                    this.setState({ details: details }, () => console.log(this.state.details));
+                    this.setState({ details: details });
                 });
             } else {
                 Swal.fire({
@@ -63,6 +64,62 @@ class ModelDetailsModal extends React.Component {
         }))
     }
 
+    getParameterDescription = (name) => {
+        let paramDescription = '';
+        switch (name) {
+            case 'a':
+                paramDescription = 'A';
+                break;
+            case 'b':
+                paramDescription = 'B';
+                break;
+            case 'c':
+                paramDescription = 'C';
+                break;
+            case 'd':
+                paramDescription = 'D';
+                break;
+            case 'initialSt':
+                paramDescription = "Initial Soil Moisture";
+                break;
+            case 'initialGt':
+                paramDescription = "Initial Groundwater";
+                break;
+            default:
+                break;
+        }
+        return paramDescription;
+    }
+
+    getParametersToRender = () => {
+        let parameters = this.state.details.parameters;
+        if (parameters === null) return <></>
+        return <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 150 }} aria-label="Parameter Table">
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Parameter Name</TableCell>
+                        <TableCell>Value</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {
+                        parameters.map((param) => {
+                            return <TableRow key={param.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                                <TableCell>
+                                    {this.getParameterDescription(param.name)}
+                                </TableCell>
+                                <TableCell>
+                                    {param.parameter}
+                                </TableCell>
+                            </TableRow>
+                        })
+                    }
+                </TableBody>
+            </Table>
+        </TableContainer>
+    }
+
     getModalHeader = () => {
         return <ModalHeader>
             Simulation Details
@@ -71,6 +128,16 @@ class ModelDetailsModal extends React.Component {
 
     getModalBody = () => {
         let details = this.state.details;
+
+        if (details.modelName === "" || details.modelType === "" || !details.parameters
+        || details.updateDate === "" || details.userMail === "" || details.userName === "" || details.version === 0) {
+            return <ModalBody style={{ minHeight: "10rem" }}>
+                <Box sx={{ display: 'flex', justifyContent: "center" }}>
+                    <CircularProgress size={100} thickness={2} />
+                </Box>
+            </ModalBody>
+        }
+
         let timeZoneOffset = (new Date()).getTimezoneOffset() / -60;
         return <ModalBody>
             <>
@@ -84,16 +151,22 @@ class ModelDetailsModal extends React.Component {
                     <span><b>Update Date:</b> {`${details.updateDate}${timeZoneOffset>0?'+'+timeZoneOffset:timeZoneOffset}`}</span>
                 </div>
                 <div>
-                    <span><b>Model: </b>{details.modelType}</span>
-                </div>
-                <div>
-                    <span><b>Parameters: </b></span>
-                </div>
-                <div>
                     <span><b>Creator Name: </b>{details.userName}</span>
                 </div>
                 <div>
                     <span><b>Creator Mail: </b>{details.userMail}</span>
+                </div>
+                <div>
+                    <span><b>Model: </b>{details.modelType}</span>
+                </div>
+                <div>
+                    <span><b>Data Percentage for Optimization: </b>{this.state.model.training_Percentage}%</span>
+                </div>
+                <div>
+                    <span><b>Parameters: </b></span>
+                    <div style={{ margin: "0.75rem 0 1.5rem 0" }}>
+                        { this.getParametersToRender() }
+                    </div>
                 </div>
                 <div style={{ marginTop: "1.5rem", display: "flex", justifyContent: "center" }}>
                     <button 

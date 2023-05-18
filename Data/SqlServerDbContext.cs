@@ -108,6 +108,7 @@ namespace HydroFlowProject.Data
                     .IsConcurrencyToken();
                 entity.Property(e => e.Name).HasMaxLength(50);
                 entity.Property(e => e.Title).HasMaxLength(50);
+                entity.Property(e => e.Training_Percentage);
             });
 
             modelBuilder.Entity<ModelModelType>(entity =>
@@ -132,6 +133,10 @@ namespace HydroFlowProject.Data
                     .HasForeignKey(e => e.Model_Id)
                     .OnDelete(DeleteBehavior.Cascade)
                     .HasConstraintName("FK_ModelParameters_Model");
+                entity.HasOne(e => e.User).WithMany(u => u.ModelParameters)
+                    .HasForeignKey(e => e.User_Id)
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .HasConstraintName("FK_ModelParameters_User");
                 entity.Property(e => e.Model_Param).IsRequired();
                 entity.Property(e => e.Model_Param_Name).HasMaxLength(25).IsRequired();
             });

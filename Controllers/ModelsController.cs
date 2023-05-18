@@ -94,12 +94,12 @@ namespace HydroFlowProject.Controllers
                 
                 var parameters = new List<ModelParameter>
                 {
-                    new ModelParameter{Model_Id = id, Model_Param = 1f, Model_Param_Name = "a"},
-                    new ModelParameter{Model_Id = id, Model_Param = 5f, Model_Param_Name = "b"},
-                    new ModelParameter{Model_Id = id, Model_Param = 0.5f, Model_Param_Name = "c"},
-                    new ModelParameter{Model_Id = id, Model_Param = 0.1f, Model_Param_Name = "d"},
-                    new ModelParameter{Model_Id = id, Model_Param = 2f, Model_Param_Name = "initialSt"},
-                    new ModelParameter{Model_Id = id, Model_Param = 2f, Model_Param_Name = "initialGt"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 1f, Model_Param_Name = "a"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 5f, Model_Param_Name = "b"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 0.5f, Model_Param_Name = "c"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 0.1f, Model_Param_Name = "d"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 2f, Model_Param_Name = "initialSt"},
+                    new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 2f, Model_Param_Name = "initialGt"},
                 };
                 
                 await _context.UserModels.AddAsync(new UserModel
@@ -133,10 +133,10 @@ namespace HydroFlowProject.Controllers
 
         [HttpPost]
         [Route("getModelParameters")]
-        public ActionResult<ModelParameterViewModel> GetModelParameters([FromBody] int ModelId)
+        public ActionResult<ModelParameterViewModel> GetModelParameters([FromBody] Dictionary<string, int> modelUserIds)
         {
-            var parameters = _context.ModelParameters.ToList().FindAll(p => p.Model_Id == ModelId);
-            var modelingTypeId = _context.ModelModelTypes.ToList().Find(mt => mt.Model_Id == ModelId);
+            var parameters = _context.ModelParameters.ToList().FindAll(p => p.Model_Id == modelUserIds["Model_Id"] && p.User_Id == modelUserIds["User_Id"]);
+            var modelingTypeId = _context.ModelModelTypes.ToList().Find(mt => mt.Model_Id == modelUserIds["Model_Id"]);
             var modelingType = _context.BalanceModelTypes.Find(modelingTypeId!.Model_Type_Id);
             var modelParameters = new ModelParameterViewModel
             {
@@ -258,7 +258,8 @@ namespace HydroFlowProject.Controllers
                     Name = model.Name,
                     Title = model.Title,
                     ModelFile = "",
-                    ModelPermissionId = model.ModelPermissionId
+                    ModelPermissionId = model.ModelPermissionId,
+                    Training_Percentage = model.Training_Percentage
                 });
             }
 

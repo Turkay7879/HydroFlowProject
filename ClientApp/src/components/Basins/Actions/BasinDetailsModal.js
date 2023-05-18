@@ -10,6 +10,7 @@ class BasinDetailsModal extends React.Component {
             showModal: props.showModal,
             basin: props.basin,
             modelList: props.models,
+            totalCount: props.totalCount,
             sessionPresent: false,
             showModelDetailsModal: false,
             selectedModel: null
@@ -41,6 +42,7 @@ class BasinDetailsModal extends React.Component {
                 <div><span>Flow Station No: </span>{basin.flowStationNo}</div>
                 <div><span>Area Field (km2): </span>{basin.field}</div>
                 <div><span>Description: </span>{basin.description}</div>
+                <div><span>Total Created Simulations: </span>{this.state.totalCount}</div>
             </div>
             <div className={"title-basin-models"}><h5>Simulation List</h5></div>
             <div className={"model-list-container"}>

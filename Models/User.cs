@@ -31,5 +31,7 @@
         public virtual ICollection<UserConsent> UserConsents { get; } = new List<UserConsent>();
 
         public virtual ICollection<SimulationDetails> SimulationDetails { get; } = new List<SimulationDetails>();
+
+        public virtual ICollection<ModelParameter> ModelParameters { get; } = new List<ModelParameter>();
     }
 }
