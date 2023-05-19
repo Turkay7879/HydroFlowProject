@@ -39,11 +39,18 @@ class Login extends React.Component {
             Password: this.state.password
         };
         this.setState({ loggingIn: true }, () => {
-            SessionsRemote.loginUser(loginPayload, (result) => {
+            SessionsRemote.loginUser(loginPayload, (result, errorMessage) => {
                 if (result) {
                     this.setState({
                         loggingIn: false,
                         validSessionPresent: true
+                    });
+                } else {
+                    this.setState({ loggingIn: false, validSessionPresent: false });
+                    Swal.fire({
+                        title: "Login Error",
+                        text: errorMessage,
+                        icon: "error"
                     });
                 }
             });

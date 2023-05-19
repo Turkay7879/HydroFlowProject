@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { FormGroup, Label, Input } from "reactstrap";
 import Form from "react-bootstrap/Form";
-import { FormControlLabel, Switch } from '@mui/material';
+import { FormControlLabel, Switch, Slider } from '@mui/material';
 
 class AddModelForm extends React.Component {
     defaultBasinOption = "Select a basin";
@@ -104,6 +104,24 @@ class AddModelForm extends React.Component {
                             }
                         }}
                     />
+                </FormGroup>
+                <FormGroup>
+                    <Label for="trainingPercentageSlider">Data percentage to be used for Optimization (Remaining is used for testing):</Label>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                        <div style={{ marginTop: "1rem", width: "90%"}}>
+                            <Slider
+                                aria-label="Training Data Percentage Slider"
+                                name="trainingPercentageSlider"
+                                defaultValue={this.state.selectedModel ? this.state.selectedModel.Training_Percentage : 80}
+                                step={1}
+                                min={20}
+                                max={90}
+                                marks={[{label: "20%", value: 20}, {label: "90%", value: 90}]}
+                                valueLabelDisplay="on"
+                                onChange={(e) => this.props.setModel('Training_Percentage', e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </FormGroup>
                 <FormControlLabel 
                     control={<Switch

@@ -23,8 +23,7 @@ export class NavMenu extends Component {
   }
   
   componentDidMount() {
-    let intervalId = setInterval(() => this.checkPermissions(), 500);
-    this.setState({ intervalId: intervalId });
+    this.enableSessionCheckInterval();
   }
   
   componentDidUpdate(prevProps, prevState, snapshot) {
@@ -32,6 +31,11 @@ export class NavMenu extends Component {
       this.render();
       this.setState({ navigateToLogin: false });
     }
+  }
+
+  enableSessionCheckInterval = () => {
+    let intervalId = setInterval(() => this.checkPermissions(), 1000);
+    this.setState({ intervalId: intervalId });
   }
   
   checkPermissions = () => {
@@ -59,7 +63,7 @@ export class NavMenu extends Component {
               this.setState({
                 validSessionPresent: false,
                 authorizedForAdminPanels: false
-              });
+              }, () => this.enableSessionCheckInterval());
             });
           });
         }

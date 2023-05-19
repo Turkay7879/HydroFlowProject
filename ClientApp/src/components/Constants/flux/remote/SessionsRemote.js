@@ -12,16 +12,13 @@ const SessionsRemote = {
             },
             body: JSON.stringify(payload)
         }).then(response => {
-            if (response.status === 404) {
-                console.log("failed to save user in previous request")
-            } else if (response.status === 403) {
-                console.log("something went wrong with password checking")
+            if (response.status === 404 || response.status === 403) {
+                callback(false, "Given e-mail or password is incorrect.");
             } else if (response.status === 500) {
-                console.log("error, credentials are approved, but could not create session")
+                callback(false, "Could not create a session, please try again.");
             } else if (response.status === 200) {
                 response.json().then(sessionData => {
                     window.localStorage.setItem("hydroFlowSession", JSON.stringify(sessionData));
-                    
                     callback(true);
                 })
             }

@@ -15,7 +15,9 @@ namespace HydroFlowProject.ViewModels
         public string ModelFile { get; set; } = null!;
 
         public int ModelPermissionId { get; set; }
-        
+
+        public int Training_Percentage { get; set; }
+
         public string? SessionId { get; set; }
         
         public int BasinId { get; set; }
@@ -29,7 +31,8 @@ namespace HydroFlowProject.ViewModels
                 Title = Title,
                 CreateDate = null,
                 ModelFile = Convert.FromBase64String(ModelFile.Substring(55)),
-                ModelPermissionId = ModelPermissionId
+                ModelPermissionId = ModelPermissionId,
+                Training_Percentage = Training_Percentage
             };
             return model;
         }

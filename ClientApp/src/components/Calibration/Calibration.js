@@ -115,7 +115,8 @@ class Calibration extends React.Component {
                 samples: null
             })
         }));
-        CalibrationRemote.getModelParameters(model.id).then(response => response.json().then(parameterData => {
+        let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
+        CalibrationRemote.getModelParameters({"Model_Id": model.id, "User_Id": session.sessionUserId}).then(response => response.json().then(parameterData => {
             const modelingType = parameterData.modelingType;
             const parameters = this.getParameters(parameterData.parameters, modelingType);
             this.setState({
@@ -171,6 +172,7 @@ class Calibration extends React.Component {
                             parameters={this.state.parameters}
                             isOptimizationStarted={this.state.runningOptimization}
                             onOptimizationFinished={this.onOptimizationFinished}
+                            optimize={false}
                             onCalibrationScatter={this.onCalibrationScatter}/>
                         {
                             this.state.actualObsmmValues && this.state.predictedQmodelValues && <LineChart

@@ -2,13 +2,15 @@
 import { read, utils } from 'xlsx';
 
 class ModelCalculation extends React.Component {
-
-
-    state = {
-        showResult: false,
-        result: {},
-        Qmodelt: [],
-        parameters: null
+    constructor(props) {
+        super(props);
+        this.state = {
+            showResult: false,
+            result: {},
+            Qmodelt: [],
+            parameters: null,
+            enableOptimization: props.optimize
+        }
     }
     
     componentDidMount() {
@@ -43,7 +45,7 @@ class ModelCalculation extends React.Component {
 
             let resultToReturn = {
                 type1: "Observed Streamflow",
-                actualValues: Obsmm.filter(value => value),
+                actualValues: Obsmm,
                 type2: "Simulated Streamflow",
                 qModelValues: Qmodelt.filter(value => value),
                 date: T,
@@ -119,8 +121,8 @@ class ModelCalculation extends React.Component {
             P: columnData.P,
             PET: columnData.PET,
             Obsmm: columnData.Obsmm,
-            G: columnData['G(t)'],
-            S: columnData['S(t)'],
+            G: param_Gt,
+            S: param_St,
             A: param_A,
             B: param_B,
             C: param_C,
@@ -135,7 +137,6 @@ class ModelCalculation extends React.Component {
         const Et = [];
         const DRt = [];
         const GRt = [];
-        const Gt = [];
         const GDt = [];
         const Qmodelt = [];
 
@@ -153,33 +154,30 @@ class ModelCalculation extends React.Component {
 
         ////calibrasyon
         const calibratedvalues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
-        const optimized_A = calibratedvalues.predictedA;
-        const optimized_B = calibratedvalues.predictedB;
-        const optimized_C = calibratedvalues.predictedC;
-        const optimized_D = calibratedvalues.predictedD;
-        const final_RMSE = calibratedvalues.currentRMSE;
-        console.log("AAAAAAAA",calibratedvalues)
+        const optimized_A = this.state.enableOptimization === true ? calibratedvalues.predictedA : actualA;
+        const optimized_B = this.state.enableOptimization === true ? calibratedvalues.predictedB : actualB;
+        const optimized_C = this.state.enableOptimization === true ? calibratedvalues.predictedC : actualC;
+        const optimized_D = this.state.enableOptimization === true ? calibratedvalues.predictedD : actualD;
+        const final_RMSE = this.state.enableOptimization === true ? calibratedvalues.currentRMSE : null;
         
         for (let i = 1; i < T.length; i++) {
-            // Adım 1
+            // Step 1
             const Wt = S[i - 1] + P[i];
-            //Step 2 Yt=(Wt+B)/(2A)‐SQRT(((Wt+B)/(2A))^2‐B*Wt/A)
+            // Step 2
             const Yt = (Wt + optimized_B[0]) / (2 * optimized_A[0]) - Math.sqrt(Math.pow((Wt + optimized_B[0]) / (2 * optimized_A[0]), 2) - (optimized_B[0] * Wt) / optimized_A[0]);
-            // Adım 3
+            // Step 3
+            S[i] = Yt * Math.exp(-1 * PET[i] / optimized_B[0]);
+            // Step 4
             Et[i] = Yt * (1 - Math.exp(-PET[i] / optimized_B[0]))
-
-            // Adım 4
+            // Step 5
             DRt[i] = ((1 - optimized_C[0]) * (Wt - Yt));
-
-            // Adım 5
+            // Step 6
             GRt[i] = (optimized_C[0] * (Wt - Yt));
-
-            Gt[i] = G[i];
-
-            // Adım 7
+            // Step 7
+            G[i] = (1 / (1 + optimized_D[0])) * (G[i - 1] + GRt[i])
+            // Step 8
             GDt[i] = (optimized_D[0] * G[i]);
-
-            // Adım 8
+            // Step 9
             Qmodelt[i] = (DRt[i] + GDt[i]);
         }
         //deviation
@@ -260,7 +258,6 @@ class ModelCalculation extends React.Component {
  }
   
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
-
         ///Et, P, Obsmm, Qmodelt
         const rmse = this.calculateRMSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         console.log("RMSE value: ", rmse);
@@ -276,9 +273,8 @@ class ModelCalculation extends React.Component {
             nse_CalibrateOnly: nse
 
         });
-        let calibratedValues = {};
-        calibratedValues = this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01);
-        return calibratedValues;
+        if (this.state.enableOptimization === false) {return null};
+        return this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01);
     }
 
   calculateR2(actual, predicted) {

@@ -32,7 +32,7 @@ export class Home extends Component {
                         data.forEach(function(basin) {
                            array.push( {
                                basinId: basin.id,
-                               geocode: [basin.flowObservationStationLong, basin.flowObservationStationLat]
+                               geocode: [basin.flowObservationStationLat, basin.flowObservationStationLong]
                            })
                         });
                         this.setState({
@@ -60,10 +60,11 @@ export class Home extends Component {
             BasinId: basinId
         };
         BasinsRemote.findModelsOfBasin(payload).then(response => {
-            response.json().then(modelList => {
+            response.json().then(data => {
                 this.setState({
                     basin: this.state.basins.find(b => b.id === basinId),
-                    models: modelList
+                    models: data.modelList,
+                    totalCount: data.totalCount
                 }, () => this.toggleShowBasinDetailModal())
             });
         });
@@ -92,6 +93,7 @@ export class Home extends Component {
                     onDismiss={this.toggleShowBasinDetailModal}
                     basin={this.state.basin}
                     models={this.state.models}
+                    totalCount={this.state.totalCount}
                     /> 
                 }
                 {

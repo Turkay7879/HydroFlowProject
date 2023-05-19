@@ -142,7 +142,7 @@ namespace HydroFlowProject.Controllers
 
         [HttpPost]
         [Route("findModelsOfBasin")]
-        public async Task<ActionResult<ModelViewModel>> FindModelsOfBasin([FromBody] RestrictedBasinModelsViewModel payload)
+        public async Task<ActionResult<Dictionary<string, object>>> FindModelsOfBasin([FromBody] RestrictedBasinModelsViewModel payload)
         {
             var isUserHasValidSession = _context.Sessions.ToList().Find(s => s.SessionId == payload.SessionId && s.SessionIsValid == true) != null;
             var modelIdList = _context.BasinModels.ToList().FindAll(bm => bm.BasinId == payload.BasinId);
@@ -157,7 +157,7 @@ namespace HydroFlowProject.Controllers
             {
                 var model = await _context.Models.FindAsync(basinModel.ModelId);
                 var isUserEligibleToViewModel = false;
-                if (model.ModelPermissionId == 0)
+                if (model!.ModelPermissionId == 0)
                 {
                     isUserEligibleToViewModel = true;
                 }
@@ -180,13 +180,20 @@ namespace HydroFlowProject.Controllers
                         Title = model.Title,
                         ModelFile = "",
                         ModelPermissionId = model.ModelPermissionId,
+                        Training_Percentage = model.Training_Percentage,
                         SessionId = null,
                         BasinId = payload.BasinId
                     });
                 }
             }
 
-            return Ok(modelList);
+            Dictionary<string, object> resultMap = new()
+            {
+                { "totalCount", modelIdList.Count },
+                { "modelList", modelList }
+            };
+
+            return Ok(resultMap);
         }
     }
 }
