@@ -15,6 +15,8 @@ using System.Diagnostics;
 using HydroFlowProject.Utilities;
 using Newtonsoft.Json;
 using System.Reflection.Metadata;
+using System.Linq.Expressions;
+using Microsoft.Data.SqlClient;
 
 namespace HydroFlowProject.Controllers
 {
@@ -23,6 +25,7 @@ namespace HydroFlowProject.Controllers
     public class ModelsController : Controller
     {
         private readonly SqlServerDbContext _context;
+        private readonly int MAX_MODEL_NUM_CREATED_BY_NORMAL_USERS_IN_A_DAY = 5;
 
         public ModelsController(SqlServerDbContext context)
         {
@@ -65,10 +68,24 @@ namespace HydroFlowProject.Controllers
         public async Task<ActionResult<ModelViewModel>> SaveModel([FromBody] ModelViewModel modelVM)
         {
             Model model = modelVM.ToModel();
+            var userSession = _context.Sessions.ToList().Find(s => s.SessionId == modelVM.SessionId);
+            if (userSession == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
             var toUpdate = await _context.Models.FindAsync(model.Id);
             var id = -1;
             if (toUpdate == null)
             {
+                var userRole = _context.UserRoles.ToList().Find(ur => ur.UserId == userSession.UserId);
+                var userId = new SqlParameter("userId", userSession.UserId);
+                var modelCountInADay = _context.Database.SqlQueryRaw<int>($"select count(dbo.Models.Id) as 'count' from dbo.Models\r\ninner join dbo.User_Models on dbo.User_Models.ModelId = dbo.Models.Id\r\nwhere dbo.User_Models.UserId = @userId\r\nand dbo.Models.CreateDate > (GETDATE() - 1)", userId).ToList();
+                if (modelCountInADay.ElementAt(0) > MAX_MODEL_NUM_CREATED_BY_NORMAL_USERS_IN_A_DAY && userRole!.RoleId == 3)
+                {
+                    return StatusCode(StatusCodes.Status403Forbidden, "Regular users are not allowed to create more than " + MAX_MODEL_NUM_CREATED_BY_NORMAL_USERS_IN_A_DAY + " simulations in the last 24 hours!");
+                }
+
                 await _context.Models.AddAsync(model);
             }
             else
@@ -85,13 +102,7 @@ namespace HydroFlowProject.Controllers
             }
             
             if (added > 0)
-            {
-                var userSession = _context.Sessions.ToList().Find(s => s.SessionId == modelVM.SessionId);
-                if (userSession == null)
-                {
-                    return StatusCode(StatusCodes.Status500InternalServerError);
-                }
-                
+            {       
                 var parameters = new List<ModelParameter>
                 {
                     new ModelParameter{Model_Id = id, User_Id = userSession.UserId, Model_Param = 1f, Model_Param_Name = "a"},
@@ -224,7 +235,21 @@ namespace HydroFlowProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            _context.Models.Remove((Model) modelToDelete);
+            var basinModel = _context.BasinModels.FirstOrDefault(b => b.ModelId == Id);
+            var modelType = _context.ModelModelTypes.FirstOrDefault(t => t.Model_Id == Id);
+            var parameterList = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == Id);
+            var simulationDetails = _context.SimulationDetails.ToList().FindAll(sd => sd.Model_Id == Id);
+            var userModels = _context.UserModels.ToList().FindAll(um => um.ModelId == Id);
+            var permissions = _context.UserUserPermissions.ToList().FindAll(p => p.ModelId == Id);
+
+            _context.BasinModels.Remove(basinModel!);
+            _context.ModelModelTypes.Remove(modelType!);
+            _context.ModelParameters.RemoveRange(parameterList);
+            _context.SimulationDetails.RemoveRange(simulationDetails);
+            _context.UserModels.RemoveRange(userModels);
+            _context.UserUserPermissions.RemoveRange(permissions);
+
+            _context.Models.Remove(modelToDelete);
             int result = await _context.SaveChangesAsync();
             if (result > 0)
             {
@@ -312,16 +337,26 @@ namespace HydroFlowProject.Controllers
             }
             resultMap.Add("user", userInfoMap);
 
-            var latestSimulationDetails = _context.SimulationDetails
+            var simulationList = _context.SimulationDetails
                 .ToList()
-                .FindAll(details => details.User_Id == user!.Id && details.Model_Id == modelId)
-                .OrderByDescending(details => details.Version)
-                .ElementAt(0);
+                .FindAll(details => details.User_Id == user!.Id && details.Model_Id == modelId);
+            var simulationDetails = new SimulationDetails();
+            if (simulationList.Count == 0)
+            {
+                return StatusCode(StatusCodes.Status412PreconditionFailed, "This simulation needs to be run and saved with parameters first to view its details!");
+            }
+            else
+            {
+                simulationDetails = simulationList
+                    .OrderByDescending(details => details.Version)
+                    .ElementAt(0);
+            }
+                
             var simulationDetailsMap = new Dictionary<string, object>
             {
-                { "modelName", latestSimulationDetails.Model_Name },
-                { "version", latestSimulationDetails.Version },
-                { "updateDate", latestSimulationDetails.Simulation_Date! }
+                { "modelName", simulationDetails.Model_Name },
+                { "version", simulationDetails.Version },
+                { "updateDate", simulationDetails.Simulation_Date! }
             };
             resultMap.Add("latestDetails", simulationDetailsMap);
 
@@ -337,6 +372,11 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, optimizationVM);
             }
+
+            var parameterMap = JsonConvert.DeserializeObject<Dictionary<string, float>>(optimizationVM.Parameters);
+            var A = parameterMap!["a"];
+            // Example usage: parameterMap["a"], parameterMap["b"] etc.
+            // Sent parameter payload can be found in Optimization.js to check which parameters are sent
 
             var optimizationResult = ModelOptimization.Optimize(optimizationVM);
             return Ok(optimizationResult);

@@ -82,7 +82,7 @@ export class NavMenu extends Component {
         this.setState({
           validSessionPresent: false,
           navigateToLogin: true 
-        });
+        }, () => this.enableSessionCheckInterval());
       }
     });
   }

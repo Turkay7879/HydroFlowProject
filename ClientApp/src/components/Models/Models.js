@@ -24,7 +24,7 @@ class Models extends Component {
             loadingPage: true
         };
 
-        this.tableColumns = ['Name', 'Title', 'Create Date', 'Model File', 'Model Permission'];
+        this.tableColumns = ['Name', 'Title', 'Create Date', 'Observation Data File', 'Simulation Permission'];
     }
 
     componentDidMount() {
@@ -118,7 +118,7 @@ class Models extends Component {
     deleteModel = (id) => {
         Swal.fire({
             title: 'Confirm Deletion',
-            text: `Continue deleting selected Model?`,
+            text: `Are you sure to delete this simulation and related data? If there are any permitted user(s) exist for this simulation, they also will lose their access!`,
             icon: "warning",
             showCancelButton: true,
             cancelButtonText: "Cancel",
@@ -127,8 +127,8 @@ class Models extends Component {
             if (result.isConfirmed) {
                 ModelsRemote.deleteModel(id).then(response => response.json().then(model => {
                     Swal.fire({
-                        title: "Deleted Model",
-                        text: `Deleted model successfully!`,
+                        title: "Success",
+                        text: "Deleted simulation successfully!",
                         icon: "success"
                     }).then(() => {
                         // Remove the deleted model from the models array in the state
@@ -138,7 +138,7 @@ class Models extends Component {
                     });
                 })).catch(err => {
                     Swal.fire({
-                        title: "Error Deleting Model",
+                        title: "Error Deleting Simulation",
                         text: err,
                         icon: "error"
                     });
@@ -181,7 +181,7 @@ class Models extends Component {
                                     type="button"
                                     className="btn btn-primary"
                                     onClick={() => this.downloadModelData(model.Id)}>
-                                        Download Model Data
+                                        Download Observation Data
                                     </button>
                             </td>
                             <td>{model.ModelPermissionId === 1 ? 'Private' : 'Public'}</td>
@@ -207,12 +207,12 @@ class Models extends Component {
             <div style={{ display: "flex", justifyContent: "end" }}>
                 <button type="button" className="btn btn-primary"
                     onClick={() => { this.toggleAddModelModal() }}>
-                    Add Model
+                    Create Simulation
                 </button>
             </div>
             {
-                this.state.loadingModels ? <p className="fs-1">Loading Models...</p> :
-                    !this.state.models ? <p className="fs-1">No Model Found</p> :
+                this.state.loadingModels ? <p className="fs-1">Loading Simulations...</p> :
+                    !this.state.models ? <p className="fs-1">No Simulation Found</p> :
                         this.getBody()
             }
             {

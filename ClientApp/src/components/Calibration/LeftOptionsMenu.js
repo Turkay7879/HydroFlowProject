@@ -84,7 +84,7 @@ class LeftOptionsMenu extends React.Component {
         CalibrationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
                 title: "Save Successfull",
-                text: "Model parameters have been saved!",
+                text: "Simulation and parameters have been saved!",
                 icon: "success"
             });
         }));

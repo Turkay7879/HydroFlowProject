@@ -10,6 +10,7 @@ using HydroFlowProject.Models;
 using HydroFlowProject.ViewModels;
 using NuGet.Protocol;
 using Newtonsoft.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace HydroFlowProject.Controllers
 {
@@ -98,6 +99,20 @@ namespace HydroFlowProject.Controllers
         [Route("deleteUser")]
         public async Task<ActionResult<User>> DeleteUser([FromBody] User user)
         {
+            var userHasModel = _context.UserModels.FirstOrDefault(um => um.UserId == user.Id);
+            if (userHasModel != null)
+            {
+                return StatusCode(StatusCodes.Status412PreconditionFailed, "This user has simulations created by them!");
+            }
+
+            var validUserSessions = _context.Sessions.ToList().FindAll(s => s.UserId == user.Id && s.SessionIsValid);
+            var consent = _context.UserConsents.FirstOrDefault(uc => uc.User_Id == user.Id);
+            var role = _context.UserRoles.FirstOrDefault(u => u.UserId == user.Id);
+
+            _context.Sessions.RemoveRange(validUserSessions);
+            _context.UserConsents.Remove(consent!);
+            _context.UserRoles.Remove(role!);
+
             _context.Users.Remove(user);
             int result = await _context.SaveChangesAsync();
             if (result > 0)
@@ -181,25 +196,41 @@ namespace HydroFlowProject.Controllers
                 // User created a simulation themselves
                 var isUserCreatedThisModel = _context.UserModels.ToList().Find(um => um.Id == modelId && um.UserId == foundUser.Id);
                 var isAdminSession = _context.UserRoles.ToList().Find(ur => ur.UserId == foundUser.Id && ur.RoleId == 1);
+                var model = _context.Models.Find(modelId);
                 var permission = new UserUserPermissionViewModel();
 
                 if (isUserCreatedThisModel == null)
                 {
                     // Permission is given to current user session
                     var foundPermission = _context.UserUserPermissions.ToList().Find(p => p.ModelId == modelId && p.PermittedUserId == foundUser.Id);
-                    if (foundPermission == null)
+                    if (foundPermission == null && model!.ModelPermissionId == 1)
                     {
                         return StatusCode(StatusCodes.Status500InternalServerError, checkViewModel);
                     }
-                    permission = new UserUserPermissionViewModel
+                    else if (foundPermission == null)
                     {
-                        ModelId = modelId,
-                        UserId = foundUser.Id,
-                        PermittedUserMail = "",
-                        PermData = foundPermission.PermData != null && (bool)foundPermission.PermData,
-                        PermDownload = foundPermission.PermDownload != null && (bool)foundPermission.PermDownload,
-                        PermSimulation = foundPermission.PermSimulation != null && (bool)foundPermission.PermSimulation
-                    };
+                        permission = new UserUserPermissionViewModel
+                        {
+                            ModelId = modelId,
+                            UserId = foundUser.Id,
+                            PermittedUserMail = "",
+                            PermData = true,
+                            PermDownload = true,
+                            PermSimulation = true
+                        };
+                    }
+                    else
+                    {
+                        permission = new UserUserPermissionViewModel
+                        {
+                            ModelId = modelId,
+                            UserId = foundUser.Id,
+                            PermittedUserMail = "",
+                            PermData = foundPermission.PermData != null && (bool)foundPermission.PermData,
+                            PermDownload = foundPermission.PermDownload != null && (bool)foundPermission.PermDownload,
+                            PermSimulation = foundPermission.PermSimulation != null && (bool)foundPermission.PermSimulation
+                        };
+                    }
                 }
                 else if (isAdminSession != null || isUserCreatedThisModel != null)
                 {

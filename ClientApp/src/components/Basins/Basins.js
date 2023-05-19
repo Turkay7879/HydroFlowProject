@@ -134,6 +134,15 @@ class Basins extends React.Component {
     }).then((result) => {
       if (result.isConfirmed) {
         BasinsRemote.deleteBasin(basin).then(response => {
+          if (response.status === 412) {
+            return response.json().then(errMsg => {
+              Swal.fire({
+                title: "Error",
+                text: errMsg,
+                icon: "error"
+              });
+            });
+          }
           response.json().then(result => {
             Swal.fire({
               title: "Deleted Basin",

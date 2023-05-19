@@ -109,6 +109,18 @@ namespace HydroFlowProject.Controllers
         [Route("deleteBasin")]
         public async Task<ActionResult<Basin>> DeleteBasin([FromBody] Basin basin)
         {
+            var basinHasModels = _context.BasinModels.ToList().Find(bm => bm.BasinId == basin.Id);
+            if (basinHasModels != null)
+            {
+                return StatusCode(StatusCodes.Status412PreconditionFailed, "This basin has simulations created in it!");
+            }
+
+            var basinPerm = _context.BasinPermissions.FirstOrDefault(bm => bm.BasinId.Equals(basin.Id));
+            if (basinPerm != null)
+            {
+                _context.BasinPermissions.Remove(basinPerm);
+            }
+
             _context.Basins.Remove(basin);
             int result = await _context.SaveChangesAsync();
             if (result > 0)
@@ -186,10 +198,11 @@ namespace HydroFlowProject.Controllers
                     });
                 }
             }
-
+            var totalCount = _context.Database.SqlQuery<int>($"select count(distinct dbo.Basin_Models.ModelId) from dbo.Basin_Models\ninner join dbo.User_Models on dbo.User_Models.ModelId = dbo.Basin_Models.ModelId");
+            
             Dictionary<string, object> resultMap = new()
             {
-                { "totalCount", modelIdList.Count },
+                { "totalCount", totalCount },
                 { "modelList", modelList }
             };
 

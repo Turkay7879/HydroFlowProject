@@ -4,10 +4,9 @@ import ModelDetailsModal from "../../Models/Actions/ModelDetailsModal";
 import "../../Home.css";
 import Swal from "sweetalert2";
 import UsersRemote from "../../Users/flux/UsersRemote";
-
 import ModelsRemote from "../../Models/flux/ModelsRemote";
 import Routes from "../../Constants/Routes";
-import {Link, useNavigate} from 'react-router-dom';
+import {Navigate} from 'react-router-dom';
 
 
 class BasinDetailsModal extends React.Component {
@@ -23,7 +22,8 @@ class BasinDetailsModal extends React.Component {
             selectedModel: null,
             permissionsList: null,
             sessionUserId: null,
-            canClick: false
+            navigateToCalibration: false,
+            navigateToOptimization: false
         }
     }
 
@@ -96,10 +96,8 @@ class BasinDetailsModal extends React.Component {
                                 <div className={"model-action-btn-container col-4"}>
                                     <button type="button" className="btn btn-success" disabled={this.isPermittedDetails(model.id)}
                                         onClick={() => this.toggleShowModelDetails(model)}>Details</button>
-                                    <Link to={this.state.canClick ? Routes.CalibrationPage.route: null}>
                                     <button type="button" className="btn btn-primary" disabled={this.isPermittedSimulation(model.id)}
                                         onClick={() => this.navigateToCalibration(model.id)}>Calibrate</button>
-                                    </Link>
                                     <button type="button" className="btn btn-warning" disabled={this.isPermittedSimulation(model.id)}
                                             onClick={() => this.navigateToOptimization(model.id)}>Optimize</button>
                                 </div>
@@ -150,17 +148,8 @@ class BasinDetailsModal extends React.Component {
 
         ModelsRemote.checkModelsOfUser(payload).then(response => {
             if (response.status === 302) {
-                //yönlendir
-
-                //let history = useNavigate();
-                this.setState({ canClick: true });
-                console.log("hllo");
-                //history.push(Routes.CalibrationPage.route);
-
-                //window.location.reload();
-
+                this.setState({ navigateToCalibration: true });
             }
-
         });
     }
 
@@ -171,11 +160,8 @@ class BasinDetailsModal extends React.Component {
         }
         ModelsRemote.checkModelsOfUser(payload).then(response => {
             if (response.status === 302) {
-                //yönlendir
-
-                console.log("burdayım")
+                this.setState({ navigateToOptimization: true });
             }
-
         });
     }
 
@@ -189,6 +175,9 @@ class BasinDetailsModal extends React.Component {
     render() {
         return (
             <>
+                { this.state.navigateToCalibration && <Navigate to={Routes.CalibrationPage.route}/> }
+                { this.state.navigateToOptimization && <Navigate to={Routes.OptimizationPage.route}/> }
+
                 <Modal isOpen={this.state.showModal}>
                     {this.getModalHeader()}
                     {this.getModalBody()}

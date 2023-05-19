@@ -2,6 +2,8 @@
 import Form from "react-bootstrap/Form";
 import AddModelModal from "../Models/Actions/AddModelModal";
 import GivePermissionToUserModal from "./SimulationPermissions/GivePermissionToUserModal";
+import Swal from "sweetalert2";
+import ModelsRemote from "../Models/flux/ModelsRemote";
 import "./Calibration.css";
 
 class ModelSelectorPane extends React.Component {
@@ -36,8 +38,35 @@ class ModelSelectorPane extends React.Component {
         this.setState({ showGivePermissionModal: !this.state.showGivePermissionModal });
     }
     
-    onSaveModel = () => {
+    reloadPage = () => {
         window.location.reload();
+    }
+
+    deleteModel = (id) => {
+        Swal.fire({
+            title: 'Confirm Deletion',
+            text: `Are you sure to delete this simulation and related data? If there are any permitted user(s) exist for this simulation, they also will lose their access!`,
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Cancel",
+            confirmButtonText: "Delete"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                ModelsRemote.deleteModel(id).then(response => response.json().then(model => {
+                    Swal.fire({
+                        title: "Success",
+                        text: "Deleted simulation successfully!",
+                        icon: "success"
+                    }).then(() => this.reloadPage());
+                })).catch(err => {
+                    Swal.fire({
+                        title: "Error Deleting Simulation",
+                        text: err,
+                        icon: "error"
+                    });
+                });
+            }
+        });
     }
 
     render() {
@@ -47,19 +76,19 @@ class ModelSelectorPane extends React.Component {
                     {
                         (!this.state.modelList || this.state.modelList.length === 0) ? <>
                             <div className={"selected-model"}>
-                                <span>No model found to optimize in your account.</span>
+                                <span>No simulation found to calibrate in your account.</span>
                             </div>
                             <div className={"add-model-button"}>
                                 <button
                                     type="button"
                                     className="btn btn-primary"
                                     onClick={this.toggleAddModelModal}>
-                                    Add Model
+                                    Create Simulation
                                 </button>
                             </div>
                         </> : <>
                             <div className={"selected-model"}>
-                                <span>Selected Model: {this.state.selectedModel ? this.state.selectedModel.name : ""}</span>
+                                <span>Selected Simulation: {this.state.selectedModel ? this.state.selectedModel.name : ""}</span>
                             </div>
                             <div className={"model-actions"}>
                                 {
@@ -73,9 +102,19 @@ class ModelSelectorPane extends React.Component {
                                         </button>
                                     </div>
                                 }
+                                {
+                                    this.state.selectedModel && <div className={"delete-model-button"}>
+                                        <button
+                                            type="button"
+                                            className="btn btn-danger"
+                                            onClick={() => this.deleteModel(this.state.selectedModel.id)}>
+                                            Delete Simulation
+                                        </button>
+                                    </div>
+                                }
                                 <div className={"model-selector"}>
                                     <Form.Select id={"model-selector-id"} onChange={this.props.onSelectModel}>
-                                        <option value="SelectModelOption">Select a model</option>
+                                        <option value="SelectModelOption">Select a simulation</option>
                                         {
                                             this.state.modelList.map((model, idx) => {
                                                 return <option key={`modelNo${idx}`} value={JSON.stringify(model)}>{model.name}</option>
@@ -88,7 +127,7 @@ class ModelSelectorPane extends React.Component {
                                         type="button"
                                         className="btn btn-primary"
                                         onClick={this.toggleAddModelModal}>
-                                        Add Model
+                                        Create Simulation
                                     </button>
                                 </div>
                             </div>
@@ -99,7 +138,7 @@ class ModelSelectorPane extends React.Component {
                     this.state.showAddModelModal && <AddModelModal
                         showModal={this.state.showAddModelModal}
                         onDismiss={this.toggleAddModelModal}
-                        onSave={this.onSaveModel}
+                        onSave={this.reloadPage}
                     />
                 }
                 {

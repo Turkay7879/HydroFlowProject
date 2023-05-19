@@ -86,7 +86,8 @@ class Calibration extends React.Component {
             date: result.date.map(value => value),
             errorRates: {
                 rmse: result.rmse_Calibrate,
-                nse: result.nse_Calibrate
+                nse: result.nse_Calibrate,
+                ...result.statistics
             },
             runningOptimization: false
         });

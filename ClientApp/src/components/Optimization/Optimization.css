@@ -1,0 +1,143 @@
+.model-selector-container {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    height: 5rem;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.selected-model {
+    display: flex;
+    align-items: center;
+    padding-left: 2.5rem;
+}
+
+.selected-model > span {
+    font-weight: 600;
+}
+
+.model-selector {
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.model-actions {
+    display: flex;
+}
+
+.delete-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.add-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 2.5rem;
+}
+
+.give-permission-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.optimizations-container {
+    display: flex;
+}
+
+.main-left-panel {
+    width: 25%;
+    height: fit-content;
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.main-left-panel > h4 {
+    text-align: center;
+    margin-bottom: 3rem;
+    flex-grow: 1;
+}
+
+.single-slider-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+}
+
+.single-slider-container > span {
+    font-weight: 600;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.optimize-button {
+    align-self: center;
+    padding-left: 0.35rem;
+    margin-top: 1.75rem;
+}
+
+.save-button {
+    align-self: center;
+    margin-top: 1.75rem;
+}
+
+.optimization-output-main-container {
+    width: 50%;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 1.5rem;
+}
+
+.statistics-main-container {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    width: 25%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.statistics-main-container > h4 {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.statistics-main-container > span {
+    font-weight: 600;
+}
+
+.current-statistics {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 2rem;
+}
+
+.current-statistics > span {
+    font-weight: 600;
+    margin-left: 1.5rem;
+}
+
+.best-statistics {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 3rem;
+}
+
+.best-statistics > span {
+    font-weight: 600;
+    margin-left: 1.5rem;
+}

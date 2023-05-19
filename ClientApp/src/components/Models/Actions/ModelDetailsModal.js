@@ -41,6 +41,14 @@ class ModelDetailsModal extends React.Component {
 
                     this.setState({ details: details });
                 });
+            } else if (response.status === 412) {
+                response.json().then(errMsg => {
+                    Swal.fire({
+                        title: "Error",
+                        text: errMsg,
+                        icon: "error"
+                    }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss()));
+                });
             } else {
                 Swal.fire({
                     title: "Error",

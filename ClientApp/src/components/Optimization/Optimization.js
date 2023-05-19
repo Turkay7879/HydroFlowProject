@@ -86,7 +86,8 @@ class Optimization extends React.Component {
             date: result.date.map(value => value),
             errorRates: {
                 rmse: result.rmse_Calibrate,
-                nse: result.nse_Calibrate
+                nse: result.nse_Calibrate,
+                ...result.statistics
             },
             runningOptimization: false
         });
@@ -145,7 +146,7 @@ class Optimization extends React.Component {
         let payload = {
             Model_Id: this.state.selectedModel.id,
             Model_Type: this.state.modelingType,
-            Parameters: this.state.parameters
+            Parameters: JSON.stringify(this.state.parameters)
         }
 
         OptimizationRemote.optimize(payload).then(response => {
@@ -172,7 +173,7 @@ class Optimization extends React.Component {
                     onSelectModel={(newModel) => this.changeSelectedModel(newModel)}
                 />
                 
-                <div className={"calibrations-container"}>
+                <div className={"optimizations-container"}>
                     <LeftOptionsMenu
                         selectedModel={this.state.selectedModel}
                         modelingType={this.state.modelingType}
@@ -183,7 +184,7 @@ class Optimization extends React.Component {
                         isOptimizationRunning={this.state.runningOptimization}
                     />
 
-                    <div className={"calibration-output-main-container"}>
+                    <div className={"optimization-output-main-container"}>
                         <ModelCalculation
                             modelData={this.state.modelData}
                             parameters={this.state.parameters}

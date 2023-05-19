@@ -49,8 +49,9 @@ class ModelCalculation extends React.Component {
                 type2: "Simulated Streamflow",
                 qModelValues: Qmodelt.filter(value => value),
                 date: T,
-                rmse_Calibrate: this.state.rmse_CalibrateOnly,
-                nse_Calibrate: this.state.nse_CalibrateOnly
+                rmse_Calibrate: result.final_RMSE,
+                nse_Calibrate: result.final_NSE,
+                statistics: result.statistics
             };
 
             let originalObservations = [...Obsmm];
@@ -158,7 +159,8 @@ class ModelCalculation extends React.Component {
         const optimized_B = this.state.enableOptimization === true ? calibratedvalues.predictedB : actualB;
         const optimized_C = this.state.enableOptimization === true ? calibratedvalues.predictedC : actualC;
         const optimized_D = this.state.enableOptimization === true ? calibratedvalues.predictedD : actualD;
-        const final_RMSE = this.state.enableOptimization === true ? calibratedvalues.currentRMSE : null;
+        const final_RMSE = this.state.enableOptimization === true ? calibratedvalues.currentRMSE : this.state.rmse_CalibrateOnly;
+        const final_NSE = this.state.enableOptimization === true ? calibratedvalues.currentNSE : this.state.nse_CalibrateOnly;
         
         for (let i = 1; i < T.length; i++) {
             // Step 1
@@ -180,33 +182,23 @@ class ModelCalculation extends React.Component {
             // Step 9
             Qmodelt[i] = (DRt[i] + GDt[i]);
         }
-        //deviation
-        const deviation_Qmodelt = this.calculateSampleStandardDeviation(Qmodelt);
-        console.log(" Qmodelt deviation", deviation_Qmodelt);
-        const deviation_P = this.calculateSampleStandardDeviation(P);
-        console.log(" P deviation", deviation_P);
-        const deviation_Et = this.calculateSampleStandardDeviation(Et);
-        console.log(" Et deviation", deviation_Et); //Qgözlem Obsmm mi ????
-        const deviation_Obsmm = this.calculateSampleStandardDeviation(Obsmm);
-        console.log(" Obsmm deviation", deviation_Obsmm);
-        ///////Çarpıklık
-        const skewness_Qmodelt = this.calculateSkewness(Qmodelt);
-        console.log(" Qmodelt skewness", skewness_Qmodelt);
-        const skewness_P = this.calculateSkewness(P);
-        console.log(" P skewness", skewness_P); // 0
-        const skewness_Et = this.calculateSkewness(Et);
-        console.log(" Et skewness", skewness_Et); // 0
-        const skewness_Obsmm = this.calculateSkewness(Obsmm);
-        console.log(" Obsmm skewness", skewness_Obsmm); // 0
-        ////Average
-        const average_Qmodelt = this.calculateAverage(Qmodelt);
-        console.log(" Qmodelt deviation", average_Qmodelt);
-        const average_P = this.calculateAverage(P);
-        console.log("Average_P", average_P);
-        const average_Et = this.calculateAverage(Et);
-        console.log(" Et deviation", average_Et); //Qgözlem Obsmm mi ????
-        const average_Obsmm = this.calculateAverage(Obsmm);
-        console.log(" Obsmm deviation", average_Obsmm);
+
+        let statistics = {
+            qModelDeviation: this.calculateSampleStandardDeviation(Qmodelt),
+            pDeviation: this.calculateSampleStandardDeviation(P),
+            etDeviation: this.calculateSampleStandardDeviation(Et),
+            obsmmDeviation: this.calculateSampleStandardDeviation(Obsmm),
+
+            qModelSkewness: this.calculateSkewness(Qmodelt),
+            pSkewness: this.calculateSkewness(P),
+            etSkewness: this.calculateSkewness(Et),
+            obsmmSkewness: this.calculateSkewness(Obsmm),
+
+            qModelAvg: this.calculateAverage(Qmodelt),
+            pAvg: this.calculateAverage(P),
+            etAvg: this.calculateAverage(Et),
+            obsmmAvg: this.calculateAverage(Obsmm)
+        }
         return {
             T,
             P,
@@ -218,29 +210,28 @@ class ModelCalculation extends React.Component {
             G,
             GDt,
             Qmodelt,
-            final_RMSE
+            final_RMSE,
+            final_NSE,
+            statistics
         };
     }
 
-
-
-
     calculateSkewness(numbers) {
-    const n = numbers.length;
-    const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
-    const standardDeviation = this.calculateSampleStandardDeviation(numbers);
+        const n = numbers.length;
+        const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
+        const standardDeviation = this.calculateSampleStandardDeviation(numbers);
 
-    const cubedDiffsSum = numbers.reduce((acc, val) => {
-        const diff = val - mean;
-        return acc + Math.pow(diff, 3);
-    }, 0);
+        const cubedDiffsSum = numbers.reduce((acc, val) => {
+            const diff = val - mean;
+            return acc + Math.pow(diff, 3);
+        }, 0);
 
-    const skewness = (n / ((n - 1) * (n - 2))) * (cubedDiffsSum / Math.pow(standardDeviation, 3));
+        const skewness = (n / ((n - 1) * (n - 2))) * (cubedDiffsSum / Math.pow(standardDeviation, 3));
 
-    return skewness;
-}
+        return skewness;
+    }
 
-   calculateSampleStandardDeviation(numbers) {
+    calculateSampleStandardDeviation(numbers) {
         const n = numbers.length;
         const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
         const squaredDiffs = numbers.reduce((acc, val) => {
@@ -252,10 +243,10 @@ class ModelCalculation extends React.Component {
         return standardDeviation;
     }
     //Bias Formula 
- calculateBias(predictedValue, observedValue) {
-    const bias = ((predictedValue - observedValue) / observedValue) * 100;
-    return bias;
- }
+    calculateBias(predictedValue, observedValue) {
+        const bias = ((predictedValue - observedValue) / observedValue) * 100;
+        return bias;
+    }
   
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
         ///Et, P, Obsmm, Qmodelt
@@ -277,20 +268,20 @@ class ModelCalculation extends React.Component {
         return this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01);
     }
 
-  calculateR2(actual, predicted) {
-    const actualMean = actual.reduce((a, b) => a + b, 0) / actual.length;
-    const ssTotal = actual.reduce((a, b) => a + Math.pow((b - actualMean), 2), 0);
-    const ssResidual = actual.reduce((a, b, i) => a + Math.pow((b - predicted[i]), 2), 0);
-    const r2 = 1 - (ssResidual / ssTotal);
-    return r2;
+    calculateR2(actual, predicted) {
+        const actualMean = actual.reduce((a, b) => a + b, 0) / actual.length;
+        const ssTotal = actual.reduce((a, b) => a + Math.pow((b - actualMean), 2), 0);
+        const ssResidual = actual.reduce((a, b, i) => a + Math.pow((b - predicted[i]), 2), 0);
+        const r2 = 1 - (ssResidual / ssTotal);
+        return r2;
     }
 
 
     ///arayüz için 
-     calculateAverage(numbers) {
-    const sum = numbers.reduce((acc, val) => acc + val, 0);
-    const average = sum / numbers.length;
-    return average;
+    calculateAverage(numbers) {
+        const sum = numbers.reduce((acc, val) => acc + val, 0);
+        const average = sum / numbers.length;
+        return average;
     }
    
 
@@ -389,9 +380,11 @@ class ModelCalculation extends React.Component {
         var partialDerivative = 2 * error;
         return partialDerivative;
     }
-   optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
+
+    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
         let currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
         console.log("currentRMSE:", currentRMSE);
+        let currentNSE = null;
 
         let delta = Number.MAX_SAFE_INTEGER;
         let prevDelta = Number.MAX_SAFE_INTEGER;
@@ -413,6 +406,7 @@ class ModelCalculation extends React.Component {
 
             // RMSE değerini hesapla
             const newRMSE = this.calculateRMSE2(newPredictedA, newPredictedB, newPredictedC, newPredictedD, actualA, actualB, actualC, actualD);
+            const newNSE = this.calculateNSE(newPredictedA, newPredictedB, newPredictedC, newPredictedD, actualA, actualB, actualC, actualD);
 
             // Delta değerini hesapla
             delta = Math.abs(predictedA - newPredictedA) + Math.abs(predictedB - newPredictedB) + Math.abs(predictedC - newPredictedC) + Math.abs(predictedD - newPredictedD);
@@ -427,9 +421,9 @@ class ModelCalculation extends React.Component {
             predictedC[0] = newPredictedC;
             predictedD[0] = newPredictedD;
 
-            // RMSE değerini güncelle
+            // RMSE/NSE değerini güncelle
             currentRMSE = newRMSE;
-          //  console.log("currentRMSE:", currentRMSE);
+            currentNSE = newNSE;
 
             // Delta değerini kaydet
             prevDelta = delta;
@@ -443,7 +437,7 @@ class ModelCalculation extends React.Component {
         }
 
         console.log("Optimization completed after " + iteration + " iterations. Final RMSE: " + currentRMSE);
-        return { currentRMSE, predictedA, predictedB, predictedC, predictedD };
+        return { currentRMSE, currentNSE, predictedA, predictedB, predictedC, predictedD };
     }
    
     render() {

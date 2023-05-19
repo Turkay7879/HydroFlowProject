@@ -84,7 +84,7 @@ class LeftOptionsMenu extends React.Component {
         OptimizationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
                 title: "Save Successfull",
-                text: "Model parameters have been saved!",
+                text: "Simulation and parameters have been saved!",
                 icon: "success"
             });
         }));
@@ -192,7 +192,7 @@ class LeftOptionsMenu extends React.Component {
                     { this.state.parameters && this.getParameterSliders() }
                     
                     <div className={"button-container"}>
-                        <div className={"calibrate-button"}>
+                        <div className={"optimize-button"}>
                             <Button
                                 color="primary"
                                 disabled={this.state.isRunning || !this.state.selectedModel}

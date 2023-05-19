@@ -57,7 +57,7 @@ class AddModelModal extends React.Component {
 
     getModalHeader = () => {
         return <ModalHeader>
-            Add Model
+            {`${this.props.selectedModel ? 'Edit' : 'Create'}`} Simulation
         </ModalHeader>
     }
 
@@ -79,7 +79,7 @@ class AddModelModal extends React.Component {
     getModalFooter = () => {
         return <ModalFooter>
             <button type="button" className="btn btn-primary"
-                onClick={this.checkModel}>Save Model</button>
+                onClick={this.checkModel}>Save</button>
             <button type="button" className="btn btn-secondary"
                 onClick={this.dismissModal}>Close</button>
         </ModalFooter>
@@ -106,7 +106,7 @@ class AddModelModal extends React.Component {
             this.setState({ formInvalidFields: newInvalidFields });
             return Swal.fire({
                 title: "Incorrect Form Fields",
-                text: "Please fill the required fields correctly to save new basin!",
+                text: "Please fill the required fields correctly to create new simulation!",
                 icon: "warning"
             });
         }
@@ -128,24 +128,30 @@ class AddModelModal extends React.Component {
 
         ModelsRemote.saveModel(modelToSave)
             .then(response => {
-                console.log("Model saved successfully!");
-                console.log(response);
-                Swal.fire({
-                    title: !this.props.selectedModel ? "Added Model" : "Saved Model",
-                    text: `${!this.props.selectedModel ? "Added" : "Saved"} ${model.Name} successfully!`,
-                    icon: "success"
-                }).then(() => {
-                    this.props.onSave();
-                    this.dismissModal();
-                });
-            })
-            .catch(error => {
-                console.error("Error saving model:", error);
-                Swal.fire({
-                    title: "Save Failed",
-                    text: "An error occurred while saving model!",
-                    icon: "error"
-                });
+                if (response.status === 403) {
+                    response.json().then(errMsg => {
+                        Swal.fire({
+                            title: "Quota Error",
+                            text: errMsg,
+                            icon: "error"
+                        });
+                    });
+                } else if (response.status === 500) {
+                    Swal.fire({
+                        title: "Save Failed",
+                        text: "An error occurred while saving simulation!",
+                        icon: "error"
+                    });
+                } else if (response.ok) {
+                    Swal.fire({
+                        title: "Success",
+                        text: `${!this.props.selectedModel ? "Added" : "Saved"} ${model.Name} successfully!`,
+                        icon: "success"
+                    }).then(() => {
+                        this.props.onSave();
+                        this.dismissModal();
+                    });
+                }
             });
     }
     

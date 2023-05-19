@@ -7,7 +7,7 @@ import {Navigate} from "react-router-dom";
 import NotAllowedPage from "../Common/NotAllowedPage";
 
 class Users extends React.Component {
-    tableColumns = ["Name", "Surname", "Corporation Name", "Email", "Password", "Actions"];
+    tableColumns = ["Id", "Name", "Surname", "Corporation Name", "Email", "Password", "Actions"];
 
     constructor(props) {
         super(props);
@@ -130,6 +130,15 @@ class Users extends React.Component {
         }).then((result) => {
             if (result.isConfirmed) {
                 UsersRemote.deleteUser(user).then(response => {
+                    if (response.status === 412) {
+                        return response.json().then(errMsg => {
+                            Swal.fire({
+                                title: "Error",
+                                text: errMsg,
+                                icon: "error"
+                            });
+                        });
+                    }
                     Swal.fire({
                         title: "Deleted User",
                         text: `Deleted ${user.Name} successfully!`,
@@ -158,6 +167,7 @@ class Users extends React.Component {
                 <tbody>
                     {this.state.users.map(user =>
                         <tr key={user.Id}>
+                            <td>{user.Id}</td>
                             <td>{user.Name}</td>
                             <td>{user.Surname}</td>
                             <td>{user.CorporationName}</td>
