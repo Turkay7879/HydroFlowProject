@@ -11,6 +11,7 @@ const RemoteRequestURLs = {
   USER_SAVE_NEW_USER: "/api/users/saveUser",
   USER_DELETE_USER: "/api/users/deleteUser",
   USER_GIVE_SIMULATION_PERMISSIONS_TO_USER: "/api/users/givePermissionsToUser",
+  USER_CHECK_USER_PERMISSIONS_FOR_MODELS: "/api/users/checkUserPermissionsForModels",
 
   //Model Requests
   MODEL_GET_ALL_MODELS: "/api/models/getAllModels",
@@ -22,7 +23,8 @@ const RemoteRequestURLs = {
   MODEL_SAVE_PARAMETERS: "/api/models/saveModelParameters",
   MODEL_OPTIMIZE: "/api/models/optimize",
   MODEL_DETAILS_OF_MODEL: "/api/models/getDetailsOfModel",
-  
+  MODELS_OF_USER: "/api/models/checkModelsOfUser",
+
   // Session Requests
   SESSION_LOGIN_USER: "/api/session/loginUser",
   SESSION_LOGOUT_USER: "/api/session/logoutUser",

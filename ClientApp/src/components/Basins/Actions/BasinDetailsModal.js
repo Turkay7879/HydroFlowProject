@@ -2,6 +2,13 @@ import React from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import ModelDetailsModal from "../../Models/Actions/ModelDetailsModal";
 import "../../Home.css";
+import Swal from "sweetalert2";
+import UsersRemote from "../../Users/flux/UsersRemote";
+
+import ModelsRemote from "../../Models/flux/ModelsRemote";
+import Routes from "../../Constants/Routes";
+import {Link, useNavigate} from 'react-router-dom';
+
 
 class BasinDetailsModal extends React.Component {
     constructor(props) {
@@ -12,13 +19,46 @@ class BasinDetailsModal extends React.Component {
             modelList: props.models,
             sessionPresent: false,
             showModelDetailsModal: false,
-            selectedModel: null
+            selectedModel: null,
+            permissionsList: null,
+            sessionUserId: null,
+            canClick: false
         }
     }
 
     componentDidMount() {
         let session = window.localStorage.getItem("hydroFlowSession");
-        //this.setState({ sessionPresent: session !== null && session !== undefined });
+        if (session !== null) {
+            let sessionObject = JSON.parse(session);
+
+            let User_Id = sessionObject.sessionUserId;
+            this.setState({ sessionUserId: User_Id});
+            let Model_Id_List = [];
+            this.state.modelList.forEach(model => Model_Id_List.push(model.id));
+
+            let payload = {
+                User_Id: User_Id,
+                Model_Id_List: JSON.stringify(Model_Id_List)
+            }
+            UsersRemote.checkUserPermissionsForModels(payload).then(response => {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: "Error",
+                        text: "An error occured while checking permissions.",
+                        icon: "error"
+                    });
+                }
+                else if (response.ok) {
+                    response.json().then(data => this.setState({ permissionsList: data }));
+                }
+            });
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if(prevState.permissionsList === null && this.state.permissionsList !== null){
+            this.render();
+        }
     }
 
     dismissModal = () => {
@@ -43,19 +83,23 @@ class BasinDetailsModal extends React.Component {
                 <div><span>Description: </span>{basin.description}</div>
             </div>
             <div className={"title-basin-models"}><h5>Simulation List</h5></div>
-            <div className={"model-list-container"}>
+            <div className={"model-list-container col-12"}>
                 {
                     models.length === 0 ? <span> No Simulation Found for This Basin </span> : models.map((model, idx) => {
                         return (
-                            <div key={`basinModelNo${idx}`} className={"model-list-item"}>
+                            <div key={`basinModelNo${idx}`} className={"button-group col-8"}>
                                 <div>
                                     <span>Name: </span>{model.name}
                                 </div>
-                                <div className={"model-action-btn-container"}>
-                                    <button type="button" className="btn btn-success" disabled={false}
+                                <div className={"model-action-btn-container col-4"}>
+                                    <button type="button" className="btn btn-success" disabled={this.isPermittedDetails(model.id)}
                                         onClick={() => this.toggleShowModelDetails(model)}>Details</button>
-                                    <button type="button" className="btn btn-primary" disabled={!this.state.validSessionPresent}
-                                        onClick={this.navigateToCalibration}>Calibrate</button>
+                                    <Link to={this.state.canClick ? Routes.CalibrationPage.route: null}>
+                                    <button type="button" className="btn btn-primary" disabled={this.isPermittedSimulation(model.id)}
+                                        onClick={() => this.navigateToCalibration(model.id)}>Calibrate</button>
+                                    </Link>
+                                    <button type="button" className="btn btn-warning" disabled={this.isPermittedSimulation(model.id)}
+                                            onClick={() => this.navigateToOptimization(model.id)}>Optimize</button>
                                 </div>
                             </div>
                         );
@@ -72,8 +116,65 @@ class BasinDetailsModal extends React.Component {
         </ModalFooter>
     }
 
-    navigateToCalibration = () => {
+    isPermittedDetails = (myModelId) => {
+        let givenPermission = null;
+        if(this.state.permissionsList) {
+            this.state.permissionsList.forEach(permission => {
+                if (!givenPermission && permission.modelId === myModelId && permission.permData === true) {
+                    givenPermission = permission;
+                }
+            });
+        }
+        return givenPermission == null;
+    }
 
+    isPermittedSimulation = (myModelId) => {
+        let givenPermission = null;
+        if(this.state.permissionsList) {
+            this.state.permissionsList.forEach(permission => {
+                if (!givenPermission && permission.modelId === myModelId && permission.permSimulation === true) {
+                    givenPermission = permission;
+                }
+            });
+        }
+        return givenPermission == null;
+    }
+
+    navigateToCalibration = (modelId) => {
+        let payload = {
+            User_Id: this.state.sessionUserId,
+            Model_Id: modelId
+        }
+
+        ModelsRemote.checkModelsOfUser(payload).then(response => {
+            if (response.status === 302) {
+                //yönlendir
+
+                //let history = useNavigate();
+                this.setState({ canClick: true });
+                console.log("hllo");
+                //history.push(Routes.CalibrationPage.route);
+
+                //window.location.reload();
+
+            }
+
+        });
+    }
+
+    navigateToOptimization = (modelId) => {
+        let payload = {
+            User_Id: this.state.sessionUserId,
+            Model_Id: modelId
+        }
+        ModelsRemote.checkModelsOfUser(payload).then(response => {
+            if (response.status === 302) {
+                //yönlendir
+
+                console.log("burdayım")
+            }
+
+        });
     }
 
     toggleShowModelDetails = (model) => {

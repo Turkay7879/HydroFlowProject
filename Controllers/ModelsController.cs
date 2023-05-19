@@ -340,5 +340,22 @@ namespace HydroFlowProject.Controllers
             var optimizationResult = ModelOptimization.Optimize(optimizationVM);
             return Ok(optimizationResult);
         }
+
+        [HttpPost]
+        [Route("checkModelsOfUser")]
+        public async Task<ActionResult<UserModel>> CheckModelsOfUser([FromBody] CheckModelsOfUserViewModel checkModelsOfUserVM)
+        {
+            var userModel = new UserModel();
+            var foundUserModel = _context.UserModels.ToList().Find(um => um.UserId == checkModelsOfUserVM.User_Id && um.ModelId == checkModelsOfUserVM.Model_Id);
+            if(foundUserModel == null)
+            {   
+                userModel.UserId = checkModelsOfUserVM.User_Id;
+                userModel.ModelId = checkModelsOfUserVM.Model_Id;
+                await _context.UserModels.AddAsync(userModel);
+                await _context.SaveChangesAsync();
+            }
+
+            return StatusCode(StatusCodes.Status302Found);
+        }
     }
 }

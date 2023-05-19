@@ -8,11 +8,23 @@
     margin-bottom: 2rem;
 }
 
-.model-list-item {
+/*.model-list-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0.5rem;
+}*/
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.button-group button {
+    flex: 1;
+    margin-right: 10px;
 }
 
 .model-list-item > div > span {

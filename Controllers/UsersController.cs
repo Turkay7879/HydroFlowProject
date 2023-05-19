@@ -9,6 +9,7 @@ using HydroFlowProject.Data;
 using HydroFlowProject.Models;
 using HydroFlowProject.ViewModels;
 using NuGet.Protocol;
+using Newtonsoft.Json;
 
 namespace HydroFlowProject.Controllers
 {
@@ -154,6 +155,69 @@ namespace HydroFlowProject.Controllers
             }
 
             return Ok(permission);
+        }
+
+        [HttpPost]
+        [Route("checkUserPermissionsForModels")]
+        public async Task<ActionResult<List<UserUserPermissionViewModel>>> CheckUserPermissionsForModels([FromBody] UserPermissionCheckViewModel checkViewModel)
+        {
+            var foundUser = await _context.Users.FindAsync(checkViewModel.User_Id);
+            if (foundUser == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, checkViewModel);
+            }
+
+            var tempObj = JsonConvert.DeserializeObject<object>(checkViewModel.Model_Id_List);
+            var tempJson = JsonConvert.SerializeObject(tempObj);
+            var modelIdList = JsonConvert.DeserializeObject<List<int>>(tempJson);
+            if (modelIdList == null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, checkViewModel);
+            }
+
+            var permissionList = new List<UserUserPermissionViewModel>();
+            foreach (var modelId in modelIdList)
+            {
+                // User created a simulation themselves
+                var isUserCreatedThisModel = _context.UserModels.ToList().Find(um => um.Id == modelId && um.UserId == foundUser.Id);
+                var isAdminSession = _context.UserRoles.ToList().Find(ur => ur.UserId == foundUser.Id && ur.RoleId == 1);
+                var permission = new UserUserPermissionViewModel();
+
+                if (isUserCreatedThisModel == null)
+                {
+                    // Permission is given to current user session
+                    var foundPermission = _context.UserUserPermissions.ToList().Find(p => p.ModelId == modelId && p.PermittedUserId == foundUser.Id);
+                    if (foundPermission == null)
+                    {
+                        return StatusCode(StatusCodes.Status500InternalServerError, checkViewModel);
+                    }
+                    permission = new UserUserPermissionViewModel
+                    {
+                        ModelId = modelId,
+                        UserId = foundUser.Id,
+                        PermittedUserMail = "",
+                        PermData = foundPermission.PermData != null && (bool)foundPermission.PermData,
+                        PermDownload = foundPermission.PermDownload != null && (bool)foundPermission.PermDownload,
+                        PermSimulation = foundPermission.PermSimulation != null && (bool)foundPermission.PermSimulation
+                    };
+                }
+                else if (isAdminSession != null || isUserCreatedThisModel != null)
+                {
+                    permission = new UserUserPermissionViewModel
+                    {
+                        ModelId = modelId,
+                        UserId = foundUser.Id,
+                        PermittedUserMail = "",
+                        PermData = true,
+                        PermDownload = true,
+                        PermSimulation = true
+                    };
+                }
+
+                permissionList.Add(permission);
+            }
+
+            return Ok(permissionList);
         }
     }
 }

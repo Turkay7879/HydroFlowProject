@@ -67,6 +67,18 @@ const ModelsRemote = {
             },
             body: JSON.stringify(payload)
         });
+    },
+    checkModelsOfUser: async (payload) => {
+        let requestUrl = RemoteRequestURLs.MODELS_OF_USER;
+        return await fetch(requestUrl, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json",
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
     }
 };
 
