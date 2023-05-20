@@ -143,24 +143,24 @@ class Optimization extends React.Component {
     }
     
     runOptimization = () => {
-        let payload = {
-            Model_Id: this.state.selectedModel.id,
-            Model_Type: this.state.modelingType,
-            Parameters: JSON.stringify(this.state.parameters)
-        }
+        // let payload = {
+        //     Model_Id: this.state.selectedModel.id,
+        //     Model_Type: this.state.modelingType,
+        //     Parameters: JSON.stringify(this.state.parameters)
+        // }
 
-        OptimizationRemote.optimize(payload).then(response => {
-            if (response.status === 400) {
-                Swal.fire({
-                    title: "Incorrect Request",
-                    text: `An incorrect request was sent to server.`,
-                    icon: "error"
-                });
-            } else if (response.ok) {
-                // Do something with result
-            }
-        });
-        // this.setState({ runningOptimization: true });
+        // OptimizationRemote.optimize(payload).then(response => {
+        //     if (response.status === 400) {
+        //         Swal.fire({
+        //             title: "Incorrect Request",
+        //             text: `An incorrect request was sent to server.`,
+        //             icon: "error"
+        //         });
+        //     } else if (response.ok) {
+        //         // Do something with result
+        //     }
+        // });
+        this.setState({ runningOptimization: true });
     }
     
     render() {

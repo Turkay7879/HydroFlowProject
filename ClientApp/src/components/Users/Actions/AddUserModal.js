@@ -29,10 +29,10 @@ class AddUserModal extends React.Component {
 
     componentDidMount() {
         this.setState({ showModal: this.props.showModal });
-        console.log("asdf", this.props.selectedUser);
         if (this.props.selectedUser !== null && this.props.selectedUser !== undefined) {
-            console.log("asdf", this.props.selectedUser);
-            this.setState({ user: this.props.selectedUser });
+            let selectedUser = this.props.selectedUser;
+            selectedUser.Password = "";
+            this.setState({ user: selectedUser });
         }
     }
 
@@ -42,7 +42,6 @@ class AddUserModal extends React.Component {
         </ModalHeader>
     }
 
-    //form burda olcak
     getModalBody = () => {
         console.log(this.state.user)
         return <ModalBody>

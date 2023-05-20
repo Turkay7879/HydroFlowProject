@@ -60,6 +60,14 @@ class GivePermissionToUserModal extends React.Component {
                             text: 'Please check the user mail you are giving permission to.',
                             icon: 'error'
                         });
+                    } else if (response.status === 403) {
+                        response.json().then(errorMessage => {
+                            Swal.fire({
+                                title: 'Error',
+                                text: errorMessage,
+                                icon: 'error'
+                            });
+                        });
                     } else if (response.status === 400) {
                         Swal.fire({
                             title: 'Permissions Error',

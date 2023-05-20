@@ -140,6 +140,11 @@ namespace HydroFlowProject.Controllers
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
+            if (currentUser.Email == permittedUser.Email)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, "You cannot give permissions to yourself!");
+            }
+
             var permission = _context.UserUserPermissions.ToList().Find(p => p.UserId == currentUser.Id && p.PermittedUserId == permittedUser.Id && p.ModelId == permissionViewModel.ModelId);
             var updateExistingPermission = false;
             if (permission != null) 
