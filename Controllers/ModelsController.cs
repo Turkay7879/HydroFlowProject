@@ -293,8 +293,10 @@ namespace HydroFlowProject.Controllers
 
         [HttpPost]
         [Route("getDetailsOfModel")]
-        public async Task<ActionResult<Dictionary<string, object>>> GetDetailsOfModel([FromBody] int modelId)
+        public async Task<ActionResult<Dictionary<string, object>>> GetDetailsOfModel([FromBody] Dictionary<string, int> idMap)
         {
+            var modelId = idMap["modelId"];
+            var userIdFromMap = idMap["userId"];
             var model = await _context.Models.FindAsync(modelId);
             if (model == null)
             {
@@ -303,7 +305,17 @@ namespace HydroFlowProject.Controllers
 
             var resultMap = new Dictionary<string, object>();
 
-            var modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId);
+            var modelParameters = new List<ModelParameter>();
+            if (userIdFromMap != 0)
+            {
+                modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId && mp.User_Id == userIdFromMap);
+            } 
+            else
+            {
+                var originalCreatorOfSimulation = _context.UserModels.First(um => um.ModelId == modelId)!.UserId;
+                modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId && mp.User_Id == originalCreatorOfSimulation);
+            }
+
             var parameterList = new ArrayList();
             foreach (var param in modelParameters)
             {
@@ -393,6 +405,20 @@ namespace HydroFlowProject.Controllers
                 userModel.UserId = checkModelsOfUserVM.User_Id;
                 userModel.ModelId = checkModelsOfUserVM.Model_Id;
                 await _context.UserModels.AddAsync(userModel);
+                await _context.SaveChangesAsync();
+
+                var parameters = new List<ModelParameter>
+                {
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 1f, Model_Param_Name = "a"},
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 5f, Model_Param_Name = "b"},
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 0.5f, Model_Param_Name = "c"},
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 0.1f, Model_Param_Name = "d"},
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 2f, Model_Param_Name = "initialSt"},
+                    new ModelParameter{Model_Id = checkModelsOfUserVM.Model_Id, User_Id = checkModelsOfUserVM.User_Id, Model_Param = 2f, Model_Param_Name = "initialGt"},
+                };
+
+                await _context.ModelParameters.AddRangeAsync(parameters);
+
                 await _context.SaveChangesAsync();
             }
 

@@ -25,7 +25,14 @@ class ModelDetailsModal extends React.Component {
     }
 
     componentDidMount() {
-        ModelsRemote.getDetailsOfModel(this.state.model.id).then(response => {
+        let session = window.localStorage.getItem("hydroFlowSession");
+        let userId = 0;
+        if (session) {
+            let sessionObject = JSON.parse(session);
+            userId = sessionObject.sessionUserId;
+        }
+
+        ModelsRemote.getDetailsOfModel({ modelId: this.state.model.id, userId: userId }).then(response => {
             if (response.ok) {
                 response.json().then(detailsData => {
                     let details = this.state.details;

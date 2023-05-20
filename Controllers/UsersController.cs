@@ -227,7 +227,7 @@ namespace HydroFlowProject.Controllers
             foreach (var modelId in modelIdList)
             {
                 // User created a simulation themselves
-                var isUserCreatedThisModel = _context.UserModels.ToList().Find(um => um.Id == modelId && um.UserId == foundUser.Id);
+                var isUserCreatedThisModel = _context.UserModels.ToList().Find(um => um.ModelId == modelId && um.UserId == foundUser.Id);
                 var isAdminSession = _context.UserRoles.ToList().Find(ur => ur.UserId == foundUser.Id && ur.RoleId == 1);
                 var model = _context.Models.Find(modelId);
                 var permission = new UserUserPermissionViewModel();
