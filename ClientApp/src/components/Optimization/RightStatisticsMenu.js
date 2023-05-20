@@ -63,7 +63,7 @@ class RightStatisticsMenu extends React.Component {
 
                 <div className={"current-statistics"}>
                     <span>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
-                    <span>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
+                    {/* <span>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span> */}
 
                     <span>Standart Deviations: </span>
                     <div style={{ paddingLeft: "3rem", display: "flex", flexDirection: "column" }}>
