@@ -52,6 +52,18 @@ const UsersRemote = {
             },
             body: JSON.stringify(payload)
         });
+    },
+    getUserById: async (payload) => {
+        let requestUrl = RemoteRequestURLs.USER_GET_USER_BY_ID;
+        return await fetch(requestUrl, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
     }
 };
 

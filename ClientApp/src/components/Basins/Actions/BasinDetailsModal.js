@@ -23,7 +23,8 @@ class BasinDetailsModal extends React.Component {
             permissionsList: null,
             sessionUserId: null,
             navigateToCalibration: false,
-            navigateToOptimization: false
+            navigateToOptimization: false,
+            permDownload: false,
         }
     }
 
@@ -50,7 +51,9 @@ class BasinDetailsModal extends React.Component {
                     });
                 }
                 else if (response.ok) {
-                    response.json().then(data => this.setState({ permissionsList: data }));
+                    response.json().then(data => {this.setState({ permissionsList: data,
+                        permDownload: data.permDownload})
+                    console.log(data)});
                 }
             });
         }
@@ -168,7 +171,8 @@ class BasinDetailsModal extends React.Component {
     toggleShowModelDetails = (model) => {
         this.setState({ 
             showModelDetailsModal: !this.state.showModelDetailsModal,
-            selectedModel: model
+            selectedModel: model,
+            permDownload: model && this.state.permissionsList.find(perm => perm.modelId === model.id).permDownload
         });
     }
 
@@ -189,6 +193,7 @@ class BasinDetailsModal extends React.Component {
                         showModal={this.state.showModelDetailsModal}
                         onDismiss={() => this.toggleShowModelDetails(null)}
                         model={this.state.selectedModel}
+                        permDownload={this.state.permDownload}
                     />
                 }
             </>

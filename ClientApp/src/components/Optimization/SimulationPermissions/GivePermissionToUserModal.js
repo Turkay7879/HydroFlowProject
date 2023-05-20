@@ -15,7 +15,8 @@ class GivePermissionToUserModal extends React.Component {
                 PermittedUserMail: '',
                 PermData: false,
                 PermDownload: false,
-                PermSimulation: false
+                PermSimulation: false,
+                currentUserMail: ''
             },
             selectedModel: props.selectedModel
         };
@@ -37,49 +38,77 @@ class GivePermissionToUserModal extends React.Component {
 
         let modelId = this.state.selectedModel.id;
         let userId = session.sessionUserId;
+
         let payload = {
             ...this.state.permissions,
             ModelId: modelId,
             UserId: userId
         };
 
-        Swal.fire({
-            title: 'Are you sure to give permission?',
-            text: `You are about to give the selected permissions to \'${payload.PermittedUserMail}\'. Do you want to continue?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Give Permissions'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                UsersRemote.givePermissionsToUser(payload).then(response => {
-                    if (response.status === 404) {
-                        Swal.fire({
-                            title: 'Couldn\'t Give Permission',
-                            text: 'Please check the user mail you are giving permission to.',
-                            icon: 'error'
-                        });
-                    } else if (response.status === 400) {
+        let findUser = {
+            UserId: userId
+        }
+
+        UsersRemote.getUserById(findUser).then(response => {
+            if (response.status === 404) {
+                Swal.fire({
+                    title: "Error",
+                    text: "User is not registered.",
+                    icon: "error"
+                });
+            }
+            else if (response.ok) {
+                response.json().then(data => {this.setState({ currentUserMail: data.Email })
+                    if (data === payload.permittedUserMail) {
                         Swal.fire({
                             title: 'Permissions Error',
-                            text: 'You need to give at least one permission to the user you have provided.',
+                            text: 'You can\'t give permission yourself.',
                             icon: 'error'
                         });
-                    } else if (response.status === 500) {
+                    }else{
                         Swal.fire({
-                            title: 'Permission Save Error',
-                            text: 'An error occured during saving permissions. Try again later.',
-                            icon: 'error'
+                            title: 'Are you sure to give permission?',
+                            text: `You are about to give the selected permissions to \'${payload.PermittedUserMail}\'. Do you want to continue?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Give Permissions'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                UsersRemote.givePermissionsToUser(payload).then(response => {
+                                    if (response.status === 404) {
+                                        Swal.fire({
+                                            title: 'Couldn\'t Give Permission',
+                                            text: 'Please check the user mail you are giving permission to.',
+                                            icon: 'error'
+                                        });
+                                    } else if (response.status === 400) {
+                                        Swal.fire({
+                                            title: 'Permissions Error',
+                                            text: 'You need to give at least one permission to the user you have provided.',
+                                            icon: 'error'
+                                        });
+                                    } else if (response.status === 500) {
+                                        Swal.fire({
+                                            title: 'Permission Save Error',
+                                            text: 'An error occured during saving permissions. Try again later.',
+                                            icon: 'error'
+                                        });
+                                    } else if (response.ok) {
+                                        Swal.fire({
+                                            title: 'Saved Permissions Successfully',
+                                            text: 'You have successfully gave the selected permissions to the specified user.',
+                                            icon: 'success'
+                                        }).then(() => this.dismissModal());
+                                    }
+                                });
+                            }
                         });
-                    } else if (response.ok) {
-                        Swal.fire({
-                            title: 'Saved Permissions Successfully',
-                            text: 'You have successfully gave the selected permissions to the specified user.',
-                            icon: 'success'
-                        }).then(() => this.dismissModal());
                     }
+
                 });
+
             }
         });
     }

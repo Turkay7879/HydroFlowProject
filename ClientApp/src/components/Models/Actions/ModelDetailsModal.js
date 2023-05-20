@@ -19,7 +19,8 @@ class ModelDetailsModal extends React.Component {
                 parameters: null,
                 userName: "",
                 userMail: ""
-            }
+            },
+            permDownload: props.permDownload
         }
     }
 
@@ -47,16 +48,22 @@ class ModelDetailsModal extends React.Component {
                         title: "Error",
                         text: errMsg,
                         icon: "error"
-                    }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss()));
+                    }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss(null)));
                 });
             } else {
                 Swal.fire({
                     title: "Error",
                     text: "An error occured while retrieving simulation details.",
                     icon: "error"
-                }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss()));
+                }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss(null)));
             }
         });
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot){
+        if(prevProps.permDownload !== this.props.permDownload){
+            this.setState({permDownload: this.props.permDownload});
+        }
     }
 
     downloadModelData = () => {
@@ -180,7 +187,7 @@ class ModelDetailsModal extends React.Component {
                     <button 
                         type="button" 
                         className="btn btn-primary"
-                        disabled={false}
+                        disabled={!this.state.permDownload}
                         onClick={this.downloadModelData}>
                             Download Observed Data
                     </button>
@@ -194,7 +201,7 @@ class ModelDetailsModal extends React.Component {
             <button 
                 type="button" 
                 className="btn btn-secondary"
-                onClick={() => this.setState({ showModal: false }, () => this.props.onDismiss())}>
+                onClick={() => this.setState({ showModal: false }, () => this.props.onDismiss(null))}>
                     Close
             </button>
         </ModalFooter>

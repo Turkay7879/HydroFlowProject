@@ -11,6 +11,7 @@ using HydroFlowProject.ViewModels;
 using NuGet.Protocol;
 using Newtonsoft.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace HydroFlowProject.Controllers
 {
@@ -170,6 +171,33 @@ namespace HydroFlowProject.Controllers
             }
 
             return Ok(permission);
+        }
+
+        [HttpPost]
+        [Route("getUserById")]
+        public async Task<ActionResult<UserModel>> GetUserById([FromBody] GetUserByIdViewModel getUserByIdVM)
+        {
+            var userInfo = new UserViewModel();
+            var foundUser = await _context.Users.FindAsync(getUserByIdVM.UserId);
+            if (foundUser != null)
+            {
+                userInfo = new UserViewModel
+                {
+                    Id = foundUser.Id,
+                    Name = foundUser.Name,
+                    Surname = foundUser.Surname,
+                    CorporationName = foundUser.CorporationName,
+                    Email = foundUser.Email,
+                    Password = "",
+                    Consent = false
+                };
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            return Ok(userInfo);
         }
 
         [HttpPost]
