@@ -90,7 +90,6 @@
     align-self: center;
     margin-top: 1.75rem;
 }
-
 .optimization-output-main-container {
     width: 50%;
     border-radius: 10px;
@@ -104,40 +103,42 @@
 .statistics-main-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 25%;
+    width: 48%; /* Increase the width to make it wider */
     height: fit-content;
-    display: flex;
-    flex-direction: column;
+    display: inline-block;
+    vertical-align: top;
     padding: 1rem;
+    margin-right: 1.5%; /* Add margin to the right */
+    margin-bottom: 1rem;
+    text-align: left;
 }
 
-.statistics-main-container > h4 {
-    text-align: center;
-    margin-bottom: 3rem;
+.statistics-container {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    width: 50%;
+    height: fit-content;
+    display: inline-block;
+    vertical-align: top;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
 }
 
-.statistics-main-container > span {
-    font-weight: 600;
-}
-
-.current-statistics {
+.current-statistics,
+.second-statistics {
     display: flex;
     flex-direction: column;
     margin-bottom: 2rem;
 }
 
-.current-statistics > span {
-    font-weight: 600;
-    margin-left: 1.5rem;
-}
+    .current-statistics > span,
+    .second-statistics > span {
+        font-weight: 600;
+        margin-left: 0;
+    }
 
-.best-statistics {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 3rem;
-}
-
-.best-statistics > span {
-    font-weight: 600;
-    margin-left: 1.5rem;
-}
+    .current-statistics > div > span,
+    .second-statistics > div > span {
+        text-align: left;
+    }

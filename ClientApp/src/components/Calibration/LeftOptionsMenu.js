@@ -203,7 +203,7 @@ class LeftOptionsMenu extends React.Component {
                                         : <Spinner size={"sm"}/>
                                 }
                                 <span>
-                                    {` ${!this.state.isRunning ? 'Calibrate' : 'Calibrating'}`}
+                                    {` ${!this.state.isRunning ? 'Simulate' : 'Calibrating'}`}
                                 </span>
                             </Button>
                         </div>

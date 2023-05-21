@@ -100,7 +100,7 @@ class BasinDetailsModal extends React.Component {
                                     <button type="button" className="btn btn-success" disabled={this.isPermittedDetails(model.id)}
                                         onClick={() => this.toggleShowModelDetails(model)}>Details</button>
                                     <button type="button" className="btn btn-primary" disabled={this.isPermittedSimulation(model.id)}
-                                        onClick={() => this.navigateToCalibration(model.id)}>Calibrate</button>
+                                        onClick={() => this.navigateToCalibration(model.id)}>Calculate</button>
                                     <button type="button" className="btn btn-warning" disabled={this.isPermittedSimulation(model.id)}
                                             onClick={() => this.navigateToOptimization(model.id)}>Optimize</button>
                                 </div>

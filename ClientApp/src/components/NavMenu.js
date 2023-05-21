@@ -106,10 +106,10 @@ export class NavMenu extends Component {
 			{
 				this.state.validSessionPresent ? <>
 					<NavItem>
-						<NavLink tag={Link} className="text-dark" to={Routes.CalibrationPage.route}>Calibration</NavLink>
+                                <NavLink tag={Link} className="text-dark" to={Routes.CalibrationPage.route}>Simulation</NavLink>
 					</NavItem>
           <NavItem>
-						<NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Optimization</NavLink>
+                                <NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Automatic Calibration</NavLink>
 					</NavItem>
 				</> : <></>
 			}
