@@ -90,9 +90,24 @@ class ModelCalculation extends React.Component {
 
         for (let i = 1; i < data.length; i++) {
             const row = data[i];
-            headers.forEach((header, index) => {
-                columnData[header].push(row[index]);
-            });
+            let isUndefined = false;
+
+            for(let j = 0; j < row.length; j++){
+                //console.log("row: ", row[j]);
+                if(row[j] === undefined){
+                    isUndefined = true;
+                    break;
+                }
+            }
+
+            if(!isUndefined){
+                headers.forEach((header, index) => {
+                    columnData[header].push(row[index]);
+                    //console.log("header: ", header);
+                    //console.log("excel: ", row[index]);
+                });
+            }
+
         }
 
         ////tarih
