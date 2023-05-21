@@ -8,5 +8,6 @@
         public object? Observed_Data { get; set; }
         public object? Predicted_Data { get; set; }
         public object? Scatter_Data { get; set; }
+        public object? Optimized_Parameters { get; set; }
     }
 }
