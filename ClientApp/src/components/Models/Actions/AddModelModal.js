@@ -99,7 +99,7 @@ class AddModelModal extends React.Component {
         model.Title = trimmedTitle;
         newInvalidFields.titleInvalid = trimmedTitle === "";
 
-        newInvalidFields.modelFileInvalid = model.ModelFile === undefined;
+        newInvalidFields.modelFileInvalid = model.ModelFile === null;
         newInvalidFields.basinInvalid = model.BasinId === 0;
       
         if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid || newInvalidFields.basinInvalid) {

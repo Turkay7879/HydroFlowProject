@@ -1,5 +1,8 @@
 ﻿import RemoteRequestURLs from "../../Constants/RemoteRequestURLs";
 
+const allowedDataFileExtensions = ['xlsx'];
+const allowedDataFileColumns = ['Date', 'P', 'PET', 'Obsmm'];
+
 const ModelsRemote = {
     getAllModels: async () => {
         let requestUrl = RemoteRequestURLs.MODEL_GET_ALL_MODELS;
@@ -73,7 +76,9 @@ const ModelsRemote = {
             },
             body: JSON.stringify(payload)
         });
-    }
+    },
+    getAllowedExtensions: () => { return allowedDataFileExtensions },
+    getAllowedColumns: () => { return allowedDataFileColumns }
 };
 
 export default ModelsRemote;

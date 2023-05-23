@@ -10,6 +10,7 @@ import SessionsRemote from "../Constants/flux/remote/SessionsRemote";
 import ModelsRemote from "../Models/flux/ModelsRemote";
 import Swal from "sweetalert2";
 import {Navigate} from "react-router-dom";
+import { read, utils } from 'xlsx';
 
 class Optimization extends React.Component {
     constructor(props) {
@@ -141,12 +142,53 @@ class Optimization extends React.Component {
         }
         return null;
     }
+
+    convertData = () => {
+        const workbook = read(this.state.modelData, { type: "base64" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = utils.sheet_to_json(worksheet, { header: 1 });
+
+        const headers = data[0];
+        const columnData = {};
+        headers.forEach((header) => {
+            columnData[header] = [];
+        });
+
+        for (let i = 1; i < data.length; i++) {
+            const row = data[i];
+            let isUndefined = false;
+
+            for(let j = 0; j < row.length; j++){
+                if(row[j] === undefined){
+                    isUndefined = true;
+                    break;
+                }
+            }
+
+            if(!isUndefined){
+                headers.forEach((header, index) => {
+                    columnData[header].push(row[index]);
+                });
+            }
+        }
+
+        return {
+            P: columnData.P,
+            PET: columnData.PET,
+            Obsmm: columnData.Obsmm
+        }
+    }
     
     runOptimization = () => {
+        let { P, PET, Obsmm } = this.convertData();
+
         let payload = {
             Model_Id: this.state.selectedModel.id,
             Model_Type: this.state.modelingType,
-            Parameters: JSON.stringify(this.state.parameters)
+            Parameters: JSON.stringify(this.state.parameters),
+            P: JSON.stringify(P),
+            PET: JSON.stringify(PET),
+            Obsmm: JSON.stringify(Obsmm)
         }
 
         OptimizationRemote.optimize(payload).then(response => {

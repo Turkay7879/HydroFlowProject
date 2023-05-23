@@ -2,6 +2,8 @@
 using HydroFlowProject.BalanceModels.GeneticAlgorithm;
 using HydroFlowProject.Models;
 using HydroFlowProject.ViewModels;
+using Microsoft.Build.Framework;
+using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace HydroFlowProject.Utilities
@@ -48,8 +50,20 @@ namespace HydroFlowProject.Utilities
                 };
 
                 // Optimization Operations Here
-                ABCDModel model = new ABCDModel();
-                model.SetParams(1, 5, 0.5, 0.1);
+                var P_List = JsonConvert.DeserializeObject<List<Double>>(optimizationViewModel.P)!.ToArray();
+                var PET_List = JsonConvert.DeserializeObject<List<Double>>(optimizationViewModel.PET)!.ToArray();
+                var Obsmm_List = JsonConvert.DeserializeObject<List<Double>>(optimizationViewModel.Obsmm)!.ToArray();
+                var parameterMap = JsonConvert.DeserializeObject<Dictionary<string, float>>(optimizationViewModel.Parameters);
+                var A = parameterMap!["a"];
+                var B = parameterMap!["b"];
+                var C = parameterMap!["c"];
+                var D = parameterMap!["d"];
+                var InitialSt = parameterMap!["initialSt"];
+                var InitialGt = parameterMap!["initialGt"];
+
+                ABCDModel model = new ABCDModel(InitialSt, InitialGt);
+                model.SetDataSets(P_List, PET_List, Obsmm_List);
+                model.SetParams(A, B, C, D);
 
                 GA geneticAlgorithm = new GA(model, UpdateProgress, DEFAULT_THREAD_COUNT, CROSSOVER_RATE, MUTATION_RATE, POPULATION_SIZE, TERMINATION_GENERATIONS, TERMINATION_THRESHOLD);
                 geneticAlgorithm.Go();

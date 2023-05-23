@@ -2,6 +2,9 @@
 import { FormGroup, Label, Input } from "reactstrap";
 import Form from "react-bootstrap/Form";
 import { FormControlLabel, Switch, Slider } from '@mui/material';
+import ModelsRemote from "../flux/ModelsRemote";
+import Swal from "sweetalert2";
+import { read, utils } from 'xlsx';
 
 class AddModelForm extends React.Component {
     defaultBasinOption = "Select a basin";
@@ -16,7 +19,9 @@ class AddModelForm extends React.Component {
             savedModel: false,
             selectedModel: null,
             editingModal: false,
-            basinList: props.basinList
+            basinList: props.basinList,
+            extensions: ModelsRemote.getAllowedExtensions(),
+            columns: ModelsRemote.getAllowedColumns()
         };
     }
     componentDidMount() {
@@ -42,6 +47,52 @@ class AddModelForm extends React.Component {
         }
         if (this.state.modelFileInvalid !== this.props.modelFileInvalid) {
             this.setState({ modelFileInvalid: this.props.modelFileInvalid });
+        }
+    }
+
+    checkColumns = (modelData) => {
+        const workbook = read(modelData, { type: "base64" });
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        const data = utils.sheet_to_json(worksheet, { header: 1 });
+
+        const headers = data[0];
+        let invalid = false;
+        headers.forEach((header, idx) => {
+            if (!invalid && this.state.columns.at(idx).toLowerCase() !== header.toLowerCase()) {
+                invalid = true;
+            }
+        });
+
+        return !invalid;
+    }
+
+    handleFileUpload = (e) => {
+        // Check file extension
+        const tempFileNameSplitted = e.target.files[0].name.split(".");
+        const fileExtension = tempFileNameSplitted.at(tempFileNameSplitted.length-1);
+        if (this.state.extensions.find(extension => extension.toLowerCase() === fileExtension.toLowerCase()) === undefined) {
+            return Swal.fire({
+                title: "Invalid File",
+                text: "Selected file is not a valid Excel data file!",
+                icon: "error"
+            });
+        }
+
+        // Check data file columns
+        let reader = new FileReader();
+        const originalData = e.target.files[0];
+
+        reader.readAsDataURL(originalData);
+        reader.onload = (evt) => {
+            if (!this.checkColumns(evt.target.result.substring(78))) {
+                return Swal.fire({
+                    title: "Invalid File",
+                    text: "Selected file contains invalid columns!",
+                    icon: "error"
+                });
+            } else {
+                this.props.setModel('ModelFile', evt.target.result.substring(23));
+            } 
         }
     }
 
@@ -96,13 +147,7 @@ class AddModelForm extends React.Component {
                         type="file"
                         invalid={this.state.titleInvalid}
                         disabled={this.state.editingModal}
-                        onChange={(e) => {
-                            let reader = new FileReader();
-                            reader.readAsDataURL(e.target.files[0]);
-                            reader.onload = (evt) => {
-                                this.props.setModel('ModelFile', evt.target.result.substring(23))
-                            }
-                        }}
+                        onChange={this.handleFileUpload}
                     />
                 </FormGroup>
                 <FormGroup>
