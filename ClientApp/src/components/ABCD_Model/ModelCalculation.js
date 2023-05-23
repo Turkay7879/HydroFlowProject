@@ -112,8 +112,8 @@ class ModelCalculation extends React.Component {
 
         ////tarih
         const T = [];
-        for (let i = 0; i < columnData.Tarih.length; i++) {
-            let dateInt = columnData.Tarih[i];
+        for (let i = 0; i < columnData.Date.length; i++) {
+            let dateInt = columnData.Date[i];
             const excelSerialDate = new Date(Date.UTC(1899, 11, 30));
             const excelSerialDay = Math.floor(dateInt);
             const jsDate = new Date(excelSerialDate.getTime() + (excelSerialDay * 86400000));

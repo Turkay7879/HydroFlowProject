@@ -43,7 +43,7 @@
 }
 
 .main-left-panel {
-    width: 25%;
+    width: 55%;
     height: fit-content;
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
@@ -86,7 +86,7 @@
 }
 
 .calibration-output-main-container {
-    width: 50%;
+    width: 75%;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -98,12 +98,16 @@
 .statistics-main-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 80%;
+    width: 20%;
     height: fit-content;
-    display: flex;
-    flex-direction: column;
+    display: inline-block;
+    vertical-align: top;
     padding: 1rem;
+    margin-right: 1.5%; /* Sağa boşluk ekleyin */
+    margin-bottom: 1rem;
+    text-align: center;
 }
+
 
     .statistics-main-container > h4 {
         text-align: center;
@@ -118,6 +122,7 @@
     display: flex;
     flex-direction: column;
     margin-bottom: 2rem;
+    width: 100%;
 }
 
     .current-statistics > span {

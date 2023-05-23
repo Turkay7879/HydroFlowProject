@@ -103,26 +103,26 @@
 .statistics-main-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 48%; /* Increase the width to make it wider */
+    width: 80%; /* Increase the width to make it wider */
     height: fit-content;
     display: inline-block;
     vertical-align: top;
     padding: 1rem;
     margin-right: 1.5%; /* Add margin to the right */
     margin-bottom: 1rem;
-    text-align: left;
+    text-align: center;
 }
 
 .statistics-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 50%;
+    width: 80%;
     height: fit-content;
     display: inline-block;
     vertical-align: top;
     padding: 1rem;
     margin-bottom: 1rem;
-    text-align: left;
+    text-align: center;
 }
 
 .current-statistics,
@@ -140,5 +140,5 @@
 
     .current-statistics > div > span,
     .second-statistics > div > span {
-        text-align: left;
+        text-align: center;
     }

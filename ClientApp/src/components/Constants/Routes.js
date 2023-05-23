@@ -5,6 +5,7 @@ import Login from "../Users/Login/Login";
 import Registration from "../Users/Registration/Registration";
 import Calibration from "../Calibration/Calibration";
 import Optimization from "../Optimization/Optimization";
+import Theory from '../../Theory/Theory.js';
 
 const Routes = {
   CalibrationPage: {
@@ -34,7 +35,12 @@ const Routes = {
   RegisterPage: {
     route: "/register",
     component: <Registration/>
-  }
+    },
+
+   Theory: {
+        route: "/theory",
+        component: <Theory/>
+   }
 };
 
 export default Routes;

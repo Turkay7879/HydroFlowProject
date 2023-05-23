@@ -33,7 +33,11 @@ const AppRoutes = [
   {
     path: Routes.RegisterPage.route,
     element: Routes.RegisterPage.component,
-  }
+    },
+   {
+        path: Routes.Theory.route,
+        element: Routes.Theory.component,
+    }
 ];
 
 export default AppRoutes;

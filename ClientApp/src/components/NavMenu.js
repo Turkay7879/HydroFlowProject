@@ -93,61 +93,70 @@ export class NavMenu extends Component {
     });
   }
   
-  getNavBar = () => {
-    return <header>
-      <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
-        <NavbarBrand tag={Link} to="/">HydroFlowProject</NavbarBrand>
-        <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
-        <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
-          <ul className="navbar-nav flex-grow">
-            <NavItem>
-              <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
-            </NavItem>
-			{
-				this.state.validSessionPresent ? <>
-					<NavItem>
-                                <NavLink tag={Link} className="text-dark" to={Routes.CalibrationPage.route}>Simulation</NavLink>
-					</NavItem>
-          <NavItem>
-                                <NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Automatic Calibration</NavLink>
-					</NavItem>
-				</> : <></>
-			}
-            {
-              (this.state.validSessionPresent && this.state.authorizedForAdminPanels) ?
-                  <>
-                    <NavItem>
-                      <NavLink tag={Link} className="text-dark" to={Routes.BasinsAdminPanel.route}>Basins</NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink tag={Link} className="text-dark" to={Routes.UsersAdminPanel.route}>Users</NavLink>
-                    </NavItem>
-                    <NavItem>
-                      <NavLink tag={Link} className="text-dark" to={Routes.ModelsAdminPanel.route}>Models</NavLink>
-                    </NavItem>
-                  </>
-                  : <></>
-            }
-            {
-              !this.state.validSessionPresent ? <>
-                <NavItem>
-                  <NavLink tag={Link} className={"text-dark"} to={Routes.LoginPage.route}>Login</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink tag={Link} className={"text-dark"} to={Routes.RegisterPage.route}>Register</NavLink>
-                </NavItem>
-              </> : <>
-                <button
-                    className={"btn btn-secondary"}
-                    onClick={this.logout}
-                >Logout</button>
-              </>
-            }
-          </ul>
-        </Collapse>
-      </Navbar>
-    </header>
-  }
+    getNavBar = () => {
+        return (
+            <header>
+                <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>
+                    <NavbarBrand tag={Link} to="/">HydroFlowProject</NavbarBrand>
+                    <NavbarToggler onClick={this.toggleNavbar} className="mr-2" />
+                    <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!this.state.collapsed} navbar>
+                        <ul className="navbar-nav flex-grow">
+                            <NavItem>
+                                <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
+                            </NavItem>
+                            {
+                                this.state.validSessionPresent ? (
+                                    <>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.CalibrationPage.route}>Simulation</NavLink>
+                                        </NavItem>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Automatic Calibration</NavLink>
+                                        </NavItem>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.Theory.route}>Theory</NavLink>
+                                        </NavItem>
+                                    </>
+                                ) : null
+                            }
+                            {
+                                this.state.validSessionPresent && this.state.authorizedForAdminPanels ? (
+                                    <>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.BasinsAdminPanel.route}>Basins</NavLink>
+                                        </NavItem>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.UsersAdminPanel.route}>Users</NavLink>
+                                        </NavItem>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.ModelsAdminPanel.route}>Models</NavLink>
+                                        </NavItem>
+                                    </>
+                                ) : null
+                            }
+                            {
+                                !this.state.validSessionPresent ? (
+                                    <>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.LoginPage.route}>Login</NavLink>
+                                        </NavItem>
+                                        <NavItem>
+                                            <NavLink tag={Link} className="text-dark" to={Routes.RegisterPage.route}>Register</NavLink>
+                                        </NavItem>
+                                    </>
+                                ) : (
+                                    <button className={"btn btn-secondary"} onClick={this.logout}>
+                                        Logout
+                                    </button>
+                                )
+                            }
+                        </ul>
+                    </Collapse>
+                </Navbar>
+            </header>
+        );
+    };
+
 
   render() {
     return this.state.navigateToLogin ? (

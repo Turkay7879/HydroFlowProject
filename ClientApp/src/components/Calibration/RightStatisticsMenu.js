@@ -48,7 +48,7 @@ class RightStatisticsMenu extends React.Component {
 
     render() {
         return (
-            <div className={"statistics-main-container"} style={{ marginBottom: "1rem" }}>
+            <div className="statistics-main-container" style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>
                 <h4 style={{ marginBottom: "1rem" }}>Statistics</h4>
                 <div className="current-statistics" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                     <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
@@ -68,9 +68,9 @@ class RightStatisticsMenu extends React.Component {
                         <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Observed Data: {Number(this.state.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                         <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Calculated Data:{Number(this.state.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
-
-                    </div>
                 </div>
+            </div>
+
 
 
 

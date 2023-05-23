@@ -29,11 +29,11 @@ export class Home extends Component {
                 if (response.ok) {
                     response.json().then(data => {
                         let array = [];
-                        data.forEach(function(basin) {
-                           array.push( {
-                               basinId: basin.id,
-                               geocode: [basin.flowObservationStationLat, basin.flowObservationStationLong]
-                           })
+                        data.forEach(function (basin) {
+                            array.push({
+                                basinId: basin.id,
+                                geocode: [basin.flowObservationStationLat, basin.flowObservationStationLong]
+                            })
                         });
                         this.setState({
                             markers: array,
@@ -78,23 +78,39 @@ export class Home extends Component {
         this.setState({ addBasin: !this.state.addBasin });
     }
 
+    handleDownload = () => {
+        const fileUrl = process.env.PUBLIC_URL + "/Template_ABCD.xlsx";
+        window.open(fileUrl, "_blank");
+    }
+
     render() {
         return (
             <>
-                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginBottom: "1.5rem" }}>
-                    <span style={{ marginRight: '1rem' }}> Don't see the basin you are looking for? </span>
-                    <button type="button" className="btn btn-primary" disabled={window.localStorage.getItem("hydroFlowSession") === null}
-                        onClick={this.toggleAddBasinModal}>Add Basin</button>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+                    <div>
+                        <span style={{ marginRight: '1rem' }}> Don't see the basin you are looking for? </span>
+                        <button type="button" className="btn btn-primary" disabled={window.localStorage.getItem("hydroFlowSession") === null}
+                            onClick={this.toggleAddBasinModal}>Add Basin</button>
+                    </div>
+                    <div>
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            onClick={this.handleDownload}
+                        >
+                            Download Template (xlsx file)
+                        </button>
+                    </div>
                 </div>
                 <h1 style={{ textAlign: "center" }}> HydroFlow </h1>
-                { this.state.markers.length > 0 ? WorldMapLeaflet(this.state.markers, this.displayModelsInBasins) : <></> }
-                { this.state.showBasinDetails && <BasinDetailsModal
+                {this.state.markers.length > 0 ? WorldMapLeaflet(this.state.markers, this.displayModelsInBasins) : <></>}
+                {this.state.showBasinDetails && <BasinDetailsModal
                     showModal={this.state.showBasinDetails}
                     onDismiss={this.toggleShowBasinDetailModal}
                     basin={this.state.basin}
                     models={this.state.models}
                     totalCount={this.state.totalCount}
-                    /> 
+                />
                 }
                 {
                     this.state.addBasin && <AddBasinModal
@@ -105,7 +121,7 @@ export class Home extends Component {
                                 window.location.reload();
                             } else {
                                 this.toggleAddBasinModal();
-                            } 
+                            }
                         }}
                     />
                 }
@@ -113,4 +129,5 @@ export class Home extends Component {
         );
     }
 }
+
 

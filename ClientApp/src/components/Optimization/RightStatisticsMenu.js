@@ -48,9 +48,8 @@ class RightStatisticsMenu extends React.Component {
         return (
             <div>
                 <div className="statistics-main-container">
-                    <h4 style={{ marginBottom: "1rem" }}>Optimization</h4>
+                    <h4 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>Optimization</h4>
                     <div className="current-statistics">
-                        {/* First set of statistics */}
                         <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
                         <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
                         <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>Averages:</span>
@@ -74,7 +73,7 @@ class RightStatisticsMenu extends React.Component {
               
 
                 <div className="statistics-container">
-                    <h4 style={{ marginBottom: "1rem" }}>Verification</h4>
+                    <h4 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>Verification</h4>
                     <div className="second-statistics">
                         {/* Second set of statistics */}
                         <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
