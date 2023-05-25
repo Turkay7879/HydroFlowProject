@@ -61,6 +61,9 @@ namespace HydroFlowProject.Utilities
                 var InitialSt = parameterMap!["initialSt"];
                 var InitialGt = parameterMap!["initialGt"];
 
+                var bestParams = GA_ABCD.Run(P_List, PET_List, Obsmm_List, A, B, C, D, InitialSt, InitialGt);
+
+                /*
                 ABCDModel model = new ABCDModel(InitialSt, InitialGt);
                 model.SetDataSets(P_List, PET_List, Obsmm_List);
                 model.SetParams(A, B, C, D);
@@ -80,6 +83,7 @@ namespace HydroFlowProject.Utilities
                 Debug.WriteLine("B: " + bestB);
                 Debug.WriteLine("C: " + bestC);
                 Debug.WriteLine("D: " + bestD);
+                */
 
                 // Verification Step here, then results
 

@@ -235,3 +235,4 @@ _Pvt_Extensions
 appsettings.json
 appsettings.Development.json
 ClientApp/package-lock.json
+.DS_Store
