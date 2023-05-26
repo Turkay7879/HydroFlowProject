@@ -1,4 +1,5 @@
 import React from "react";
+import "./Optimization.css";
 
 class RightStatisticsMenu extends React.Component {
     STATISTICS_PRECISION = 6;
@@ -6,19 +7,37 @@ class RightStatisticsMenu extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            rmse: props.errorRates.rmse,
-            nse: props.errorRates.nse,
-            deviation: {
-                calculatedData: props.errorRates.qModelDeviation,
-                observedData: props.errorRates.obsmmDeviation
+            optimization: {
+                rmse: props.errorRates.optimization.rmse,
+                nse: props.errorRates.optimization.nse,
+                deviation: {
+                    calculatedData: props.errorRates.optimization.qModelDeviation,
+                    observedData: props.errorRates.optimization.obsmmDeviation
+                },
+                skewness: {
+                    calculatedData: props.errorRates.optimization.qModelSkewness,
+                    observedData: props.errorRates.optimization.obsmmSkewness
+                },
+                average: {
+                    calculatedData: props.errorRates.optimization.qModelAvg,
+                    observedData: props.errorRates.optimization.obsmmAvg
+                }
             },
-            skewness: {
-                calculatedData: props.errorRates.qModelSkewness,
-                observedData: props.errorRates.obsmmSkewness
-            },
-            average: {
-                calculatedData: props.errorRates.qModelAvg,
-                observedData: props.errorRates.obsmmAvg
+            verification: {
+                rmse: props.errorRates.verification.rmse,
+                nse: props.errorRates.verification.nse,
+                deviation: {
+                    calculatedData: props.errorRates.verification.qModelDeviation,
+                    observedData: props.errorRates.verification.obsmmDeviation
+                },
+                skewness: {
+                    calculatedData: props.errorRates.verification.qModelSkewness,
+                    observedData: props.errorRates.verification.obsmmSkewness
+                },
+                average: {
+                    calculatedData: props.errorRates.verification.qModelAvg,
+                    observedData: props.errorRates.verification.obsmmAvg
+                }
             }
         };
     }
@@ -26,81 +45,92 @@ class RightStatisticsMenu extends React.Component {
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.errorRates !== this.props.errorRates) {
             this.setState({ 
-                rmse: this.props.errorRates.rmse,
-                nse: this.props.errorRates.nse,
-                deviation: {
-                    calculatedData: this.props.errorRates.qModelDeviation,
-                    observedData: this.props.errorRates.obsmmDeviation
+                optimization: {
+                    rmse: this.props.errorRates.optimization.rmse,
+                    nse: this.props.errorRates.optimization.nse,
+                    deviation: {
+                        calculatedData: this.props.errorRates.optimization.qModelDeviation,
+                        observedData: this.props.errorRates.optimization.obsmmDeviation
+                    },
+                    skewness: {
+                        calculatedData: this.props.errorRates.optimization.qModelSkewness,
+                        observedData: this.props.errorRates.optimization.obsmmSkewness
+                    },
+                    average: {
+                        calculatedData: this.props.errorRates.optimization.qModelAvg,
+                        observedData: this.props.errorRates.optimization.obsmmAvg
+                    }
                 },
-                skewness: {
-                    calculatedData: this.props.errorRates.qModelSkewness,
-                    observedData: this.props.errorRates.obsmmSkewness
-                },
-                average: {
-                    calculatedData: this.props.errorRates.qModelAvg,
-                    observedData: this.props.errorRates.obsmmAvg
+                verification: {
+                    rmse: this.props.errorRates.verification.rmse,
+                    nse: this.props.errorRates.verification.nse,
+                    deviation: {
+                        calculatedData: this.props.errorRates.verification.qModelDeviation,
+                        observedData: this.props.errorRates.verification.obsmmDeviation
+                    },
+                    skewness: {
+                        calculatedData: this.props.errorRates.verification.qModelSkewness,
+                        observedData: this.props.errorRates.verification.obsmmSkewness
+                    },
+                    average: {
+                        calculatedData: this.props.errorRates.verification.qModelAvg,
+                        observedData: this.props.errorRates.verification.obsmmAvg
+                    }
                 }
             });
         }
     }
-    ///verifikasyon olunca verileri oradan alcaz şimdilik optimizasyondan çektim
+
     render() {
         return (
-            <div>
+            <div style={{ display: "flex", flexDirection: "column", width: "25%" }}>
                 <div className="statistics-main-container">
                     <h4 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>Optimization</h4>
                     <div className="current-statistics">
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>Averages:</span>
+                        <span>RMSE: {Number(this.state.optimization.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>NSE: {Number(this.state.optimization.nse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>Averages:</span>
                         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.optimization.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.optimization.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                         </div>
+                    </div>
                     <span style={{ display: "flex", justifyContent: "space-between" }}>Standard Deviations</span>
-                    <div style={{  display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                    <div className="standart-deviation-optimization">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.optimization.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.optimization.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
                     <span style={{ display: "flex", justifyContent: "space-between" }}>Skewness:</span>
-                    <div style={{display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                    <div className="standart-deviation-optimization">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.optimization.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.optimization.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
                 </div>
-            </div>
 
-              
-
-                <div className="statistics-container">
+                <div className="statistics-main-container">
                     <h4 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>Verification</h4>
-                    <div className="second-statistics">
-                        {/* Second set of statistics */}
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", marginRight: "auto" }}>Averages:</span>
+                    <div className="current-statistics">
+                        <span>RMSE: {Number(this.state.verification.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>NSE: {Number(this.state.verification.nse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>Averages:</span>
                         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.verification.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.verification.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                         </div>
-                        <span style={{ display: "flex"}}>Standard Deviations</span>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        </div>
-                        <span style={{ display: "flex", justifyContent: "space-between" }}>Skewness:</span>
-                        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed:{Number(this.state.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated:{Number(this.state.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        </div>
+                    </div>
+                    <span style={{ display: "flex", justifyContent: "space-between" }}>Standard Deviations</span>
+                    <div className="standart-deviation-optimization">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.verification.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.verification.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                    </div>
+                    <span style={{ display: "flex", justifyContent: "space-between" }}>Skewness:</span>
+                    <div className="standart-deviation-optimization">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.verification.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.verification.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
                 </div>
             </div>
-
         );
-
-
-
     }
 }
 

@@ -103,42 +103,45 @@
 .statistics-main-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 80%; /* Increase the width to make it wider */
+    width: 100%; /* Increase the width to make it wider */
     height: fit-content;
     display: inline-block;
     vertical-align: top;
-    padding: 1rem;
-    margin-right: 1.5%; /* Add margin to the right */
     margin-bottom: 1rem;
-    text-align: center;
+    margin-right: 0;
+    text-align: left;
+}
+
+.statistics-main-container > span {
+    margin-left: 1rem;
 }
 
 .statistics-container {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 80%;
+    width: 100%;
     height: fit-content;
     display: inline-block;
     vertical-align: top;
     padding: 1rem;
-    margin-bottom: 1rem;
-    text-align: center;
+    text-align: left;
 }
 
-.current-statistics,
-.second-statistics {
+.current-statistics {
     display: flex;
     flex-direction: column;
-    margin-bottom: 2rem;
+    width: 100%;
+    margin-bottom: 0 !important;
 }
 
-    .current-statistics > span,
-    .second-statistics > span {
-        font-weight: 600;
-        margin-left: 0;
-    }
+.current-statistics > span {
+    margin-left: 1rem;
+}
 
-    .current-statistics > div > span,
-    .second-statistics > div > span {
-        text-align: center;
-    }
+.current-statistics > div > span {
+    margin-left: 2rem;
+}
+
+.standart-deviation-optimization > span {
+    margin-left: 2rem;
+}

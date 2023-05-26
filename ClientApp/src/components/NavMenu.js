@@ -104,6 +104,9 @@ export class NavMenu extends Component {
                             <NavItem>
                                 <NavLink tag={Link} className="text-dark" to="/">Home</NavLink>
                             </NavItem>
+                            <NavItem>
+                                <NavLink tag={Link} className="text-dark" to={Routes.Theory.route}>Theory</NavLink>
+                            </NavItem>
                             {
                                 this.state.validSessionPresent ? (
                                     <>
@@ -112,10 +115,7 @@ export class NavMenu extends Component {
                                         </NavItem>
                                         <NavItem>
                                             <NavLink tag={Link} className="text-dark" to={Routes.OptimizationPage.route}>Automatic Calibration</NavLink>
-                                        </NavItem>
-                                        <NavItem>
-                                            <NavLink tag={Link} className="text-dark" to={Routes.Theory.route}>Theory</NavLink>
-                                        </NavItem>
+                                        </NavItem>       
                                     </>
                                 ) : null
                             }

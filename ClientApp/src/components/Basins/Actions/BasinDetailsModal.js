@@ -30,7 +30,7 @@ class BasinDetailsModal extends React.Component {
 
     componentDidMount() {
         let session = window.localStorage.getItem("hydroFlowSession");
-        if (session !== null) {
+        if (session !== null && this.state.modelList.length > 0) {
             let sessionObject = JSON.parse(session);
 
             let User_Id = sessionObject.sessionUserId;
@@ -51,9 +51,12 @@ class BasinDetailsModal extends React.Component {
                     });
                 }
                 else if (response.ok) {
-                    response.json().then(data => {this.setState({ permissionsList: data,
-                        permDownload: data.permDownload})
-                    console.log(data)});
+                    response.json().then(data => {
+                        this.setState({ 
+                            permissionsList: data,
+                            permDownload: data.permDownload
+                        });
+                    });
                 }
             });
         }

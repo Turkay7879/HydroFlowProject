@@ -384,13 +384,9 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, optimizationVM);
             }
+            var modelDetails = _context.Models.Find(optimizationVM.Model_Id);
 
-            var parameterMap = JsonConvert.DeserializeObject<Dictionary<string, float>>(optimizationVM.Parameters);
-            var A = parameterMap!["a"];
-            // Example usage: parameterMap["a"], parameterMap["b"] etc.
-            // Sent parameter payload can be found in Optimization.js to check which parameters are sent
-
-            var optimizationResult = ModelOptimization.Optimize(optimizationVM);
+            var optimizationResult = ModelOptimization.Optimize(optimizationVM, modelDetails!);
             return Ok(optimizationResult);
         }
 

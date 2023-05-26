@@ -8,9 +8,10 @@ namespace HydroFlowProject.Utilities
     {
         static Random random = new Random();
         static int populationSize = 200;
-        static int numGenerations = 100;
-        static double crossoverThreshold = 0.8;
+        static int numGenerations = 200;
+        static double crossoverThreshold = 0.5;
         static double mutationRate = 0.5;
+        static double randomParamRangeLimit = 0.2;
         static double[] P;
         static double[] PET;
         static double[] Obsmm;
@@ -29,7 +30,7 @@ namespace HydroFlowProject.Utilities
             { "D", Tuple.Create(0.0, 1.0) }
         };
 
-        static double[] Calculate(double[] P, double[] PET, double A, double B, double C, double D, double initialSt, double initialGt)
+        public static double[] Calculate(double[] P, double[] PET, double A, double B, double C, double D, double initialSt, double initialGt)
         {
             // Perform the calculation using the given parameters
             var W = new Double[P.Length];       // Available soil water
@@ -68,7 +69,7 @@ namespace HydroFlowProject.Utilities
                 DR[i] = (1 - C) * (W[i] - Y[i]);
 
                 // Step 6
-                ;
+                GR[i] = C * (W[i] - Y[i]);
 
                 // Step 7
                 if (i == 0)
@@ -90,26 +91,103 @@ namespace HydroFlowProject.Utilities
             return Qmodel;
         }
 
-        static double Fitness(double[] predictedValues)
+        public static double Fitness(double[] predictedValues, double[] targetValues)
         {
             // Calculate fitness as the mean squared error
             double sumSquaredError = 0.0;
             for (int i = 0; i < predictedValues.Length; i++)
             {
-                double error = predictedValues[i] - Obsmm[i];
+                double error = predictedValues[i] - targetValues[i];
                 sumSquaredError += error * error;
             }
             return Math.Sqrt(sumSquaredError / predictedValues.Length);
+        }
+
+        public static double NSE(double[] predicted, double[] observed)
+        {
+            int n = observed.Length;
+            double sumSquaredObserved = 0.0;
+            double sumSquaredDifference = 0.0;
+
+            for (int i = 0; i < n; i++)
+            {
+                sumSquaredObserved += Math.Pow(observed[i], 2);
+                double difference = observed[i] - predicted[i];
+                sumSquaredDifference += Math.Pow(difference, 2);
+            }
+
+            double nse = 1 - (sumSquaredDifference / sumSquaredObserved);
+            return nse;
+        }
+
+        public static double Average(double[] values)
+        {
+            double mean = 0.0;
+            for (int i = 0; i < values.Length; i++)
+            {
+                mean += values[i];
+            }
+            mean /= values.Length;
+            return mean;
+        }
+
+        public static double StandartDeviation(double[] values)
+        {
+            double mean = Average(values);
+            double sumDifferenceFromMean = 0.0;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                sumDifferenceFromMean += Math.Pow(values[i] - mean, 2);
+            }
+            double deviation = Math.Sqrt(sumDifferenceFromMean / (values.Length - 1));
+
+            return deviation;
+        }
+
+        public static double Skewness(double[] values)
+        {
+            double mean = Average(values);
+            double deviation = StandartDeviation(values);
+            double sumDifferenceFromMean = 0.0;
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                sumDifferenceFromMean += Math.Pow(values[i] - mean, 3);
+            }
+            double skewness = sumDifferenceFromMean / ((values.Length - 1) * Math.Pow(deviation, 3));
+
+            return skewness;
         }
 
         static Dictionary<string, double> CreateRandomIndividual()
         {
             // Create a random individual with values within the parameter range
             Dictionary<string, double> individual = new Dictionary<string, double>();
-            individual.Add("A", initialA);
-            individual.Add("B", initialB);
-            individual.Add("C", initialC);
-            individual.Add("D", initialD);
+            var randA = -1.0;
+            var randB = -1.0;
+            var randC = -1.0;
+            var randD = -1.0;
+            while (Math.Abs(randA - initialA) > randomParamRangeLimit)
+            {
+                randA = random.NextDouble();
+            }
+            while (Math.Abs(randB - initialB) > randomParamRangeLimit * 1000)
+            {
+                randB = random.NextDouble() * 100;
+            }
+            while (Math.Abs(randC - initialC) > randomParamRangeLimit)
+            {
+                randC = random.NextDouble();
+            }
+            while (Math.Abs(randD - initialD) > randomParamRangeLimit)
+            {
+                randD = random.NextDouble();
+            }
+            individual.Add("A", randA);
+            individual.Add("B", randB);
+            individual.Add("C", randC);
+            individual.Add("D", randD);
             return individual;
         }
 
@@ -135,8 +213,8 @@ namespace HydroFlowProject.Utilities
                 int index2 = random.Next(populationSize);
                 Dictionary<string, double> parent1 = population[index1];
                 Dictionary<string, double> parent2 = population[index2];
-                double fitness1 = Fitness(Calculate(P, PET, parent1["A"], parent1["B"], parent1["C"], parent1["D"], initialSt, initialGt));
-                double fitness2 = Fitness(Calculate(P, PET, parent2["A"], parent2["B"], parent2["C"], parent2["D"], initialSt, initialGt));
+                double fitness1 = Fitness(Calculate(P, PET, parent1["A"], parent1["B"], parent1["C"], parent1["D"], initialSt, initialGt), targetValues);
+                double fitness2 = Fitness(Calculate(P, PET, parent2["A"], parent2["B"], parent2["C"], parent2["D"], initialSt, initialGt), targetValues);
                 parents.Add(fitness1 < fitness2 ? parent1 : parent2);
             }
             return parents;
@@ -201,7 +279,6 @@ namespace HydroFlowProject.Utilities
             List<Dictionary<string, double>> population = InitializePopulation();
             Dictionary<string, double> bestIndividual = null;
             double bestFitness = double.MaxValue;
-            double[] predictedValues = new double[1];
 
             for (int generation = 0; generation < numGenerations; generation++)
             {
@@ -209,24 +286,17 @@ namespace HydroFlowProject.Utilities
                 List<Dictionary<string, double>> offspring = Reproduce(parents);
                 population = offspring;
 
-                
-                
-
                 foreach (var individual in population)
                 {
-                    predictedValues = Calculate(P, PET, individual["A"], individual["B"], individual["C"], individual["D"], initialSt, initialGt);
-                    double fitness = Fitness(predictedValues);
+                    double[] predictedValues = Calculate(P, PET, individual["A"], individual["B"], individual["C"], individual["D"], initialSt, initialGt);
+                    double fitness = Fitness(predictedValues, Obsmm);
                     if (fitness < bestFitness)
                     {
                         bestFitness = fitness;
                         bestIndividual = individual;
                     }
                 }
-
-                //Debug.WriteLine($"Generation {generation + 1}, Best Fitness: {bestFitness}, Parameters: {string.Join(", ", bestIndividual)}");
             }
-
-            Debug.WriteLine($"Genetic algorithm finished. Best Fitness: {bestFitness}, Params: {string.Join(", ", bestIndividual)}");
 
             return bestIndividual;
         }

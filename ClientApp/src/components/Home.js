@@ -60,13 +60,21 @@ export class Home extends Component {
             BasinId: basinId
         };
         BasinsRemote.findModelsOfBasin(payload).then(response => {
-            response.json().then(data => {
+            if (response.ok) {
+                response.json().then(data => {
+                    this.setState({
+                        basin: this.state.basins.find(b => b.id === basinId),
+                        models: data.modelList,
+                        totalCount: data.totalCount
+                    }, () => this.toggleShowBasinDetailModal())
+                });
+            } else if (response.status === 404) {
                 this.setState({
                     basin: this.state.basins.find(b => b.id === basinId),
-                    models: data.modelList,
-                    totalCount: data.totalCount
+                    models: [],
+                    totalCount: 0
                 }, () => this.toggleShowBasinDetailModal())
-            });
+            }
         });
     }
 

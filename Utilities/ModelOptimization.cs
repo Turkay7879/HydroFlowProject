@@ -21,11 +21,11 @@ namespace HydroFlowProject.Utilities
         private static readonly double TERMINATION_THRESHOLD = 0.001;
 
 
-        public static OptimizationViewModel Optimize(OptimizationViewModel optimizationViewModel)
+        public static OptimizationViewModel Optimize(OptimizationViewModel optimizationViewModel, Model model)
         {
             OptimizationViewModel? result = optimizationViewModel.Model_Type switch
             {
-                "ABCD" => Optimize_ABCD(optimizationViewModel),
+                "ABCD" => Optimize_ABCD(optimizationViewModel, model),
                 _ => new OptimizationViewModel
                 {
                     Model_Id = optimizationViewModel.Model_Id,
@@ -36,7 +36,7 @@ namespace HydroFlowProject.Utilities
             return result;
         }
 
-        private static OptimizationViewModel Optimize_ABCD(OptimizationViewModel optimizationViewModel)
+        private static OptimizationViewModel Optimize_ABCD(OptimizationViewModel optimizationViewModel, Model m)
         {
             try
             {
@@ -61,31 +61,125 @@ namespace HydroFlowProject.Utilities
                 var InitialSt = parameterMap!["initialSt"];
                 var InitialGt = parameterMap!["initialGt"];
 
-                var bestParams = GA_ABCD.Run(P_List, PET_List, Obsmm_List, A, B, C, D, InitialSt, InitialGt);
+                var optimizePercent = m.Training_Percentage;
+                var pForOptimization = new double[P_List.Length * optimizePercent / 100];
+                var petForOptimization = new double[PET_List.Length * optimizePercent / 100];
+                var obsmmForOptimization = new double[Obsmm_List.Length * optimizePercent / 100];
 
-                /*
-                ABCDModel model = new ABCDModel(InitialSt, InitialGt);
-                model.SetDataSets(P_List, PET_List, Obsmm_List);
-                model.SetParams(A, B, C, D);
+                var pForVerification = new double[P_List.Length - pForOptimization.Length];
+                var petForVerification = new double[PET_List.Length - petForOptimization.Length];
+                var obsmmForVerification = new double[Obsmm_List.Length - obsmmForOptimization.Length];
+                
+                var i = 0;
+                for (; i < obsmmForOptimization.Length; i++)
+                {
+                    pForOptimization[i] = P_List[i];
+                    petForOptimization[i] = PET_List[i];
+                    obsmmForOptimization[i] = Obsmm_List[i];
+                }
+                for (; i < Obsmm_List.Length; i++)
+                {
+                    pForVerification[i - pForOptimization.Length] = P_List[i];
+                    petForVerification[i - petForOptimization.Length] = PET_List[i];
+                    obsmmForVerification[i - obsmmForOptimization.Length] = Obsmm_List[i];
+                }
 
-                GA geneticAlgorithm = new GA(model, UpdateProgress, DEFAULT_THREAD_COUNT, CROSSOVER_RATE, MUTATION_RATE, POPULATION_SIZE, TERMINATION_GENERATIONS, TERMINATION_THRESHOLD);
-                geneticAlgorithm.Go();
+                var bestParams = GA_ABCD.Run(pForOptimization, petForOptimization, obsmmForOptimization, A, B, C, D, InitialSt, InitialGt);
+                var best_A = bestParams["A"];
+                var best_B = bestParams["B"];
+                var best_C = bestParams["C"];
+                var best_D = bestParams["D"];
 
-                double[] bestGenes; double bestFitness;
-                geneticAlgorithm.GetBest(out bestGenes, out bestFitness);
+                // Calculate optimization RMSE (And other possible statistics)
+                var predictWithOptimizationArrays = GA_ABCD.Calculate(pForOptimization, petForOptimization, best_A, best_B, best_C, best_D, InitialSt, InitialGt);
+                
+                var rmseOptimization = GA_ABCD.Fitness(predictWithOptimizationArrays, obsmmForOptimization);
+                var nseOptimization = GA_ABCD.NSE(predictWithOptimizationArrays, obsmmForOptimization);
+                var averageForObservedOptimization = GA_ABCD.Average(obsmmForOptimization);
+                var averageForPredictedOptimization = GA_ABCD.Average(predictWithOptimizationArrays);
+                var deviationForObservedOptimization = GA_ABCD.StandartDeviation(obsmmForOptimization);
+                var deviationForPredictedOptimization = GA_ABCD.StandartDeviation(predictWithOptimizationArrays);
+                var skewnessForObservedOptimization = GA_ABCD.Skewness(obsmmForOptimization);
+                var skewnessForPredictedOptimization = GA_ABCD.Skewness(predictWithOptimizationArrays);
 
-                double bestA = bestGenes[0];
-                double bestB = bestGenes[1];
-                double bestC = bestGenes[2];
-                double bestD = bestGenes[3];
+                // Verification Steps
+                var predictWithVerificationArrays = GA_ABCD.Calculate(pForVerification, petForVerification, best_A, best_B, best_C, best_D, InitialSt, InitialGt);
+                var rmseVerification = GA_ABCD.Fitness(predictWithVerificationArrays, obsmmForVerification);
+                var nseVerification = GA_ABCD.NSE(predictWithVerificationArrays, obsmmForVerification);
+                var averageForObservedVerification = GA_ABCD.Average(obsmmForVerification);
+                var averageForPredictedVerification = GA_ABCD.Average(predictWithVerificationArrays);
+                var deviationForObservedVerification = GA_ABCD.StandartDeviation(obsmmForVerification);
+                var deviationForPredictedVerification = GA_ABCD.StandartDeviation(predictWithVerificationArrays);
+                var skewnessForObservedVerification = GA_ABCD.Skewness(obsmmForVerification);
+                var skewnessForPredictedVerification = GA_ABCD.Skewness(predictWithVerificationArrays);
 
-                Debug.WriteLine("A: " + bestA);
-                Debug.WriteLine("B: " + bestB);
-                Debug.WriteLine("C: " + bestC);
-                Debug.WriteLine("D: " + bestD);
-                */
+                Debug.WriteLine($"Best A: {best_A}, Best B: {best_B}, Best C: {best_C}, Best D: {best_D}");
+                Debug.WriteLine($"Optimization RMSE: {rmseOptimization}, Verification RMSE: {rmseVerification}");
 
-                // Verification Step here, then results
+                // Scatter chart data for optimization
+                var scatterDataOptimization = new double[obsmmForOptimization.Length][][];
+                for (int j = 0; j < obsmmForOptimization.Length; j++)
+                {
+                    scatterDataOptimization[j] = new double[predictWithOptimizationArrays.Length][];
+                    for (int k = 0; k < predictWithOptimizationArrays.Length; k++)
+                    {
+                        var scatterData = new double[2];
+                        scatterData[0] = obsmmForOptimization[j];
+                        scatterData[1] = predictWithOptimizationArrays[k];
+                        scatterDataOptimization[j][k] = scatterData;
+                    }
+                }
+
+                // Scatter chart data for verification
+                var scatterDataVerification = new double[obsmmForVerification.Length][][];
+                for (int j = 0; j < obsmmForVerification.Length; j++)
+                {
+                    scatterDataVerification[j] = new double[predictWithVerificationArrays.Length][];
+                    for (int k = 0; k < predictWithVerificationArrays.Length; k++)
+                    {
+                        var scatterData = new double[2];
+                        scatterData[0] = obsmmForVerification[j];
+                        scatterData[1] = predictWithVerificationArrays[k];
+                        scatterDataVerification[j][k] = scatterData;
+                    }
+                }
+
+                // Collect statistics for optimization and verification
+                Dictionary<string, double> optimizationStatistics = new Dictionary<string, double>();
+                Dictionary<string, double> verificationStatistics = new Dictionary<string, double>();
+
+                optimizationStatistics.Add("RMSE", rmseOptimization);
+                optimizationStatistics.Add("NSE", nseOptimization);
+                optimizationStatistics.Add("AverageObserved", averageForObservedOptimization);
+                optimizationStatistics.Add("AveragePredicted", averageForPredictedOptimization);
+                optimizationStatistics.Add("DeviationObserved", deviationForObservedOptimization);
+                optimizationStatistics.Add("DeviationPredicted", deviationForPredictedOptimization);
+                optimizationStatistics.Add("SkewnessObserved", skewnessForObservedOptimization);
+                optimizationStatistics.Add("SkewnessPredicted", skewnessForPredictedOptimization);
+
+                verificationStatistics.Add("RMSE", rmseVerification);
+                verificationStatistics.Add("NSE", nseVerification);
+                verificationStatistics.Add("AverageObserved", averageForObservedVerification);
+                verificationStatistics.Add("AveragePredicted", averageForPredictedVerification);
+                verificationStatistics.Add("DeviationObserved", deviationForPredictedOptimization);
+                verificationStatistics.Add("DeviationPredicted", deviationForPredictedVerification);
+                verificationStatistics.Add("SkewnessObserved", skewnessForObservedVerification);
+                verificationStatistics.Add("SkewnessPredicted", skewnessForPredictedVerification);
+
+                // Return optimization, verification results for charts and statistics
+                result.Observed_Data_Optimization = obsmmForOptimization;
+                result.Predicted_Data_Optimization = predictWithOptimizationArrays;
+
+                result.Observed_Data_Verification = obsmmForVerification;
+                result.Predicted_Data_Verification = predictWithVerificationArrays;
+
+                result.Scatter_Data_Optimization = scatterDataOptimization;
+                result.Scatter_Data_Verification = scatterDataVerification;
+
+                result.Optimized_Parameters = bestParams;
+
+                result.Statistics_Optimization = optimizationStatistics;
+                result.Statistics_Verification = verificationStatistics;
 
                 return result;
             }
@@ -99,11 +193,6 @@ namespace HydroFlowProject.Utilities
                     Parameters = optimizationViewModel.Parameters
                 };
             }
-        }
-
-        static void UpdateProgress(String[] s)
-        {
-            Debug.WriteLine("Generations complete: " + s[0]);
         }
     }
 }

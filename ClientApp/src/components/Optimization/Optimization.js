@@ -4,7 +4,6 @@ import LeftOptionsMenu from "./LeftOptionsMenu";
 import RightStatisticsMenu from "./RightStatisticsMenu";
 import LineChart from "../Charts/LineChart";
 import ScatterChart from "../Charts/ScatterChart";
-import ModelCalculation from "../ABCD_Model/ModelCalculation";
 import OptimizationRemote from "./flux/remote/OptimizationRemote";
 import SessionsRemote from "../Constants/flux/remote/SessionsRemote";
 import ModelsRemote from "../Models/flux/ModelsRemote";
@@ -25,11 +24,33 @@ class Optimization extends React.Component {
             parameters: null,
             origParamList: null,
             errorRates: {
-                rmse: null,
-                nse: null
+                optimization: {
+                    rmse: null,
+                    nse: null,
+                    qModelDeviation: null,
+                    obsmmDeviation: null,
+                    qModelSkewness: null,
+                    obsmmSkewness: null,
+                    qModelAvg: null,
+                    obsmmAvg: null
+                },
+                verification: {
+                    rmse: null,
+                    nse: null,
+                    qModelDeviation: null,
+                    obsmmDeviation: null,
+                    qModelSkewness: null,
+                    obsmmSkewness: null,
+                    qModelAvg: null,
+                    obsmmAvg: null
+                }
             },
-            actualObsmmValues: null,
-            predictedQmodelValues: null,
+            observedDataOptimization: null,
+            predictedDataOptimization: null,
+            observedDataVerification: null,
+            predictedDataVerification: null,
+            scatterDataOptimization: null,
+            scatterDataVerification: null,
             samples: null,
             runningOptimization: false
         };
@@ -114,7 +135,35 @@ class Optimization extends React.Component {
                 modelData: dataBase64,
                 actualObsmmValues: null,
                 predictedQmodelValues: null,
-                samples: null
+                samples: null,
+                errorRates: {
+                    optimization: {
+                        rmse: null,
+                        nse: null,
+                        qModelDeviation: null,
+                        obsmmDeviation: null,
+                        qModelSkewness: null,
+                        obsmmSkewness: null,
+                        qModelAvg: null,
+                        obsmmAvg: null
+                    },
+                    verification: {
+                        rmse: null,
+                        nse: null,
+                        qModelDeviation: null,
+                        obsmmDeviation: null,
+                        qModelSkewness: null,
+                        obsmmSkewness: null,
+                        qModelAvg: null,
+                        obsmmAvg: null
+                    }
+                },
+                observedDataOptimization: null,
+                predictedDataOptimization: null,
+                observedDataVerification: null,
+                predictedDataVerification: null,
+                scatterDataOptimization: null,
+                scatterDataVerification: null,
             })
         }));
         let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
@@ -172,10 +221,22 @@ class Optimization extends React.Component {
             }
         }
 
+        // Check for undefined round #2
+        const p = [];
+        const pet = [];
+        const obsmm = [];
+        columnData.Obsmm.forEach((item, index) => {
+            if (typeof(item) !== 'undefined') {
+                p.push(columnData.P[index]);
+                pet.push(columnData.PET[index]);
+                obsmm.push(columnData.Obsmm[index]);
+            }
+        });
+
         return {
-            P: columnData.P,
-            PET: columnData.PET,
-            Obsmm: columnData.Obsmm
+            P: p,
+            PET: pet,
+            Obsmm: obsmm
         }
     }
     
@@ -191,18 +252,64 @@ class Optimization extends React.Component {
             Obsmm: JSON.stringify(Obsmm)
         }
 
-        OptimizationRemote.optimize(payload).then(response => {
-            if (response.status === 400) {
-                Swal.fire({
-                    title: "Incorrect Request",
-                    text: `An incorrect request was sent to server.`,
-                    icon: "error"
-                });
-            } else if (response.ok) {
-                // Do something with result
-            }
+        this.setState({ runningOptimization: true }, () => {
+            OptimizationRemote.optimize(payload).then(response => {
+                if (response.status === 400) {
+                    Swal.fire({
+                        title: "Incorrect Request",
+                        text: `An incorrect request was sent to server.`,
+                        icon: "error"
+                    });
+                } else if (response.ok) {
+                    response.json().then(data => this.handleOptimizationResult(data));
+                }
+            });
         });
-        // this.setState({ runningOptimization: true });
+    }
+
+    handleOptimizationResult = (data) => {
+        const optimizedParams = {
+            ...this.state.parameters,
+            a: Number(data.optimized_Parameters.A).toFixed(2),
+            b: Number(data.optimized_Parameters.B).toFixed(0),
+            c: Number(data.optimized_Parameters.C).toFixed(2),
+            d: Number(data.optimized_Parameters.D).toFixed(2)           
+        }
+
+        const statistics = {
+            optimization: {
+                rmse: data.statistics_Optimization.RMSE,
+                nse: data.statistics_Optimization.NSE,
+                qModelDeviation: data.statistics_Optimization.DeviationPredicted,
+                obsmmDeviation: data.statistics_Optimization.DeviationObserved,
+                qModelSkewness: data.statistics_Optimization.SkewnessPredicted,
+                obsmmSkewness: data.statistics_Optimization.SkewnessObserved,
+                qModelAvg: data.statistics_Optimization.AveragePredicted,
+                obsmmAvg: data.statistics_Optimization.AverageObserved
+            },
+            verification: {
+                rmse: data.statistics_Verification.RMSE,
+                nse: data.statistics_Verification.NSE,
+                qModelDeviation: data.statistics_Verification.DeviationPredicted,
+                obsmmDeviation: data.statistics_Verification.DeviationObserved,
+                qModelSkewness: data.statistics_Verification.SkewnessPredicted,
+                obsmmSkewness: data.statistics_Verification.SkewnessObserved,
+                qModelAvg: data.statistics_Verification.AveragePredicted,
+                obsmmAvg: data.statistics_Verification.AverageObserved
+            }
+        };
+
+        this.onParameterChange(optimizedParams);
+        this.setState({
+            runningOptimization: false,
+            errorRates: statistics,
+            observedDataOptimization: data.observed_Data_Optimization.map(item => Number(item).toFixed(0)),
+            predictedDataOptimization: data.predicted_Data_Optimization.map(item => Number(item).toFixed(0)),
+            observedDataVerification: data.observed_Data_Verification.map(item => Number(item).toFixed(0)),
+            predictedDataVerification: data.predicted_Data_Verification.map(item => Number(item).toFixed(0)),
+            scatterDataOptimization: data.scatter_Data_Optimization.map(row => row.map(listItem => listItem.map(item => Number(item).toFixed(0)))),
+            scatterDataVerification: data.scatter_Data_Verification.map(row => row.map(listItem => listItem.map(item => Number(item).toFixed(0)))),
+        });
     }
     
     render() {
@@ -226,25 +333,36 @@ class Optimization extends React.Component {
                         isOptimizationRunning={this.state.runningOptimization}
                     />
 
-                    <div className={"optimization-output-main-container"}>
-                        <ModelCalculation
-                            modelData={this.state.modelData}
-                            parameters={this.state.parameters}
-                            isOptimizationStarted={this.state.runningOptimization}
-                            onOptimizationFinished={this.onOptimizationFinished}
-                            optimize={true}
-                            onCalibrationScatter={this.onCalibrationScatter}/>
+                    <div className={"optimization-output-main-container"}>      
                         {
-                            this.state.actualObsmmValues && this.state.predictedQmodelValues && <LineChart
-                                type1={this.state.type1}
-                                actual={this.state.actualObsmmValues}
-                                type2={this.state.type2}
-                                predicted={this.state.predictedQmodelValues}
-                                date={this.state.date}/>
+                            this.state.observedDataOptimization && this.state.predictedDataOptimization && <>
+                                <h4> Optimization Results </h4>
+                                <LineChart
+                                    type1="Observed Streamflow"
+                                    actual={this.state.observedDataOptimization}
+                                    type2="Predicted Streamflow"
+                                    predicted={this.state.predictedDataOptimization}
+                                    date={null}/>
+                            </>
                         }
                         {
-                            this.state.samples &&  <ScatterChart
-                                samples={this.state.samples}/>
+                            this.state.scatterDataOptimization && <ScatterChart
+                                samples={this.state.scatterDataOptimization}/>
+                        }
+                        {
+                            this.state.observedDataVerification && this.state.predictedDataVerification && <>
+                                <h4> Verification Results </h4>
+                                <LineChart
+                                    type1="Observed Streamflow"
+                                    actual={this.state.observedDataVerification}
+                                    type2="Predicted Streamflow"
+                                    predicted={this.state.predictedDataVerification}
+                                    date={null}/>
+                            </>
+                        }
+                        {
+                            this.state.scatterDataVerification && <ScatterChart
+                                samples={this.state.scatterDataVerification}/>
                         }
                     </div>
 

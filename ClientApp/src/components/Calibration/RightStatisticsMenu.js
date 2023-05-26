@@ -1,4 +1,5 @@
 ﻿import React from "react";
+import "./Calibration.css";
 
 class RightStatisticsMenu extends React.Component {
     STATISTICS_PRECISION = 6;
@@ -48,32 +49,28 @@ class RightStatisticsMenu extends React.Component {
 
     render() {
         return (
-            <div className="statistics-main-container" style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>
-                <h4 style={{ marginBottom: "1rem" }}>Statistics</h4>
-                <div className="current-statistics" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
-                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
-                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Averages:</span>
-                    <div style={{ paddingLeft: "3rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Observed Data: {Number(this.state.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Calculated Data: {Number(this.state.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+            <div className="statistics-main-container-calibration">
+                <h4 style={{ marginBottom: "1rem", fontSize: "1.5rem" }}>Statistics</h4>
+                    <div className="current-statistics-calibration">
+                        <span>RMSE: {Number(this.state.rmse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>NSE: {Number(this.state.nse).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span>Averages:</span>
+                        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.average.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                            <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.average.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        </div>
                     </div>
-                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Standard Deviations:</span>
-                    <div style={{ paddingLeft: "3rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Observed Data: {Number(this.state.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Calculated Data: {Number(this.state.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                    <span style={{ display: "flex", justifyContent: "space-between" }}>Standard Deviations</span>
+                    <div className="standart-deviation-calibration">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.deviation.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.deviation.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
-                    <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Skewness:</span>
-                    <div style={{ paddingLeft: "3rem", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Observed Data: {Number(this.state.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
-                        <span style={{ display: "flex", justifyContent: "space-between", fontSize: "1.2rem" }}>Calculated Data:{Number(this.state.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                    <span style={{ display: "flex", justifyContent: "space-between" }}>Skewness:</span>
+                    <div className="standart-deviation-calibration">
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Observed: {Number(this.state.skewness.observedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
+                        <span style={{ display: "flex", justifyContent: "space-between" }}>Calculated: {Number(this.state.skewness.calculatedData ?? 0).toFixed(this.STATISTICS_PRECISION)}</span>
                     </div>
-                </div>
             </div>
-
-
-
-
         );
     }
 }

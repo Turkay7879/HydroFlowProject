@@ -13,9 +13,9 @@
     padding-left: 2.5rem;
 }
 
-    .selected-model > span {
-        font-weight: 600;
-    }
+.selected-model > span {
+    font-weight: 600;
+}
 
 .model-selector {
     align-self: center;
@@ -24,6 +24,12 @@
 
 .model-actions {
     display: flex;
+}
+
+.delete-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
 }
 
 .add-model-button {
@@ -43,7 +49,7 @@
 }
 
 .main-left-panel {
-    width: 55%;
+    width: 25%;
     height: fit-content;
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
@@ -52,11 +58,11 @@
     padding: 1rem;
 }
 
-    .main-left-panel > h4 {
-        text-align: center;
-        margin-bottom: 3rem;
-        flex-grow: 1;
-    }
+.main-left-panel > h4 {
+    text-align: center;
+    margin-bottom: 3rem;
+    flex-grow: 1;
+}
 
 .single-slider-container {
     width: 80%;
@@ -65,9 +71,9 @@
     align-self: center;
 }
 
-    .single-slider-container > span {
-        font-weight: 600;
-    }
+.single-slider-container > span {
+    font-weight: 600;
+}
 
 .button-container {
     display: flex;
@@ -86,7 +92,7 @@
 }
 
 .calibration-output-main-container {
-    width: 75%;
+    width: 50%;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -95,48 +101,52 @@
     padding-right: 1.5rem;
 }
 
-.statistics-main-container {
+.statistics-main-container-calibration {
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
-    width: 20%;
+    width: 25%;
+    height: fit-content;
+    display: inline-block;
+    vertical-align: top;
+    margin-bottom: 1rem;
+    margin-right: 0;
+    text-align: left;
+}
+
+.statistics-main-container-calibration > h4 {
+    text-align: center;
+}
+
+.statistics-main-container-calibration > span {
+    margin-left: 1rem;
+}
+
+.statistics-container-calibration {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    width: 100%;
     height: fit-content;
     display: inline-block;
     vertical-align: top;
     padding: 1rem;
-    margin-right: 1.5%; /* Sağa boşluk ekleyin */
-    margin-bottom: 1rem;
-    text-align: center;
+    text-align: left;
 }
 
-
-    .statistics-main-container > h4 {
-        text-align: center;
-        margin-bottom: 3rem;
-    }
-
-    .statistics-main-container > span {
-        font-weight: 600;
-    }
-
-.current-statistics {
+.current-statistics-calibration {
     display: flex;
     flex-direction: column;
-    margin-bottom: 2rem;
     width: 100%;
+    margin-bottom: 0 !important;
 }
 
-    .current-statistics > span {
-        font-weight: 600;
-        margin-left: 1.5rem;
-    }
-
-.best-statistics {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 3rem;
+.current-statistics-calibration > span {
+    margin-left: 1rem;
 }
 
-    .best-statistics > span {
-        font-weight: 600;
-        margin-left: 1.5rem;
-    }
+.current-statistics > div > span {
+    margin-left: 2rem;
+}
+
+.standart-deviation-calibration > span {
+    margin-left: 2rem;
+}

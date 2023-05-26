@@ -10,6 +10,7 @@ import SessionsRemote from "../Constants/flux/remote/SessionsRemote";
 import Swal from "sweetalert2";
 import {Navigate} from "react-router-dom";
 import ModelsRemote from "../Models/flux/ModelsRemote";
+import "./Calibration.css";
 
 class Calibration extends React.Component {
     constructor(props) {
