@@ -240,7 +240,7 @@ class Optimization extends React.Component {
         }
     }
     
-    runOptimization = () => {
+    runOptimization = (percentage) => {
         let { P, PET, Obsmm } = this.convertData();
 
         let payload = {
@@ -249,7 +249,8 @@ class Optimization extends React.Component {
             Parameters: JSON.stringify(this.state.parameters),
             P: JSON.stringify(P),
             PET: JSON.stringify(PET),
-            Obsmm: JSON.stringify(Obsmm)
+            Obsmm: JSON.stringify(Obsmm),
+            Optimization_Percentage: percentage
         }
 
         this.setState({ runningOptimization: true }, () => {
@@ -299,6 +300,21 @@ class Optimization extends React.Component {
             }
         };
 
+        const optimizationScatter = [];
+        const verificationScatter = [];
+
+        data.scatter_Data_Optimization.forEach((item) => {
+            let x = Number(item[0]);
+            let y = Number(item[1]).toFixed(2);
+            optimizationScatter.push([x, y]);
+        });
+
+        data.scatter_Data_Verification.forEach((item) => {
+            let x = Number(item[0]);
+            let y = Number(item[1]).toFixed(2);
+            verificationScatter.push([x, y]);
+        });
+
         this.onParameterChange(optimizedParams);
         this.setState({
             runningOptimization: false,
@@ -307,8 +323,8 @@ class Optimization extends React.Component {
             predictedDataOptimization: data.predicted_Data_Optimization.map(item => Number(item).toFixed(0)),
             observedDataVerification: data.observed_Data_Verification.map(item => Number(item).toFixed(0)),
             predictedDataVerification: data.predicted_Data_Verification.map(item => Number(item).toFixed(0)),
-            scatterDataOptimization: data.scatter_Data_Optimization.map(row => row.map(listItem => listItem.map(item => Number(item).toFixed(0)))),
-            scatterDataVerification: data.scatter_Data_Verification.map(row => row.map(listItem => listItem.map(item => Number(item).toFixed(0)))),
+            scatterDataOptimization: optimizationScatter,
+            scatterDataVerification: verificationScatter,
         });
     }
     
@@ -323,7 +339,6 @@ class Optimization extends React.Component {
                 />
 
                 <div className={"optimizations-container"}>
-
                     <div style={{flexDirection : "column" }}>
 
                         <LeftOptionsMenu
@@ -331,7 +346,7 @@ class Optimization extends React.Component {
                             modelingType={this.state.modelingType}
                             parameters={this.state.parameters}
                             originalParameters={this.state.origParamList}
-                            onStartOptimize={this.runOptimization}
+                            onStartOptimize={(percentage) => this.runOptimization(percentage)}
                             onParameterChange={this.onParameterChange}
                             isOptimizationRunning={this.state.runningOptimization}
                         />

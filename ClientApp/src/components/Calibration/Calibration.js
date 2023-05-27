@@ -95,6 +95,7 @@ class Calibration extends React.Component {
     }
 
     onCalibrationScatter = (result) => {
+        console.log(result.samples)
         this.setState({
             samples: result.samples
         });
@@ -143,7 +144,7 @@ class Calibration extends React.Component {
         return null;
     }
     
-    runOptimization = () => {
+    runSimulation = () => {
         this.setState({ runningOptimization: true });
     }
     
@@ -163,7 +164,7 @@ class Calibration extends React.Component {
                         modelingType={this.state.modelingType}
                         parameters={this.state.parameters}
                         originalParameters={this.state.origParamList}
-                        onStartOptimize={this.runOptimization}
+                        onStartOptimize={this.runSimulation}
                         onParameterChange={this.onParameterChange}
                         isOptimizationRunning={this.state.runningOptimization}
                     />

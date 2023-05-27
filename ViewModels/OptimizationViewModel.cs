@@ -8,6 +8,7 @@
         public string P { get; set; } = null!;
         public string PET { get; set; } = null!;
         public string Obsmm { get; set; } = null!;
+        public int Optimization_Percentage { get; set; }
         public object? Observed_Data_Optimization { get; set; }
         public object? Predicted_Data_Optimization { get; set; }
         public object? Observed_Data_Verification { get; set; }

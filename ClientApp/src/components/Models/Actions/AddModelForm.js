@@ -150,24 +150,6 @@ class AddModelForm extends React.Component {
                         onChange={this.handleFileUpload}
                     />
                 </FormGroup>
-                <FormGroup>
-                    <Label for="trainingPercentageSlider">Data percentage to be used for Optimization (Remaining is used for testing):</Label>
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                        <div style={{ marginTop: "1rem", width: "90%"}}>
-                            <Slider
-                                aria-label="Training Data Percentage Slider"
-                                name="trainingPercentageSlider"
-                                defaultValue={this.state.selectedModel ? this.state.selectedModel.Training_Percentage : 80}
-                                step={1}
-                                min={20}
-                                max={90}
-                                marks={[{label: "20%", value: 20}, {label: "90%", value: 90}]}
-                                valueLabelDisplay="on"
-                                onChange={(e) => this.props.setModel('Training_Percentage', e.target.value)}
-                            />
-                        </div>
-                    </div>
-                </FormGroup>
                 <FormControlLabel 
                     control={<Switch
                         checked={this.state.selectedModel ? this.state.selectedModel.ModelPermissionId === 1 ? true : false : false}

@@ -12,6 +12,7 @@ class LeftOptionsMenu extends React.Component {
         this.state = {
             selectedModel: null,
             modelingType: null,
+            percentage: 80,
             runningOptimization: false
         };
     }
@@ -51,7 +52,7 @@ class LeftOptionsMenu extends React.Component {
     }
     
     onClickOptimize = () => {
-        this.props.onStartOptimize()
+        this.props.onStartOptimize(this.state.percentage)
     }
     
     onClickSave = () => {
@@ -79,7 +80,8 @@ class LeftOptionsMenu extends React.Component {
             User_Id: session.sessionUserId,
             Model_Id: this.state.selectedModel.id,
             Model_Name: this.state.selectedModel.name,
-            Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map))
+            Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map)),
+            Optimization_Percentage: this.state.percentage
         }
         OptimizationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
@@ -98,6 +100,7 @@ class LeftOptionsMenu extends React.Component {
             let param_D = this.state.parameters.d;
             let param_St = this.state.parameters.initialSt;
             let param_Gt = this.state.parameters.initialGt;
+            let percentage = this.state.percentage;
             
             return (
                 <>
@@ -179,6 +182,19 @@ class LeftOptionsMenu extends React.Component {
                             onChange={(_event, newValue) => this.updateParameterValue("d", newValue)}
                         />
                     </div>
+                    <div className={"single-slider-container"}>
+                        <span>
+                            Data % For Optimization: {percentage}
+                        </span>
+                        <Slider
+                            aria-label="Optimization Percentage Slider"
+                            min={10}
+                            max={90}
+                            step={1}
+                            value={percentage}
+                            onChange={(_event, newValue) => this.setState({ percentage: newValue })}
+                        />
+                    </div>
                 </>  
             );
         }
@@ -203,7 +219,7 @@ class LeftOptionsMenu extends React.Component {
                                         : <Spinner size={"sm"}/>
                                 }
                                 <span>
-                                    {` ${!this.state.isRunning ? 'Optimize' : 'Optimizing'}`}
+                                    {` ${!this.state.isRunning ? 'Auto Calibrate' : 'Processing'}`}
                                 </span>
                             </Button>
                         </div>

@@ -108,7 +108,6 @@ namespace HydroFlowProject.Data
                     .IsConcurrencyToken();
                 entity.Property(e => e.Name).HasMaxLength(50);
                 entity.Property(e => e.Title).HasMaxLength(50);
-                entity.Property(e => e.Training_Percentage);
             });
 
             modelBuilder.Entity<ModelModelType>(entity =>

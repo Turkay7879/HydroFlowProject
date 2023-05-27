@@ -21,11 +21,11 @@ namespace HydroFlowProject.Utilities
         private static readonly double TERMINATION_THRESHOLD = 0.001;
 
 
-        public static OptimizationViewModel Optimize(OptimizationViewModel optimizationViewModel, Model model)
+        public static OptimizationViewModel Optimize(OptimizationViewModel optimizationViewModel)
         {
             OptimizationViewModel? result = optimizationViewModel.Model_Type switch
             {
-                "ABCD" => Optimize_ABCD(optimizationViewModel, model),
+                "ABCD" => Optimize_ABCD(optimizationViewModel),
                 _ => new OptimizationViewModel
                 {
                     Model_Id = optimizationViewModel.Model_Id,
@@ -36,7 +36,7 @@ namespace HydroFlowProject.Utilities
             return result;
         }
 
-        private static OptimizationViewModel Optimize_ABCD(OptimizationViewModel optimizationViewModel, Model m)
+        private static OptimizationViewModel Optimize_ABCD(OptimizationViewModel optimizationViewModel)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace HydroFlowProject.Utilities
                 var InitialSt = parameterMap!["initialSt"];
                 var InitialGt = parameterMap!["initialGt"];
 
-                var optimizePercent = m.Training_Percentage;
+                var optimizePercent = optimizationViewModel.Optimization_Percentage;
                 var pForOptimization = new double[P_List.Length * optimizePercent / 100];
                 var petForOptimization = new double[PET_List.Length * optimizePercent / 100];
                 var obsmmForOptimization = new double[Obsmm_List.Length * optimizePercent / 100];
@@ -117,32 +117,23 @@ namespace HydroFlowProject.Utilities
                 Debug.WriteLine($"Optimization RMSE: {rmseOptimization}, Verification RMSE: {rmseVerification}");
 
                 // Scatter chart data for optimization
-                // FIXME: değerlere bak
-                var scatterDataOptimization = new double[obsmmForOptimization.Length][][];
+                var scatterDataOptimization = new double[obsmmForOptimization.Length][];
                 for (int j = 0; j < obsmmForOptimization.Length; j++)
                 {
-                    scatterDataOptimization[j] = new double[predictWithOptimizationArrays.Length][];
-                    for (int k = 0; k < predictWithOptimizationArrays.Length; k++)
-                    {
-                        var scatterData = new double[2];
-                        scatterData[0] = obsmmForOptimization[j];
-                        scatterData[1] = predictWithOptimizationArrays[k];
-                        scatterDataOptimization[j][k] = scatterData;
-                    }
+                    var scatterData = new double[2];
+                    scatterData[0] = obsmmForOptimization[j];
+                    scatterData[1] = predictWithOptimizationArrays[j];
+                    scatterDataOptimization[j] = scatterData;
                 }
 
                 // Scatter chart data for verification
-                var scatterDataVerification = new double[obsmmForVerification.Length][][];
+                var scatterDataVerification = new double[obsmmForVerification.Length][];
                 for (int j = 0; j < obsmmForVerification.Length; j++)
                 {
-                    scatterDataVerification[j] = new double[predictWithVerificationArrays.Length][];
-                    for (int k = 0; k < predictWithVerificationArrays.Length; k++)
-                    {
-                        var scatterData = new double[2];
-                        scatterData[0] = obsmmForVerification[j];
-                        scatterData[1] = predictWithVerificationArrays[k];
-                        scatterDataVerification[j][k] = scatterData;
-                    }
+                    var scatterData = new double[2];
+                    scatterData[0] = obsmmForVerification[j];
+                    scatterData[1] = predictWithVerificationArrays[j];
+                    scatterDataVerification[j] = scatterData;
                 }
 
                 // Collect statistics for optimization and verification

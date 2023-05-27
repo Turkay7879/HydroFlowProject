@@ -41,7 +41,6 @@ class Users extends React.Component {
 
     checkPermissions = () => {
         let session = window.localStorage.getItem("hydroFlowSession");
-        console.log(session)
         if (session !== null) {
             SessionsRemote.validateSession(session, (status) => {
                 if (status) {

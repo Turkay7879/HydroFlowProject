@@ -196,7 +196,8 @@ namespace HydroFlowProject.Controllers
                     User_Id = relatedUser.Id,
                     Model_Id = relatedModel.Id,
                     Model_Name = relatedModel.Name,
-                    Version = 0
+                    Version = 0,
+                    Optimization_Percentage = modelParameters.Optimization_Percentage
                 };
                 _context.SimulationDetails.Add(simulationDetails);
 
@@ -283,8 +284,7 @@ namespace HydroFlowProject.Controllers
                     Name = model.Name,
                     Title = model.Title,
                     ModelFile = "",
-                    ModelPermissionId = model.ModelPermissionId,
-                    Training_Percentage = model.Training_Percentage
+                    ModelPermissionId = model.ModelPermissionId
                 });
             }
 
@@ -368,7 +368,8 @@ namespace HydroFlowProject.Controllers
             {
                 { "modelName", simulationDetails.Model_Name },
                 { "version", simulationDetails.Version },
-                { "updateDate", simulationDetails.Simulation_Date! }
+                { "updateDate", simulationDetails.Simulation_Date! },
+                { "percentage", simulationDetails.Optimization_Percentage }
             };
             resultMap.Add("latestDetails", simulationDetailsMap);
 
@@ -384,10 +385,8 @@ namespace HydroFlowProject.Controllers
             {
                 return StatusCode(StatusCodes.Status400BadRequest, optimizationVM);
             }
-            var modelDetails = _context.Models.Find(optimizationVM.Model_Id);
 
-            var optimizationResult = ModelOptimization.Optimize(optimizationVM, modelDetails!);
-            return Ok(optimizationResult);
+            return Ok(ModelOptimization.Optimize(optimizationVM));
         }
 
         [HttpPost]

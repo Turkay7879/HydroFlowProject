@@ -42,6 +42,7 @@ class ModelDetailsModal extends React.Component {
                     date.setUTCHours(date.getUTCHours() + 3);
                     details.updateDate = date.toUTCString();
                     details.version = detailsData.latestDetails.version;
+                    details.percentage = detailsData.latestDetails.percentage;
                     details.modelType = detailsData.modelType;
                     details.parameters = detailsData.parameters;
                     details.userName = detailsData.user.name;
@@ -182,7 +183,7 @@ class ModelDetailsModal extends React.Component {
                     <span><b>Model: </b>{details.modelType}</span>
                 </div>
                 <div>
-                    <span><b>Data Percentage for Optimization: </b>{this.state.model.training_Percentage}%</span>
+                    <span><b>Data Percentage for Optimization: </b>{details.percentage}%</span>
                 </div>
                 <div>
                     <span><b>Parameters: </b></span>

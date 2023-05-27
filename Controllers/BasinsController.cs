@@ -192,7 +192,6 @@ namespace HydroFlowProject.Controllers
                         Title = model.Title,
                         ModelFile = "",
                         ModelPermissionId = model.ModelPermissionId,
-                        Training_Percentage = model.Training_Percentage,
                         SessionId = null,
                         BasinId = payload.BasinId
                     });

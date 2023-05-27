@@ -18,7 +18,6 @@ class AddModelModal extends React.Component {
                 CreateDate: null,
                 ModelFile: null,
                 ModelPermissionId: 0,
-                Training_Percentage: 80,
                 BasinId: 0
             },
             formInvalidFields: {
@@ -120,7 +119,6 @@ class AddModelModal extends React.Component {
             Title: model.Title,
             ModelFile: model.ModelFile,
             ModelPermissionId: model.ModelPermissionId,
-            Training_Percentage: model.Training_Percentage,
             SessionId: (JSON.parse(window.localStorage.getItem("hydroFlowSession"))).sessionId,
             BasinId: model.BasinId
         }

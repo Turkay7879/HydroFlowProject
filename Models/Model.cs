@@ -16,8 +16,6 @@ namespace HydroFlowProject.Models
 
         public int ModelPermissionId { get; set; }
 
-        public int Training_Percentage { get; set; }
-
         public virtual ICollection<BasinModel> BasinModels { get; } = new List<BasinModel>();
 
         public virtual ICollection<ModelModelType> ModelModelTypes { get; } = new List<ModelModelType>();
