@@ -353,12 +353,7 @@ class Optimization extends React.Component {
                         {
                             this.state.observedDataOptimization && this.state.predictedDataOptimization
                             && this.state.scatterDataOptimization && <div className={"view-statics-btn"}>
-                                <button
-                                    type="button"
-                                    className="btn btn-warning"
-                                    onClick={() => {}}>
-                                    View Statics
-                                </button>
+                              
                             </div>
                         }
                     </div>
@@ -406,6 +401,10 @@ class Optimization extends React.Component {
                         </div>
                     </div>
 
+                    <RightStatisticsMenu
+                        errorRates={this.state.errorRates}
+                    />
+                
 
                 </div>
             </>
