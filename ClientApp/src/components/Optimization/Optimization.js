@@ -321,54 +321,77 @@ class Optimization extends React.Component {
                     userModelList={this.state.userModels}
                     onSelectModel={(newModel) => this.changeSelectedModel(newModel)}
                 />
-                
-                <div className={"optimizations-container"}>
-                    <LeftOptionsMenu
-                        selectedModel={this.state.selectedModel}
-                        modelingType={this.state.modelingType}
-                        parameters={this.state.parameters}
-                        originalParameters={this.state.origParamList}
-                        onStartOptimize={this.runOptimization}
-                        onParameterChange={this.onParameterChange}
-                        isOptimizationRunning={this.state.runningOptimization}
-                    />
 
-                    <div className={"optimization-output-main-container"}>      
+                <div className={"optimizations-container"}>
+
+                    <div style={{flexDirection : "column" }}>
+
+                        <LeftOptionsMenu
+                            selectedModel={this.state.selectedModel}
+                            modelingType={this.state.modelingType}
+                            parameters={this.state.parameters}
+                            originalParameters={this.state.origParamList}
+                            onStartOptimize={this.runOptimization}
+                            onParameterChange={this.onParameterChange}
+                            isOptimizationRunning={this.state.runningOptimization}
+                        />
                         {
-                            this.state.observedDataOptimization && this.state.predictedDataOptimization && <>
-                                <h4> Optimization Results </h4>
-                                <LineChart
-                                    type1="Observed Streamflow"
-                                    actual={this.state.observedDataOptimization}
-                                    type2="Predicted Streamflow"
-                                    predicted={this.state.predictedDataOptimization}
-                                    date={null}/>
-                            </>
-                        }
-                        {
-                            this.state.scatterDataOptimization && <ScatterChart
-                                samples={this.state.scatterDataOptimization}/>
-                        }
-                        {
-                            this.state.observedDataVerification && this.state.predictedDataVerification && <>
-                                <h4> Verification Results </h4>
-                                <LineChart
-                                    type1="Observed Streamflow"
-                                    actual={this.state.observedDataVerification}
-                                    type2="Predicted Streamflow"
-                                    predicted={this.state.predictedDataVerification}
-                                    date={null}/>
-                            </>
-                        }
-                        {
-                            this.state.scatterDataVerification && <ScatterChart
-                                samples={this.state.scatterDataVerification}/>
+                            this.state.observedDataOptimization && this.state.predictedDataOptimization
+                            && this.state.scatterDataOptimization && <div className={"view-statics-btn"}>
+                                <button
+                                    type="button"
+                                    className="btn btn-warning"
+                                    onClick={() => {}}>
+                                    View Statics
+                                </button>
+                            </div>
                         }
                     </div>
+                    <div className={"optimization-output-main-container"}>
+                        {this.state.observedDataOptimization && this.state.predictedDataOptimization
+                            && this.state.scatterDataOptimization && (
+                                <h4 style={{marginBottom: "20px"}}>Optimization Results</h4>
+                            )}
+                        <div style={{ display: "flex" }}>
+                            {this.state.observedDataOptimization && this.state.predictedDataOptimization && (
+                                <div>
+                                    <LineChart
+                                        type1="Observed Streamflow"
+                                        actual={this.state.observedDataOptimization}
+                                        type2="Predicted Streamflow"
+                                        predicted={this.state.predictedDataOptimization}
+                                        date={null}
+                                    />
 
-                    <RightStatisticsMenu
-                        errorRates={this.state.errorRates}
-                    />
+                                </div>
+                            )}
+                            {this.state.scatterDataOptimization && (
+                                <ScatterChart samples={this.state.scatterDataOptimization} />
+                            )}
+                        </div>
+                        {this.state.observedDataVerification && this.state.predictedDataVerification
+                            && this.state.scatterDataVerification && (
+                                <h4 style={{marginBottom: "20px"}}>Verification Results</h4>
+                            )}
+                        <div style={{display: "flex"}}>
+                            {
+                                this.state.observedDataVerification && this.state.predictedDataVerification && <>
+                                    <LineChart
+                                        type1="Observed Streamflow"
+                                        actual={this.state.observedDataVerification}
+                                        type2="Predicted Streamflow"
+                                        predicted={this.state.predictedDataVerification}
+                                        date={null}/>
+                                </>
+                            }
+                            {
+                                this.state.scatterDataVerification && <ScatterChart
+                                    samples={this.state.scatterDataVerification}/>
+                            }
+                        </div>
+                    </div>
+
+
                 </div>
             </>
         );

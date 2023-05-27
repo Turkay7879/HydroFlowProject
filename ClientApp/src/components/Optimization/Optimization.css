@@ -49,7 +49,7 @@
 }
 
 .main-left-panel {
-    width: 25%;
+    width: 300px;
     height: fit-content;
     border: 3.5px solid #1b6ec2;
     border-radius: 10px;
@@ -82,7 +82,6 @@
 
 .optimize-button {
     align-self: center;
-    padding-left: 0.35rem;
     margin-top: 1.75rem;
 }
 
@@ -90,14 +89,20 @@
     align-self: center;
     margin-top: 1.75rem;
 }
+
+.view-statics-btn{
+    align-self: center;
+    margin-top: 1.75rem;
+    padding-left: 95px;
+}
+
 .optimization-output-main-container {
-    width: 50%;
+    width: 100%;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding-right: 1.5rem;
 }
 
 .statistics-main-container {
@@ -109,6 +114,8 @@
     vertical-align: top;
     margin-bottom: 1rem;
     margin-right: 0;
+    padding-bottom: 1rem;
+    padding-top: 1rem;
     text-align: left;
 }
 

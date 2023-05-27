@@ -117,6 +117,7 @@ namespace HydroFlowProject.Utilities
                 Debug.WriteLine($"Optimization RMSE: {rmseOptimization}, Verification RMSE: {rmseVerification}");
 
                 // Scatter chart data for optimization
+                // FIXME: değerlere bak
                 var scatterDataOptimization = new double[obsmmForOptimization.Length][][];
                 for (int j = 0; j < obsmmForOptimization.Length; j++)
                 {

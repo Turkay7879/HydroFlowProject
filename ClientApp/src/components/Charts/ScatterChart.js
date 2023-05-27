@@ -30,7 +30,7 @@ class ScatterChart extends Component {
                     }
                 },
                 yaxis: {
-                    tickAmount: 7
+                    tickAmount: 5
                 }
             },
 
