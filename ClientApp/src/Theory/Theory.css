@@ -1,0 +1,37 @@
+﻿.theory-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.model-image {
+    width: 50%;
+    height: auto;
+    margin: 20px 0;
+}
+.larger-title {
+    font-size: 2.5rem;
+}
+
+
+.section {
+    margin-bottom: 30px;
+}
+
+    .section h3 {
+        margin-bottom: 10px;
+    }
+
+    .section ul {
+        list-style-type: disc;
+        margin-left: 20px;
+    }
+
+    .section ol {
+        list-style-type: decimal;
+        margin-left: 20px;
+    }
+
+    .section p {
+        margin-top: 10px;
+    }
