@@ -33,6 +33,7 @@ namespace HydroFlowProject.Controllers
         }
 
         // GET: Models
+        //// Get all models from the database 
         [HttpGet]
         [Route("getAllModels")]
         public ActionResult<Model> GetAllModels()
@@ -60,9 +61,11 @@ namespace HydroFlowProject.Controllers
                 return Ok(models.ToJson());
             }
         }
-        
+
 
         // POST: Save new model
+        //// Save a new model 
+        // Check if user is allowed to create more than MAX_MODEL_NUM_CREATED_BY_NORMAL_USERS_IN_A_DAY models 
         [HttpPost]
         [Route("saveModel")]
         public async Task<ActionResult<ModelViewModel>> SaveModel([FromBody] ModelViewModel modelVM)
@@ -141,7 +144,8 @@ namespace HydroFlowProject.Controllers
             modelVM.SessionId = "";
             return Ok(modelVM);
         }
-
+        // Get model parameters for given model and user IDs  
+        // Find model parameters matching the given IDs
         [HttpPost]
         [Route("getModelParameters")]
         public ActionResult<ModelParameterViewModel> GetModelParameters([FromBody] Dictionary<string, int> modelUserIds)
@@ -156,7 +160,12 @@ namespace HydroFlowProject.Controllers
             };
             return Ok(modelParameters);
         }
-
+        // Save updated model parameters
+        // Find related user and model 
+        // Deserialize parameter JSON
+        // Update parameters in database
+        // Save a new simulation details record
+        // Save changes
         [HttpPost]
         [Route("saveModelParameters")]
         public async Task<ActionResult<ModelParameterSaveViewModel>> SaveModelParameters([FromBody] ModelParameterSaveViewModel modelParameters)
@@ -210,7 +219,9 @@ namespace HydroFlowProject.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, modelParameters);
             }
         }
-        
+        // Download model data for given model ID 
+        // Find model with given ID  
+
         [HttpPost]
         [Route("downloadModelData")]
         public async Task<ActionResult<ModelViewModel>> DownloadModelData([FromBody] int Id)
@@ -224,8 +235,12 @@ namespace HydroFlowProject.Controllers
             modelVM.ModelFile = Convert.ToBase64String(foundModel.ModelFile);
             return Ok(modelVM);
         }
-        
-        // DELETE: Delete a model
+
+        // Delete model with given ID
+        // Find model with given ID     
+        // Remove related data  
+        // Save changes      
+        // Return result
         [HttpDelete]
         [Route("deleteModel")]
         public async Task<ActionResult<Model>> DeleteModel([FromBody] int Id)
@@ -258,7 +273,12 @@ namespace HydroFlowProject.Controllers
             }
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
-
+        // Get all models for given user 
+        // Find user session by session ID
+        // Get all user models for that user 
+        // If no models exist, return empty array
+        // For each user model, get related model data  
+        // Return list of model view models
         [HttpPost]
         [Route("getModelsOfUser")]
         public async Task<ActionResult<ModelViewModel>> GetModelsOfUser([FromBody] SessionViewModel session)
@@ -290,7 +310,13 @@ namespace HydroFlowProject.Controllers
 
             return Ok(modelList);
         }
-
+        // Get details of model for given model and user IDs
+        // Find model by ID   
+        // Get model parameters  
+        // Get model type   
+        // Get user details
+        // Get latest simulation details
+        // Return result map  
         [HttpPost]
         [Route("getDetailsOfModel")]
         public async Task<ActionResult<Dictionary<string, object>>> GetDetailsOfModel([FromBody] Dictionary<string, int> idMap)
@@ -375,7 +401,10 @@ namespace HydroFlowProject.Controllers
 
             return Ok(resultMap);
         }
-
+        // Optimize model using optimization algorithm
+        // Check if given model type exists  
+        // Call optimization function
+        // Return optimized values
         [HttpPost]
         [Route("optimize")]
         public ActionResult<OptimizationViewModel> Optimize([FromBody] OptimizationViewModel optimizationVM)
@@ -388,7 +417,10 @@ namespace HydroFlowProject.Controllers
 
             return Ok(ModelOptimization.Optimize(optimizationVM));
         }
-
+        // Check if user has access to given model  
+        // If not, add user model record  
+        // Add default parameters for user  
+        // Save changes  
         [HttpPost]
         [Route("checkModelsOfUser")]
         public async Task<ActionResult<UserModel>> CheckModelsOfUser([FromBody] CheckModelsOfUserViewModel checkModelsOfUserVM)

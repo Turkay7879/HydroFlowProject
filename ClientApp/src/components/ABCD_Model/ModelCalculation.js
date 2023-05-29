@@ -2,6 +2,7 @@
 import { read, utils } from 'xlsx';
 
 class ModelCalculation extends React.Component {
+      // Constructor initializes the state    
     constructor(props) {
         super(props);
         this.state = {
@@ -14,6 +15,7 @@ class ModelCalculation extends React.Component {
     }
     
     componentDidMount() {
+        // Initialize state from props
         this.setState({ 
             modelData: this.props.modelData,
             parameters: this.props.parameters
@@ -33,8 +35,12 @@ class ModelCalculation extends React.Component {
     }
 
     startOperations = () => {
+           // Convert Excel data to JSON
         const data = this.convertData(this.state.modelData);
+          // Calculate results 
         const result = this.calculateResult(data);
+            // Update state with results and call props callbacks
+
         this.setState({
             showResult: true,
             result
@@ -76,7 +82,7 @@ class ModelCalculation extends React.Component {
         return <></>
     }
 
-    // Veri dönüşümü işlemleri
+    // This function is used to manipulate a data model. It retrieves the data from an Excel file and creates an object containing column headers and related data. It then returns this object.
     convertData = (modelData) => {
         const workbook = read(modelData, { type: "base64" });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -93,7 +99,6 @@ class ModelCalculation extends React.Component {
             let isUndefined = false;
 
             for(let j = 0; j < row.length; j++){
-                //console.log("row: ", row[j]);
                 if(row[j] === undefined){
                     isUndefined = true;
                     break;
@@ -103,14 +108,13 @@ class ModelCalculation extends React.Component {
             if(!isUndefined){
                 headers.forEach((header, index) => {
                     columnData[header].push(row[index]);
-                    //console.log("header: ", header);
-                    //console.log("excel: ", row[index]);
+                    
                 });
             }
 
         }
 
-        ////tarih
+        ////Conversion operations were made due to different coding of dates in Excel
         const T = [];
         for (let i = 0; i < columnData.Date.length; i++) {
             let dateInt = columnData.Date[i];
@@ -146,7 +150,7 @@ class ModelCalculation extends React.Component {
         };
     }
 
-    // Hesaplama işlemleri
+    //Calculation Operations
     calculateResult = (data) => {
         const { T, P, PET, Obsmm, G, S, A, B, C, D } = data;
 
@@ -161,14 +165,14 @@ class ModelCalculation extends React.Component {
         const actualC = C;
         const actualD = D;
 
-        // Parametre tahmini işlemleri
+        // Parameter estimation operations
         let predictionArray = this.createPredictionArray();
         let paramA = predictionArray.A;
         let paramB= predictionArray.B;
         let paramC = predictionArray.C;
         let paramD = predictionArray.D;
 
-        ////calibrasyon
+        ////Calibrasyon Operations
         const calibratedvalues = this.calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
         const optimized_A = this.state.enableOptimization === true ? calibratedvalues.predictedA : actualA;
         const optimized_B = this.state.enableOptimization === true ? calibratedvalues.predictedB : actualB;
@@ -198,6 +202,7 @@ class ModelCalculation extends React.Component {
             Qmodelt[i] = (DRt[i] + GDt[i]);
         }
 
+        ///Statistics For Calibration Values
         let statistics = {
             qModelDeviation: this.calculateSampleStandardDeviation(Qmodelt),
             pDeviation: this.calculateSampleStandardDeviation(P),
@@ -231,6 +236,9 @@ class ModelCalculation extends React.Component {
         };
     }
 
+    /*Various helper methods are included to calculate statistical measures such as skewness, standard deviation, bias, and RMSE (Root Mean Square Error). Additionally, there is a method for calculating NSE (Nash-Sutcliffe Efficiency) and R2 (coefficient of determination).*/
+
+    //This function calculates the skewness of a given set of numbers. Skewness is a measure of the asymmetry of the distribution of the data.
     calculateSkewness(numbers) {
         const n = numbers.length;
         const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
@@ -245,7 +253,7 @@ class ModelCalculation extends React.Component {
 
         return skewness;
     }
-
+    ////Calculate Standart Deviation
     calculateSampleStandardDeviation(numbers) {
         const n = numbers.length;
         const mean = numbers.reduce((acc, val) => acc + val, 0) / n;
@@ -257,22 +265,14 @@ class ModelCalculation extends React.Component {
         const standardDeviation = Math.sqrt(variance);
         return standardDeviation;
     }
-    //Bias Formula 
-    calculateBias(predictedValue, observedValue) {
-        const bias = ((predictedValue - observedValue) / observedValue) * 100;
-        return bias;
-    }
-  
+   
+  //Rmse and Nse values were calculated using prediction arrays and actual values. Other statistical operations were also calculated for this step.
+
     calibrateFunction(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD) {
         ///Et, P, Obsmm, Qmodelt
         const rmse = this.calculateRMSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
-        console.log("RMSE value: ", rmse);
         const nse = this.calculateNSE(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD);
-        console.log("NSE value: ", nse);
-        const bias = this.calculateBias(paramB, actualB);
-        console.log("bias", bias);
-        const r2 = this.calculateR2(paramB, actualB);
-        console.log("r2", r2);
+       
 
         this.setState({
             rmse_CalibrateOnly: rmse,
@@ -283,23 +283,14 @@ class ModelCalculation extends React.Component {
         return this.optimizeParameters(paramA, paramB, paramC, paramD, actualA, actualB, actualC, actualD, 0.01);
     }
 
-    calculateR2(actual, predicted) {
-        const actualMean = actual.reduce((a, b) => a + b, 0) / actual.length;
-        const ssTotal = actual.reduce((a, b) => a + Math.pow((b - actualMean), 2), 0);
-        const ssResidual = actual.reduce((a, b, i) => a + Math.pow((b - predicted[i]), 2), 0);
-        const r2 = 1 - (ssResidual / ssTotal);
-        return r2;
-    }
-
-
-    ///arayüz için 
+  ///This is used for average calculation for the interface.
     calculateAverage(numbers) {
         const sum = numbers.reduce((acc, val) => acc + val, 0);
         const average = sum / numbers.length;
         return average;
     }
    
-
+    ///This used for average calculation for the arrays.
     average(actualA, actualB, actualC, actualD) {
         let sum = 0;
 
@@ -312,6 +303,8 @@ class ModelCalculation extends React.Component {
 
         return sum / (1 * 4);
     }
+
+    ////This function calculates the Root Mean Squared Error (RMSE) between predicted and actual values. It takes in predicted values for four variables (A, B, C, D) and their corresponding actual values.
     calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
 
         let sumSquare = 0.0;
@@ -326,20 +319,7 @@ class ModelCalculation extends React.Component {
         return rmse;
     }
 
-    calculateRMSE2(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
-
-        let sumSquare = 0.0;
-        sumSquare += (predictedA - actualA) ** 2;
-        sumSquare += (predictedB - actualB) ** 2;
-        sumSquare += (predictedC - actualC) ** 2;
-        sumSquare += (predictedD - actualD) ** 2;
-
-        const n = 4;
-        const meanSquare = sumSquare / n;
-        const rmse = Math.sqrt(meanSquare);
-        return rmse;
-    }
-    
+    ///Random numbers were assigned into the prediction arrays according to the range of parameters A,B,C,D.l
     createPredictionArray() {
         const predictionArray = {
             A: [],
@@ -355,6 +335,8 @@ class ModelCalculation extends React.Component {
 
         return predictionArray;
     }
+
+    ///This function calculates the Normalized Squared Error (NSE) between predicted and actual values. It takes in predicted values for four variables (A, B, C, D) and their corresponding actual values.
     calculateNSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
         let sumSquare = 0.0;
         let actualSumSquare = 0.0;
@@ -372,88 +354,7 @@ class ModelCalculation extends React.Component {
 
         return 1 - (sumSquare / actualSumSquare);
     }
-    calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
-        var error = predictedB[0] - actualB[0];
-        var partialDerivative = 2 * error;
-        return partialDerivative;
-    }
-
-    calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
-        var error = predictedC[0] - actualC[0];
-        var partialDerivative = 2 * error;
-        return partialDerivative;
-    }
-
-    calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
-        var error = predictedD[0] - actualD[0];
-        var partialDerivative = 2 * error;
-        return partialDerivative;
-    }
-
-    calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD) {
-        var error = predictedA[0] - actualA[0];
-        var partialDerivative = 2 * error;
-        return partialDerivative;
-    }
-
-    optimizeParameters(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD, learningRate, targetRMSE) {
-        let currentRMSE = this.calculateRMSE(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-        console.log("currentRMSE:", currentRMSE);
-        let currentNSE = null;
-
-        let delta = Number.MAX_SAFE_INTEGER;
-        let prevDelta = Number.MAX_SAFE_INTEGER;
-        let iteration = 0;
-        const maxIterations = 1000;
-        const deltaThreshold = 0.001;
-        const maxDeltaConvergenceIterations = 10;
-
-        while (delta > deltaThreshold) {
-            // A, B, C ve D değerlerini güncelle
-            const partialDerivativeA = this.calculatePartialDerivativeA(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            const partialDerivativeB = this.calculatePartialDerivativeB(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            const partialDerivativeC = this.calculatePartialDerivativeC(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            const partialDerivativeD = this.calculatePartialDerivativeD(predictedA, predictedB, predictedC, predictedD, actualA, actualB, actualC, actualD);
-            const newPredictedA = predictedA - learningRate * partialDerivativeA;
-            const newPredictedB = predictedB - learningRate * partialDerivativeB;
-            const newPredictedC = predictedC - learningRate * partialDerivativeC;
-            const newPredictedD = predictedD - learningRate * partialDerivativeD;
-
-            // RMSE değerini hesapla
-            const newRMSE = this.calculateRMSE2(newPredictedA, newPredictedB, newPredictedC, newPredictedD, actualA, actualB, actualC, actualD);
-            const newNSE = this.calculateNSE(newPredictedA, newPredictedB, newPredictedC, newPredictedD, actualA, actualB, actualC, actualD);
-
-            // Delta değerini hesapla
-            delta = Math.abs(predictedA - newPredictedA) + Math.abs(predictedB - newPredictedB) + Math.abs(predictedC - newPredictedC) + Math.abs(predictedD - newPredictedD);
-
-            // Eğer delta eşik değerinin altında ise ya da önceki iterasyonlarda delta değeri yeterince azalmışsa optimizasyonu durdur
-            if (delta < deltaThreshold || (iteration > maxDeltaConvergenceIterations && delta >= prevDelta)) {
-                console.log("Optimization converged after " + iteration + "iterations.Delta value: " + delta);
-                break;
-            }    // Yeni parametre değerlerini kaydet
-            predictedA[0] = newPredictedA;
-            predictedB[0] = newPredictedB;
-            predictedC[0] = newPredictedC;
-            predictedD[0] = newPredictedD;
-
-            // RMSE/NSE değerini güncelle
-            currentRMSE = newRMSE;
-            currentNSE = newNSE;
-
-            // Delta değerini kaydet
-            prevDelta = delta;
-
-            iteration++;
-
-            if (iteration >= maxIterations) {
-                console.log("Maximum iterations reached");
-                break;
-            }
-        }
-
-        console.log("Optimization completed after " + iteration + " iterations. Final RMSE: " + currentRMSE);
-        return { currentRMSE, currentNSE, predictedA, predictedB, predictedC, predictedD };
-    }
+   
    
     render() {
         return <>
