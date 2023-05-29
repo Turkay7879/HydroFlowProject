@@ -1,7 +1,6 @@
 import React from "react";
 import ModelSelectorPane from "./ModelSelectorPane";
 import LeftOptionsMenu from "./LeftOptionsMenu";
-import RightStatisticsMenu from "./RightStatisticsMenu";
 import LineChart from "../Charts/LineChart";
 import ScatterChart from "../Charts/ScatterChart";
 import OptimizationRemote from "./flux/remote/OptimizationRemote";
@@ -10,6 +9,7 @@ import ModelsRemote from "../Models/flux/ModelsRemote";
 import Swal from "sweetalert2";
 import {Navigate} from "react-router-dom";
 import { read, utils } from 'xlsx';
+import StatisticsModal from "./StatisticsModal";
 
 class Optimization extends React.Component {
     constructor(props) {
@@ -52,7 +52,10 @@ class Optimization extends React.Component {
             scatterDataOptimization: null,
             scatterDataVerification: null,
             samples: null,
-            runningOptimization: false
+            runningOptimization: false,
+            showStatisticsModal: false,
+            dates: null,
+            optimizationPercentage: 0,
         };
     }
     
@@ -192,7 +195,7 @@ class Optimization extends React.Component {
         return null;
     }
 
-    convertData = () => {
+    convertData = (percentage) => {
         const workbook = read(this.state.modelData, { type: "base64" });
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = utils.sheet_to_json(worksheet, { header: 1 });
@@ -225,13 +228,27 @@ class Optimization extends React.Component {
         const p = [];
         const pet = [];
         const obsmm = [];
+        const dates = [];
         columnData.Obsmm.forEach((item, index) => {
             if (typeof(item) !== 'undefined') {
                 p.push(columnData.P[index]);
                 pet.push(columnData.PET[index]);
                 obsmm.push(columnData.Obsmm[index]);
+
+                let dateInt = columnData.Date[index];
+                const excelSerialDate = new Date(Date.UTC(1899, 11, 30));
+                const excelSerialDay = Math.floor(dateInt);
+                const jsDate = new Date(excelSerialDate.getTime() + (excelSerialDay * 86400000));
+                const day = ('0' + jsDate.getDate()).slice(-2);
+                const month = ('0' + (jsDate.getMonth() + 1)).slice(-2);
+                const year = jsDate.getFullYear();
+
+                const formattedDate = day + '.' + month + '.' + year;
+                dates.push(formattedDate);
             }
         });
+
+        this.setState({ dates: dates, optimizationPercentage: percentage });
 
         return {
             P: p,
@@ -241,7 +258,7 @@ class Optimization extends React.Component {
     }
     
     runOptimization = (percentage) => {
-        let { P, PET, Obsmm } = this.convertData();
+        let { P, PET, Obsmm } = this.convertData(percentage);
 
         let payload = {
             Model_Id: this.state.selectedModel.id,
@@ -327,6 +344,10 @@ class Optimization extends React.Component {
             scatterDataVerification: verificationScatter,
         });
     }
+
+    toggleStatisticsModal = () => {
+        this.setState({ showStatisticsModal: !this.state.showStatisticsModal });
+    }
     
     render() {
         return this.state.loadingPage ? <></> : 
@@ -340,7 +361,6 @@ class Optimization extends React.Component {
 
                 <div className={"optimizations-container"}>
                     <div style={{flexDirection : "column" }}>
-
                         <LeftOptionsMenu
                             selectedModel={this.state.selectedModel}
                             modelingType={this.state.modelingType}
@@ -349,18 +369,29 @@ class Optimization extends React.Component {
                             onStartOptimize={(percentage) => this.runOptimization(percentage)}
                             onParameterChange={this.onParameterChange}
                             isOptimizationRunning={this.state.runningOptimization}
+                            dates={this.state.dates}
                         />
+                        <div className="statistics-btn-div">
+                            <button
+                                type="button" 
+                                className="btn btn-primary"
+                                disabled={!this.state.errorRates.optimization.rmse && !this.state.errorRates.verification.rmse}
+                                onClick={this.toggleStatisticsModal}>
+                                    Statistics
+                            </button>
+                        </div>
                         {
-                            this.state.observedDataOptimization && this.state.predictedDataOptimization
-                            && this.state.scatterDataOptimization && <div className={"view-statics-btn"}>
-                              
-                            </div>
+                            this.state.showStatisticsModal && <StatisticsModal
+                                showModal={this.state.showStatisticsModal}
+                                errorRates={this.state.errorRates}
+                                onDismiss={this.toggleStatisticsModal}
+                            />
                         }
                     </div>
                     <div className={"optimization-output-main-container"}>
                         {this.state.observedDataOptimization && this.state.predictedDataOptimization
                             && this.state.scatterDataOptimization && (
-                                <h4 style={{marginBottom: "20px"}}>Optimization Results</h4>
+                                <h4 style={{marginBottom: "20px"}}>Auto-Calibration Results</h4>
                             )}
                         <div style={{ display: "flex" }}>
                             {this.state.observedDataOptimization && this.state.predictedDataOptimization && (
@@ -370,7 +401,9 @@ class Optimization extends React.Component {
                                         actual={this.state.observedDataOptimization}
                                         type2="Predicted Streamflow"
                                         predicted={this.state.predictedDataOptimization}
-                                        date={null}
+                                        date={this.state.dates && this.state.optimizationPercentage !== 0 && this.state.dates
+                                            .map(item => item.split(".").at(1) + "." + item.split(".").at(2))
+                                            .slice(0, this.state.dates.length * this.state.optimizationPercentage / 100)}
                                     />
 
                                 </div>
@@ -391,7 +424,9 @@ class Optimization extends React.Component {
                                         actual={this.state.observedDataVerification}
                                         type2="Predicted Streamflow"
                                         predicted={this.state.predictedDataVerification}
-                                        date={null}/>
+                                        date={this.state.dates && this.state.optimizationPercentage !== 0 && this.state.dates
+                                            .map(item => item.split(".").at(1) + "." + item.split(".").at(2))
+                                            .slice(this.state.dates.length * this.state.optimizationPercentage / 100)}/>
                                 </>
                             }
                             {
@@ -400,12 +435,6 @@ class Optimization extends React.Component {
                             }
                         </div>
                     </div>
-
-                    <RightStatisticsMenu
-                        errorRates={this.state.errorRates}
-                    />
-                
-
                 </div>
             </>
         );

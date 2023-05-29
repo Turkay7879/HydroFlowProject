@@ -13,7 +13,8 @@ class LeftOptionsMenu extends React.Component {
             selectedModel: null,
             modelingType: null,
             percentage: 80,
-            runningOptimization: false
+            runningOptimization: false,
+            dates: props.dates,
         };
     }
     
@@ -42,6 +43,9 @@ class LeftOptionsMenu extends React.Component {
         }
         if (prevProps.originalParameters !== this.props.originalParameters) {
             this.setState({ originalParamList: this.props.originalParameters });
+        }
+        if (prevProps.dates !== this.props.dates) {
+            this.setState({ dates: this.props.dates });
         }
     }
 
@@ -75,13 +79,15 @@ class LeftOptionsMenu extends React.Component {
             Parameter_Map.set(initialGt.parameter_Id, this.state.parameters.initialGt);
         }
 
+        const optimizationDateRange = this.state.dates.at(0) + ' - ' + this.state.dates.at(this.state.dates.length * this.state.percentage / 100);
         let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
         let payload = {
             User_Id: session.sessionUserId,
             Model_Id: this.state.selectedModel.id,
             Model_Name: this.state.selectedModel.name,
             Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map)),
-            Optimization_Percentage: this.state.percentage
+            Optimization_Percentage: this.state.percentage,
+            Date_Range: optimizationDateRange
         }
         OptimizationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
@@ -184,7 +190,7 @@ class LeftOptionsMenu extends React.Component {
                     </div>
                     <div className={"single-slider-container"}>
                         <span>
-                            Data % For Optimization: {percentage}
+                            Data % For Auto-Calibration: {percentage}
                         </span>
                         <Slider
                             aria-label="Optimization Percentage Slider"
@@ -226,7 +232,7 @@ class LeftOptionsMenu extends React.Component {
                         <div className={"save-button"}>
                             <Button
                                 color="success"
-                                disabled={this.state.isRunning || !this.state.selectedModel}
+                                disabled={this.state.isRunning || !this.state.selectedModel || !this.state.dates}
                                 onClick={this.onClickSave}>
                                 <SaveOutlined/>
                                 <span>

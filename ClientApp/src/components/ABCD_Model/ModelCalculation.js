@@ -47,7 +47,7 @@ class ModelCalculation extends React.Component {
         }, () => {
             let Obsmm = this.state.result.Obsmm;
             let Qmodelt = this.state.result.Qmodelt;
-            let T = this.state.result.T.map(modelDate => modelDate.split(".").at(2))
+            let T = this.state.result.T.map(modelDate => modelDate.split(".").at(1) + "." + modelDate.split(".").at(2))
 
             let resultToReturn = {
                 type1: "Observed Streamflow",

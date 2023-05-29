@@ -55,7 +55,7 @@
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 1rem 0 1rem 0;
 }
 
 .main-left-panel > h4 {
@@ -151,4 +151,11 @@
 
 .standart-deviation-optimization > span {
     margin-left: 2rem;
+}
+
+.statistics-btn-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
 }

@@ -95,7 +95,6 @@ class Calibration extends React.Component {
     }
 
     onCalibrationScatter = (result) => {
-        console.log(result.samples)
         this.setState({
             samples: result.samples
         });

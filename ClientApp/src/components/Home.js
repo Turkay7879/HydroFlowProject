@@ -124,7 +124,7 @@ export class Home extends Component {
                     this.state.addBasin && <AddBasinModal
                         showModal={this.state.addBasin}
                         onDismiss={(result) => {
-                            if (result && result === true) {
+                            if (result && typeof(result) === 'boolean' && result === true) {
                                 this.toggleAddBasinModal();
                                 window.location.reload();
                             } else {

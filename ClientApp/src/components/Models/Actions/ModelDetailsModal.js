@@ -47,6 +47,7 @@ class ModelDetailsModal extends React.Component {
                     details.parameters = detailsData.parameters;
                     details.userName = detailsData.user.name;
                     details.userMail = detailsData.user.email;
+                    details.dateRange = detailsData.latestDetails.dateRange;
 
                     this.setState({ details: details });
                 });
@@ -183,7 +184,10 @@ class ModelDetailsModal extends React.Component {
                     <span><b>Model: </b>{details.modelType}</span>
                 </div>
                 <div>
-                    <span><b>Data Percentage for Optimization: </b>{details.percentage}%</span>
+                    <span><b>Data Percentage for Auto-Calibration: </b>{details.percentage}%</span>
+                </div>
+                <div>
+                    <span><b>Auto-Calibration Date Range: </b>{details.dateRange}</span>
                 </div>
                 <div>
                     <span><b>Parameters: </b></span>

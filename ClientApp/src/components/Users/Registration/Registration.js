@@ -72,17 +72,25 @@ class Registration extends React.Component {
                         });
                     });
                 } else {
-                    SessionsRemote.loginUser({
-                        Email: userToRegister.Email,
-                        Password: userToRegister.Password
-                    }, (result) => {
-                        if (result) {
-                            this.setState({ 
-                                validSessionPresent: true,
-                                registering: false
+                    Swal.fire({
+                        title: "Registered Successfully",
+                        text: "Registration is completed! You will be redirected to Home page now.",
+                        icon: "success"
+                    }).then((value) => {
+                        if (value.isConfirmed) {
+                            SessionsRemote.loginUser({
+                                Email: userToRegister.Email,
+                                Password: userToRegister.Password
+                            }, (result) => {
+                                if (result) {
+                                    this.setState({ 
+                                        validSessionPresent: true,
+                                        registering: false
+                                    });
+                                }
                             });
-                        }
-                    })
+                        }   
+                    });
                 }
             });
         });

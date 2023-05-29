@@ -7,4 +7,5 @@ public class ModelParameterSaveViewModel
     public string Model_Name { get; set; } = null!;
     public string Parameter_Map { get; set; } = null!;
     public int Optimization_Percentage { get; set; }
+    public string Date_Range { get; set; } = null!;
 }

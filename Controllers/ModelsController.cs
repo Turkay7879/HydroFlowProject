@@ -206,7 +206,8 @@ namespace HydroFlowProject.Controllers
                     Model_Id = relatedModel.Id,
                     Model_Name = relatedModel.Name,
                     Version = 0,
-                    Optimization_Percentage = modelParameters.Optimization_Percentage
+                    Optimization_Percentage = modelParameters.Optimization_Percentage,
+                    Simulation_Date_Range = modelParameters.Date_Range
                 };
                 _context.SimulationDetails.Add(simulationDetails);
 
@@ -335,6 +336,13 @@ namespace HydroFlowProject.Controllers
             if (userIdFromMap != 0)
             {
                 modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId && mp.User_Id == userIdFromMap);
+                
+                // This user has to have permission(s) to see this model on the list
+                if (modelParameters.Count == 0)
+                {
+                    var permitterUserId = _context.UserUserPermissions.ToList().Find(uup => uup.ModelId == modelId && uup.PermittedUserId == userIdFromMap)!.UserId;
+                    modelParameters = _context.ModelParameters.ToList().FindAll(mp => mp.Model_Id == modelId && mp.User_Id == permitterUserId);
+                }
             } 
             else
             {
@@ -395,7 +403,8 @@ namespace HydroFlowProject.Controllers
                 { "modelName", simulationDetails.Model_Name },
                 { "version", simulationDetails.Version },
                 { "updateDate", simulationDetails.Simulation_Date! },
-                { "percentage", simulationDetails.Optimization_Percentage }
+                { "percentage", simulationDetails.Optimization_Percentage },
+                { "dateRange", simulationDetails.Simulation_Date_Range }
             };
             resultMap.Add("latestDetails", simulationDetailsMap);
 

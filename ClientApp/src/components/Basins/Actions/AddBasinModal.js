@@ -62,8 +62,8 @@ class AddBasinModal extends React.Component {
         </ModalFooter>
     }
 
-    dismissModal = () => {
-        this.setState({showModal: false}, () => this.props.onDismiss());
+    dismissModal = (status) => {
+        this.setState({showModal: false}, () => this.props.onDismiss(status));
     }
 
     checkBasin = () => {

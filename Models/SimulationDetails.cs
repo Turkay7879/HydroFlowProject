@@ -9,6 +9,7 @@
         public int Optimization_Percentage { get; set; }
         public long Version { get; set; }
         public DateTime? Simulation_Date { get; set; }
+        public string Simulation_Date_Range { get; set; } = null!;
 
         public virtual Model Model { get; set; } = null!;
         public virtual User User { get; set; } = null!;
