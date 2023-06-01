@@ -22,7 +22,8 @@ class Registration extends React.Component {
             registering: false
         }
     }
-    
+
+    //session validity is checked
     componentDidMount() {
         let session = window.localStorage.getItem("hydroFlowSession");
         if (session !== null) {
@@ -31,6 +32,7 @@ class Registration extends React.Component {
         }
     }
 
+    //saves the user if the user information is entered without errors
     register = () => {
         if (!this.state.name || this.state.name.trim().length === 0 ||
             !this.state.surname || this.state.surname.trim().length === 0 ||
@@ -96,6 +98,7 @@ class Registration extends React.Component {
         });
     }
 
+    //displays the registration form after checking the session
     render() {
         return this.state.validSessionPresent ? <Navigate to={"/"}/> : (
             <div className="registerContainer">

@@ -26,7 +26,7 @@ namespace HydroFlowProject.Controllers
             _context = context;
         }
 
-        //GET: Users
+        //GET: Get all users
         [HttpGet]
         [Route("getAllUsers")]
         public string GetAllUsers()
@@ -123,6 +123,7 @@ namespace HydroFlowProject.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
+        // POST: set data and simulation permissions for a user
         [HttpPost]
         [Route("givePermissionsToUser")]
         public async Task<ActionResult<UserUserPermissionViewModel>> GivePermissionsToUser([FromBody] UserUserPermissionViewModel permissionViewModel)
@@ -178,33 +179,7 @@ namespace HydroFlowProject.Controllers
             return Ok(permission);
         }
 
-        [HttpPost]
-        [Route("getUserById")]
-        public async Task<ActionResult<UserModel>> GetUserById([FromBody] GetUserByIdViewModel getUserByIdVM)
-        {
-            var userInfo = new UserViewModel();
-            var foundUser = await _context.Users.FindAsync(getUserByIdVM.UserId);
-            if (foundUser != null)
-            {
-                userInfo = new UserViewModel
-                {
-                    Id = foundUser.Id,
-                    Name = foundUser.Name,
-                    Surname = foundUser.Surname,
-                    CorporationName = foundUser.CorporationName,
-                    Email = foundUser.Email,
-                    Password = "",
-                    Consent = false
-                };
-            }
-            else
-            {
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
-
-            return Ok(userInfo);
-        }
-
+        // POST: Checking which permissions the user has in the model
         [HttpPost]
         [Route("checkUserPermissionsForModels")]
         public async Task<ActionResult<List<UserUserPermissionViewModel>>> CheckUserPermissionsForModels([FromBody] UserPermissionCheckViewModel checkViewModel)

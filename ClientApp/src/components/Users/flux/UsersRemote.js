@@ -1,6 +1,9 @@
 import RemoteRequestURLs from "../../Constants/RemoteRequestURLs";
 
 const UsersRemote = {
+
+    //a request is created to the .net side for operations such as getting data about the user, updating them.
+
     getAllUsers: async () => {
         let requestUrl = RemoteRequestURLs.USER_GET_ALL_USERS;
         return await fetch(requestUrl);
@@ -43,18 +46,6 @@ const UsersRemote = {
     },
     checkUserPermissionsForModels: async (payload) => {
         let requestUrl = RemoteRequestURLs.USER_CHECK_USER_PERMISSIONS_FOR_MODELS;
-        return await fetch(requestUrl, {
-            method: 'POST',
-            mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
-        });
-    },
-    getUserById: async (payload) => {
-        let requestUrl = RemoteRequestURLs.USER_GET_USER_BY_ID;
         return await fetch(requestUrl, {
             method: 'POST',
             mode: 'cors',

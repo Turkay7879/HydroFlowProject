@@ -22,12 +22,7 @@ class ScatterChart extends Component {
                     }
                 },
                 xaxis: {
-                    tickAmount: 10,
-                    labels: {
-                        formatter: function(val) {
-                            return parseFloat(val).toFixed(1)
-                        }
-                    }
+                    tickAmount: 10
                 },
                 yaxis: {
                     tickAmount: 5
@@ -37,7 +32,8 @@ class ScatterChart extends Component {
 
         };
     }
-    
+
+    //series in state is updated with data which came from props
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.samples !== this.props.samples) {
             let series = [{ name: "x-observed y-simulated", data: this.props.samples }];
@@ -45,6 +41,7 @@ class ScatterChart extends Component {
         }
     }
 
+    //displays scatter chart component
     render() {
         return (
             <div id="chart">

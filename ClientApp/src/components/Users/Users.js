@@ -24,34 +24,43 @@ class Users extends React.Component {
         };
     }
 
+    //session status is checked
     componentDidMount() {
         this.checkPermissions();
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
+        //fetches updated user information if new user is registered
         if (this.state.savedUser) {
             this.refreshData();
             this.setState({ savedUser: false });
         }
+        //fetches user information if current state is active
         if (!prevState.validSessionPresent && !prevState.authorizedToView &&
             this.state.validSessionPresent && this.state.authorizedToView) {
             this.refreshData();
         }
     }
 
+    //checks the validity of the user's session
     checkPermissions = () => {
         let session = window.localStorage.getItem("hydroFlowSession");
         if (session !== null) {
+            //request for session validate
             SessionsRemote.validateSession(session, (status) => {
+                //current session is valid
                 if (status) {
                     this.setState({ validSessionPresent: true }, () => {
                         let sessionData = JSON.parse(session);
                         this.setState({
+                            //admin authority is checked
                             authorizedToView: sessionData && sessionData.allowedRole && sessionData.allowedRole === "sysadmin",
                             loadingPage: false
                         }, () => this.refreshData())
                     });
-                } else {
+                }
+                //session is expired
+                else {
                     window.localStorage.removeItem("hydroFlowSession");
                     SessionsRemote.logoutUser(session).then(response => {
                         Swal.fire({
@@ -67,7 +76,9 @@ class Users extends React.Component {
                     });
                 }
             });
-        } else {
+        }
+        //no valid session
+        else {
             this.setState({ 
                 loadingPage: false,
                 validSessionPresent: false
@@ -75,6 +86,7 @@ class Users extends React.Component {
         }
     }
 
+    //request returns all user informations in json format
     refreshData = async () => {
         UsersRemote.getAllUsers()
             .then((response) => {
@@ -93,6 +105,7 @@ class Users extends React.Component {
             });
     }
 
+    //updates the prop holding the visibility state of the addUserModal
     toggleAddUserModal = () => {
         this.setState({
             savedUser: false,
@@ -100,23 +113,26 @@ class Users extends React.Component {
         });
     }
 
+    //updates the prop that holds whether the user information exists in edit mode
     toggleEditUserModal = () => {
         this.setState({ editingUser: !this.state.editingUser });
     }
 
+    //updates user list and savedUser prop when user is saved
     onSaveUser = () => {
         this.setState({ savedUser: true }, () => {
             this.refreshData()
         })
     }
 
+    //called to edit the selected user
     editUser = (user) => {
         this.setState({ selectedUser: user }, () => {
-            console.log(this.state.selectedUser);
             this.toggleEditUserModal();
         });
     }
 
+    //called to unregister the selected user
     deleteUser = (user) => {
         console.log(`Delete User ${user.Id}`)
         Swal.fire({
@@ -192,6 +208,7 @@ class Users extends React.Component {
     }
 
     render() {
+        //displays the page after session and authorization check
         return this.state.loadingPage ? <></>
             : !this.state.validSessionPresent ? <Navigate to={"/login"}/>
                 : !this.state.authorizedToView ? <NotAllowedPage/> : <>

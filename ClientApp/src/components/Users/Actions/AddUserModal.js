@@ -1,4 +1,3 @@
-//modal --> reactte pop up
 import React from "react";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import Swal from "sweetalert2";
@@ -27,6 +26,7 @@ class AddUserModal extends React.Component {
         };
     }
 
+    //the selected user is saved in the state
     componentDidMount() {
         this.setState({ showModal: this.props.showModal });
         if (this.props.selectedUser !== null && this.props.selectedUser !== undefined) {
@@ -36,14 +36,15 @@ class AddUserModal extends React.Component {
         }
     }
 
+    //returns header component of modal
     getModalHeader = () => {
         return <ModalHeader>
             Add User
         </ModalHeader>
     }
 
+    //returns add user form in body of modal component
     getModalBody = () => {
-        console.log(this.state.user)
         return <ModalBody>
             <AddUserForm setUser={(property, value) => {
                 let newUser = this.state.user;
@@ -53,6 +54,7 @@ class AddUserModal extends React.Component {
         </ModalBody>
     }
 
+    //returns footer component of model
     getModalFooter = () => {
         return <ModalFooter>
             <button type="button" className="btn btn-primary"
@@ -62,10 +64,12 @@ class AddUserModal extends React.Component {
         </ModalFooter>
     }
 
+    //modal is closed
     dismissModal = () => {
         this.setState({ showModal: false }, () => this.props.onDismiss());
     }
 
+    //checks if user information has been entered incorrectly
     checkUser = () => {
         let user = this.state.user;
         let newInvalidFields = this.state.formInvalidFields;
@@ -103,17 +107,9 @@ class AddUserModal extends React.Component {
         this.saveUser(user);
     }
 
+    //user information is saved
     saveUser = (user) => {
-        // let testUser = {
-        //     Name: "Hebele",
-        //     Surname: "Hubele",
-        //     CorporationName: "ASDFG",
-        //     Email: "qwerty@gmail.com",
-        //     Password: "jkvhnkdjfg"
-        // };
-        console.log(user);
         UsersRemote.saveUser(user).then(response => {
-            console.log(response);
             if (response.status === 200) {
                 response.json().then(data => {
                     Swal.fire({
@@ -135,6 +131,7 @@ class AddUserModal extends React.Component {
         });
     }
 
+    //displays the add user modal
     render() {
         return <>
             <Modal isOpen={this.state.showModal}>

@@ -15,7 +15,8 @@ class Login extends React.Component {
             loggingIn: false
         }
     }
-    
+
+    //session validity is checked
     componentDidMount() {
         let session = window.localStorage.getItem("hydroFlowSession");
         if (session !== null) {
@@ -24,6 +25,7 @@ class Login extends React.Component {
         }
     }
 
+    //checks the information entered by the user and activate the session
     login = () => {
         if (!this.state.email || this.state.email.trim().length === 0
         || !this.state.password || this.state.password.trim().length === 0) {
@@ -56,7 +58,8 @@ class Login extends React.Component {
             });
         })
     }
-    
+
+    //displays the login form after checking the session
     render() {
         return this.state.validSessionPresent ? <Navigate to={"/"}/> : (
             <>

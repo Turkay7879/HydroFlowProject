@@ -15,6 +15,7 @@ class AddUserForm extends React.Component {
         };
     }
 
+    //the selected user is saved in the state
     componentDidMount() {
         if (this.props.selectedUser) {
             this.setState({ selectedUser: this.props.selectedUser }, () => {
@@ -23,6 +24,7 @@ class AddUserForm extends React.Component {
         } else { this.setState({ loading: false }); }
     }
 
+    //Updates state variables with information from props variable
     componentDidUpdate() {
         if (this.state.nameInvalid !== this.props.nameInvalid) {
             this.setState({ nameInvalid: this.props.nameInvalid });
@@ -41,6 +43,7 @@ class AddUserForm extends React.Component {
         }
     }
 
+    //displays the add user form
     render() {
         return <>
             {!this.state.loading && <Form>

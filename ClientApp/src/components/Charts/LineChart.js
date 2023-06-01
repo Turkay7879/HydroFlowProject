@@ -26,7 +26,8 @@ class LineChart extends Component {
             ]
         };
     }
-    
+
+    //series in state is updated with data which came from props
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.actual !== this.props.actual || prevProps.predicted !== this.props.predicted) {
             let series = [
@@ -37,6 +38,7 @@ class LineChart extends Component {
         }
     }
 
+    //displays line chart component
     render() {
         return (
             <div className="app">
