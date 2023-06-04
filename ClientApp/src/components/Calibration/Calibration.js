@@ -166,6 +166,7 @@ class Calibration extends React.Component {
                         onStartOptimize={this.runSimulation}
                         onParameterChange={this.onParameterChange}
                         isOptimizationRunning={this.state.runningOptimization}
+                        dates={this.state.date}
                     />
 
                     <div className={"calibration-output-main-container"}>

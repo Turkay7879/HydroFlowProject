@@ -16,6 +16,7 @@ class AddBasinForm extends React.Component {
     }
 
     componentDidMount() {
+        // Set form fields if a basin is being edited
         if (this.props.selectedBasin) {
             this.setState({ selectedBasin: this.props.selectedBasin }, () => {
                 this.setState({ loading: false });

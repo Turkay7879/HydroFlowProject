@@ -66,6 +66,7 @@ class AddBasinModal extends React.Component {
         this.setState({showModal: false}, () => this.props.onDismiss(status));
     }
 
+    // Check form fields before saving a basin
     checkBasin = () => {
         let basin = this.state.basin;
         let newInvalidFields = this.state.formInvalidFields;

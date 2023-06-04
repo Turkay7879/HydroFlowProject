@@ -22,7 +22,8 @@ class AddUserModal extends React.Component {
                 corporationNameInvalid: false,
                 emailInvalid: false,
                 passwordInvalid: false
-            }
+            },
+            editing: false,
         };
     }
 
@@ -32,14 +33,14 @@ class AddUserModal extends React.Component {
         if (this.props.selectedUser !== null && this.props.selectedUser !== undefined) {
             let selectedUser = this.props.selectedUser;
             selectedUser.Password = "";
-            this.setState({ user: selectedUser });
+            this.setState({ user: selectedUser, editing: true });
         }
     }
 
     //returns header component of modal
     getModalHeader = () => {
         return <ModalHeader>
-            Add User
+            {this.state.editing ? 'Edit' : 'Add'} User
         </ModalHeader>
     }
 

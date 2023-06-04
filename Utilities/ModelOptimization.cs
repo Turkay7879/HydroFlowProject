@@ -1,6 +1,4 @@
-﻿using HydroFlowProject.BalanceModels;
-using HydroFlowProject.BalanceModels.GeneticAlgorithm;
-using HydroFlowProject.Models;
+﻿using HydroFlowProject.Models;
 using HydroFlowProject.ViewModels;
 using Microsoft.Build.Framework;
 using Newtonsoft.Json;
@@ -14,13 +12,7 @@ namespace HydroFlowProject.Utilities
         private static readonly int MAX_USERS_TO_CALL_OPTIMIZATION_AT_SAME_TIME = 100;
         private static Semaphore semaphore = new Semaphore(0, MAX_USERS_TO_CALL_OPTIMIZATION_AT_SAME_TIME);
 
-        private static readonly double CROSSOVER_RATE = 0.8;
-        private static readonly double MUTATION_RATE = 0.05;
-        private static readonly int POPULATION_SIZE = 100;
-        private static readonly int TERMINATION_GENERATIONS = 10;
-        private static readonly double TERMINATION_THRESHOLD = 0.001;
-
-
+        // Call optimization function based on the model type
         public static OptimizationViewModel Optimize(OptimizationViewModel optimizationViewModel)
         {
             OptimizationViewModel? result = optimizationViewModel.Model_Type switch
@@ -70,6 +62,7 @@ namespace HydroFlowProject.Utilities
                 var petForVerification = new double[PET_List.Length - petForOptimization.Length];
                 var obsmmForVerification = new double[Obsmm_List.Length - obsmmForOptimization.Length];
                 
+                // Create optimization and verification arrays with given optimization percent
                 var i = 0;
                 for (; i < obsmmForOptimization.Length; i++)
                 {

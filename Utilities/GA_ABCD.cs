@@ -91,6 +91,7 @@ namespace HydroFlowProject.Utilities
             return Qmodel;
         }
 
+        // Calculate RMSE rate by comparing actual and predicted values
         public static double Fitness(double[] predictedValues, double[] targetValues)
         {
             // Calculate fitness as the mean squared error
@@ -103,6 +104,7 @@ namespace HydroFlowProject.Utilities
             return Math.Sqrt(sumSquaredError / predictedValues.Length);
         }
 
+        // Calculate NSE rate by comparing actual and predicted values
         public static double NSE(double[] predicted, double[] observed)
         {
             int n = observed.Length;
@@ -120,6 +122,7 @@ namespace HydroFlowProject.Utilities
             return nse;
         }
 
+        // Calculate average of given array
         public static double Average(double[] values)
         {
             double mean = 0.0;
@@ -131,6 +134,7 @@ namespace HydroFlowProject.Utilities
             return mean;
         }
 
+        // Calculate standart deviation of given array
         public static double StandartDeviation(double[] values)
         {
             double mean = Average(values);
@@ -145,6 +149,7 @@ namespace HydroFlowProject.Utilities
             return deviation;
         }
 
+        // Calculate skewness of given array
         public static double Skewness(double[] values)
         {
             double mean = Average(values);
@@ -264,6 +269,7 @@ namespace HydroFlowProject.Utilities
             return offspring;
         }
 
+        // Entry function to run Genetic Algorithm for ABCD model
         public static Dictionary<string, double> Run(double[] arr1, double[] arr2, double[] arr3, double A, double B, double C, double D, double initS, double initG)
         {
             P = arr1;

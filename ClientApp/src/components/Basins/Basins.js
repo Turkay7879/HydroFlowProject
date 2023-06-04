@@ -43,6 +43,7 @@ class Basins extends React.Component {
   }
   
   checkPermissions = () => {
+    // Check if current user has a valid session and admin rights to view this page
     let session = window.localStorage.getItem("hydroFlowSession");
     if (session !== null) {
       SessionsRemote.validateSession(session, (status) => {
@@ -78,6 +79,7 @@ class Basins extends React.Component {
   }
 
   refreshData = async () => {
+    // Request all basins for the table
     BasinsRemote.getAllBasins()
       .then((response) => {
         if (response.ok) {
@@ -183,8 +185,6 @@ class Basins extends React.Component {
                 <div style={{ display: "flex", justifyContent: "space-around" }}>
                   <button type="button" className="btn btn-primary"
                     onClick={(e) => { this.editBasin(basin) }}>Edit</button>
-                  <button type="button" className="btn btn-secondary"
-                    onClick={(e) => { this.changePermissions(basin) }}>Permissions</button>
                   <button type="button" className="btn btn-danger"
                     onClick={(e) => { this.deleteBasin(basin) }}>Delete</button>
                 </div>

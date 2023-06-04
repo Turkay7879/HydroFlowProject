@@ -29,6 +29,8 @@ class BasinDetailsModal extends React.Component {
     }
 
     componentDidMount() {
+        // Check if current user has a valid session, and if this basin has simulations
+        // If both conditions are true, get permissions for these simulations for current user session
         let session = window.localStorage.getItem("hydroFlowSession");
         if (session !== null && this.state.modelList.length > 0) {
             let sessionObject = JSON.parse(session);

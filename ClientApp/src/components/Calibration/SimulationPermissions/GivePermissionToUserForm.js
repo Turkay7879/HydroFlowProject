@@ -39,7 +39,7 @@ class GivePermissionToUserForm extends React.Component {
                         checked={this.props.permissions.PermSimulation}
                         onChange={() => this.props.onChangePermission('PermSimulation', !this.props.permissions.PermSimulation)}
                     />}
-                    label={`Give Optimization and Calibration Permission`}
+                    label={`Give Simulation and Auto-Calibration Permission`}
                 />
             </>
         );

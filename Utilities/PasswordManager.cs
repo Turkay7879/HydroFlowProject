@@ -6,6 +6,7 @@ public static class PasswordManager
 {
     private static readonly int ITERATION_COUNT = 200000;
     
+    // Create hash and salt for given password string
     public static Dictionary<string, byte[]> HashPassword(string password)
     {
         var data = new Dictionary<string, byte[]>();
@@ -27,6 +28,8 @@ public static class PasswordManager
         return data;
     }
 
+    // Compare the passwords from UI and database by hashing the entered password
+    // and comparing the hashes
     public static bool VerifyPassword(string password, byte[] passwordHash, byte[] salt)
     {
         var pbkdf2 = new Rfc2898DeriveBytes(password, salt, ITERATION_COUNT, HashAlgorithmName.SHA256);

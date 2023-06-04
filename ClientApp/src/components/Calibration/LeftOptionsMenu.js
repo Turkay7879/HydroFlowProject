@@ -12,7 +12,8 @@ class LeftOptionsMenu extends React.Component {
         this.state = {
             selectedModel: null,
             modelingType: null,
-            runningOptimization: false
+            runningOptimization: false,
+            dates: props.dates,
         };
     }
     
@@ -41,6 +42,9 @@ class LeftOptionsMenu extends React.Component {
         }
         if (prevProps.originalParameters !== this.props.originalParameters) {
             this.setState({ originalParamList: this.props.originalParameters });
+        }
+        if (prevProps.dates !== this.props.dates) {
+            this.setState({ dates: this.props.dates });
         }
     }
 
@@ -74,12 +78,15 @@ class LeftOptionsMenu extends React.Component {
             Parameter_Map.set(initialGt.parameter_Id, this.state.parameters.initialGt);
         }
 
+        let calibrationDateRange = this.state.dates.at(0) + ' - ' + this.state.dates.at(this.state.dates.length-1);
         let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
         let payload = {
             User_Id: session.sessionUserId,
             Model_Id: this.state.selectedModel.id,
             Model_Name: this.state.selectedModel.name,
-            Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map))
+            Parameter_Map: JSON.stringify(Object.fromEntries(Parameter_Map)),
+            Optimization_Percentage: 100,
+            Date_Range: calibrationDateRange,
         }
         CalibrationRemote.saveModelParameters(payload).then(response => response.json().then(_data => {
             Swal.fire({
@@ -210,7 +217,7 @@ class LeftOptionsMenu extends React.Component {
                         <div className={"save-button"}>
                             <Button
                                 color="success"
-                                disabled={this.state.isRunning || !this.state.selectedModel}
+                                disabled={this.state.isRunning || !this.state.selectedModel || !this.state.dates}
                                 onClick={this.onClickSave}>
                                 <SaveOutlined/>
                                 <span>

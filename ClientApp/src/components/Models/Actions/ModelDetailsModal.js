@@ -209,7 +209,7 @@ class ModelDetailsModal extends React.Component {
                     <span><b>Model: </b>{details.modelType}</span>
                 </div>
                 <div>
-                    <span><b>Data Percentage for Auto-Calibration: </b>{details.percentage}%</span>
+                    <span><b>Data Percentage for Auto-Calibration: </b>{details.percentage}% {details.percentage === 100 ? '(Simulated)' : ''}</span>
                 </div>
                 <div>
                     <span><b>Auto-Calibration Date Range: </b>{details.dateRange}</span>

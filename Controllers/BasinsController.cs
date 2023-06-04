@@ -25,6 +25,7 @@ namespace HydroFlowProject.Controllers
         }
 
         // GET: Basins
+        // Return a list of all available basins
         [HttpGet]
         [Route("getAllBasins")]
         public ActionResult<List<BasinViewModel>> GetAllBasins()
@@ -55,6 +56,7 @@ namespace HydroFlowProject.Controllers
         }
 
         // POST: Save new basin
+        // Takes a BasinViewModel as payload, converts to Basin model and saves it afterwards
         [HttpPost]
         [Route("saveBasin")]
         public async Task<ActionResult<Basin>> SaveBasin([FromBody] BasinViewModel basinVM)
@@ -81,6 +83,7 @@ namespace HydroFlowProject.Controllers
             permissions.BasinSpecPerm = basinVM.BasinSpecPerm;
             permissions.UserSpecPerm = basinVM.UserSpecPerm;
 
+            // Create or update basin permissions
             List<BasinPermission> permToUpdate = _context.BasinPermissions.Where(perm => perm.BasinId == basin.Id).ToList();
             if (permToUpdate == null || permToUpdate.Capacity <= 0)
             {
@@ -105,10 +108,12 @@ namespace HydroFlowProject.Controllers
         }
 
         // DELETE: Delete a basin
+        // Takes a Basin model as payload, and deletes it from database including permissions
         [HttpDelete]
         [Route("deleteBasin")]
         public async Task<ActionResult<Basin>> DeleteBasin([FromBody] Basin basin)
         {
+            // Check if basin has simulations in it first
             var basinHasModels = _context.BasinModels.ToList().Find(bm => bm.BasinId == basin.Id);
             if (basinHasModels != null)
             {
@@ -131,10 +136,12 @@ namespace HydroFlowProject.Controllers
         }
 
         // POST: Save Basin Permissions
+        // Updates basin permissions by taking BasinPermissionViewModel payload
         [HttpPost]
         [Route("savePermissions")]
         public async Task<ActionResult<BasinPermissionViewModel>> SavePermissions([FromBody] BasinPermissionViewModel basinPermVM)
         {
+            // Check if given basin actually exists
             List<BasinPermission> toUpdate = _context.BasinPermissions.Where(perm => perm.BasinId == basinPermVM.BasinId).ToList();
             if (toUpdate == null || toUpdate.Capacity == 0)
             {
@@ -152,6 +159,7 @@ namespace HydroFlowProject.Controllers
             return Ok(basinPermVM);
         }
 
+        // Find simulations created in a basin
         [HttpPost]
         [Route("findModelsOfBasin")]
         public async Task<ActionResult<Dictionary<string, object>>> FindModelsOfBasin([FromBody] RestrictedBasinModelsViewModel payload)
@@ -160,23 +168,33 @@ namespace HydroFlowProject.Controllers
             var modelIdList = _context.BasinModels.ToList().FindAll(bm => bm.BasinId == payload.BasinId);
             var modelList = new ArrayList();
 
+            // Basin has no simulations
             if (modelIdList.Count == 0)
             {
                 return StatusCode(StatusCodes.Status404NotFound, modelList);
             }
 
+            // Add simulations allowed to the current session user to the modelList
+            // Use isUserEligibleToViewModel flag for each simulation
             foreach (var basinModel in modelIdList)
             {
                 var model = await _context.Models.FindAsync(basinModel.ModelId);
                 var isUserEligibleToViewModel = false;
+
+                // Simulation is already public, user is allowed
                 if (model!.ModelPermissionId == 0)
                 {
                     isUserEligibleToViewModel = true;
                 }
+
+                // Simulation is private, additional control required
                 else if (isUserHasValidSession && model.ModelPermissionId == 1) 
                 {
                     var isUserHasPermissionToViewModel = _context.UserUserPermissions.ToList().Find(uup => uup.ModelId == model.Id && uup.PermittedUserId == payload.UserId);
                     var isUserCreatedModel = _context.UserModels.ToList().Find(um => um.UserId == payload.UserId && um.ModelId == model.Id);
+                    
+                    // If user has permissions to view current private simulation from its original creator
+                    // OR this private simulation is current session users own simulation, user is allowed
                     if (isUserHasPermissionToViewModel != null || isUserCreatedModel != null)
                     {
                         isUserEligibleToViewModel = true;
@@ -197,6 +215,8 @@ namespace HydroFlowProject.Controllers
                     });
                 }
             }
+
+            // Check total simulations created in this basin
             var totalCount = _context.Database.SqlQuery<int>($"select count(distinct dbo.Basin_Models.ModelId) from dbo.Basin_Models\ninner join dbo.User_Models on dbo.User_Models.ModelId = dbo.Basin_Models.ModelId");
             
             Dictionary<string, object> resultMap = new()
