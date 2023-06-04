@@ -1,3 +1,4 @@
+// Define an object called RemoteRequestURLs with various API endpoints as its properties
 const RemoteRequestURLs = {
   // Basin Requests
   BASIN_GET_ALL_BASINS: "/api/basins/getAllBasins",
@@ -32,4 +33,5 @@ const RemoteRequestURLs = {
   SESSION_VALIDATE: "/api/session/validateSession",
 };
 
+// Export the RemoteRequestURLs object as the default module export
 export default RemoteRequestURLs;
