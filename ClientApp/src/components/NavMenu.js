@@ -11,7 +11,8 @@ export class NavMenu extends Component {
 
   constructor(props) {
     super(props);
-
+          // Set initial state,
+          // Bind methods to class instance
     this.toggleNavbar = this.toggleNavbar.bind(this);
     this.state = {
       collapsed: true,
@@ -21,26 +22,27 @@ export class NavMenu extends Component {
       intervalId: null
     };
   }
-  
+      // When component is mounted, start checking for valid session
   componentDidMount() {
     this.enableSessionCheckInterval();
   }
-  
+   // When component updates, check if navigation to login page is needed
   componentDidUpdate(prevProps, prevState, snapshot) {
     if (!prevState.navigateToLogin && this.state.navigateToLogin) {
       this.render();
       this.setState({ navigateToLogin: false });
     }
   }
-
+        // Start checking for valid session at regular intervals
   enableSessionCheckInterval = () => {
     let intervalId = setInterval(() => this.checkPermissions(), 1000);
     this.setState({ intervalId: intervalId });
   }
-  
+      // Check if valid session is present
   checkPermissions = () => {
     let session = window.localStorage.getItem("hydroFlowSession");
-    if (session !== null) {
+      if (session !== null) {
+           // If session is valid, update state with session data and check authorization for admin panels
       SessionsRemote.validateSession(session, (status) => {
         if (status) {
           this.setState({validSessionPresent: true}, () => {
@@ -53,6 +55,7 @@ export class NavMenu extends Component {
             })
           });
         } else {
+                      // If session is invalid, log user out and show alert
           window.localStorage.removeItem("hydroFlowSession");
           SessionsRemote.logoutUser(session).then(response => {
             Swal.fire({
@@ -71,7 +74,7 @@ export class NavMenu extends Component {
       });
     }
   }
-
+        // Log user out and remove session from local storage
   logout = () => {
     let session = window.localStorage.getItem("hydroFlowSession");
     SessionsRemote.logoutUser(session).then(response => {
@@ -94,6 +97,8 @@ export class NavMenu extends Component {
   }
   
     getNavBar = () => {
+            // Create navigation bar with appropriate links and menu items depending on user's session status and authorization
+
         return (
             <header>
                 <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" container light>

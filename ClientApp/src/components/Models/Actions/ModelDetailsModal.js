@@ -8,35 +8,37 @@ import ModelsRemote from '../flux/ModelsRemote';
 class ModelDetailsModal extends React.Component {
     constructor(props) {
         super(props);
+        // Initialize the state
         this.state = {
-            showModal: props.showModal,
-            model: props.model,
+            showModal: props.showModal, // Whether the modal should be shown
+            model: props.model, // Model object
             details: {
-                modelName: "",
-                updateDate: "",
-                version: 0,
-                modelType: "",
-                parameters: null,
-                userName: "",
-                userMail: ""
+                modelName: "", // Name of the model
+                updateDate: "", // Date of the last update
+                version: 0, // Version number
+                modelType: "", // Type of the model
+                parameters: null, // Array of model parameters
+                userName: "", // Name of the creator
+                userMail: "" // Email of the creator
             },
-            permDownload: props.permDownload
-        }
+            permDownload: props.permDownload // Flag indicating if download is permitted
+        };
     }
 
     componentDidMount() {
+        // Get the user ID from the session if available
         let session = window.localStorage.getItem("hydroFlowSession");
         let userId = 0;
         if (session) {
             let sessionObject = JSON.parse(session);
             userId = sessionObject.sessionUserId;
         }
-
+        // Retrieve the model details from the server
         ModelsRemote.getDetailsOfModel({ modelId: this.state.model.id, userId: userId }).then(response => {
             if (response.ok) {
                 response.json().then(detailsData => {
                     let details = this.state.details;
-
+                  // Extract the necessary details from the response
                     details.modelName = detailsData.latestDetails.modelName;
                     var date = new Date(detailsData.latestDetails.updateDate);
                     date.setUTCHours(date.getUTCHours() + 3);
@@ -53,6 +55,7 @@ class ModelDetailsModal extends React.Component {
                 });
             } else if (response.status === 412) {
                 response.json().then(errMsg => {
+                  // Display an error message and close the modal
                     Swal.fire({
                         title: "Error",
                         text: errMsg,
@@ -60,6 +63,7 @@ class ModelDetailsModal extends React.Component {
                     }).then(() => this.setState({ showModal: false }, () => this.props.onDismiss(null)));
                 });
             } else {
+                   // Display a generic error message and close the modal
                 Swal.fire({
                     title: "Error",
                     text: "An error occured while retrieving simulation details.",
@@ -69,25 +73,35 @@ class ModelDetailsModal extends React.Component {
         });
     }
 
-    componentDidUpdate(prevProps, prevState, snapshot){
+    componentDidUpdate(prevProps, prevState, snapshot) {
+      // Update the permDownload state when the prop changes
         if(prevProps.permDownload !== this.props.permDownload){
             this.setState({permDownload: this.props.permDownload});
         }
     }
 
     downloadModelData = () => {
+            // Download the model data from the server
         ModelsRemote.downloadModelData(this.state.model.id).then(response => response.json().then(model => {
             let data = model.modelFile;
+              // Convert the base64 encoded data to bytes
             const bytes = Buffer.from(data, 'base64')
+               // Create a blob from the bytes
             const blob = new Blob([bytes])
+            // Create a link element and set the blob as the href
             const link = document.createElement('a');
+              // Set the filename for the download
             link.href = window.URL.createObjectURL(blob);
             link.download = "observed-data.xlsx";
+              // Simulate a click on the link to start the download
             link.click();
+             // Remove the link element
             link.remove();
         }))
     }
 
+     // This function takes in a parameter name and returns a description for that parameter.
+    // It uses a switch statement to match the parameter name with its corresponding description.
     getParameterDescription = (name) => {
         let paramDescription = '';
         switch (name) {
@@ -115,6 +129,9 @@ class ModelDetailsModal extends React.Component {
         return paramDescription;
     }
 
+        // This function returns a table containing the list of parameters and their values.
+    // It first checks if the list of parameters is null, and if so, returns an empty fragment.
+    // Otherwise, it maps through the list of parameters and renders each parameter name and value as a table row.
     getParametersToRender = () => {
         let parameters = this.state.details.parameters;
         if (parameters === null) return <></>
@@ -144,12 +161,20 @@ class ModelDetailsModal extends React.Component {
         </TableContainer>
     }
 
+        // This function returns the header of the modal window.
+
     getModalHeader = () => {
         return <ModalHeader>
             Simulation Details
         </ModalHeader>
     }
 
+
+     // This function returns the body of the modal window, which includes various details about the simulation.
+    // It first checks if all the required details are present, and if not, displays a loading spinner.
+    // Otherwise, it renders the simulation details, including the model name, version, update date, creator name and email,
+    // model type, data percentage for auto-calibration, auto-calibration date range, and the list of parameters.
+    // It also includes a button to download the observed data.
     getModalBody = () => {
         let details = this.state.details;
 
@@ -207,7 +232,7 @@ class ModelDetailsModal extends React.Component {
             </>
         </ModalBody>
     }
-
+     // This function returns the footer of the modal window, which includes a button to close the window.
     getModalFooter = () => {
         return <ModalFooter>
             <button 
@@ -219,6 +244,8 @@ class ModelDetailsModal extends React.Component {
         </ModalFooter>
     }
 
+     // This function renders the entire modal window, including the header, body, and footer.
+    // It uses the state to determine whether to show the modal and whether to enable the download button.
     render() {
         return <>
             <Modal isOpen={this.state.showModal}>

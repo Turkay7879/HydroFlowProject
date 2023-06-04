@@ -6,31 +6,35 @@ import BasinsRemote from "../../Basins/flux/BasinsRemote";
 import AddModelForm from "./AddModelForm";
 
 class AddModelModal extends React.Component {
-
+    // Class constructor
     constructor(props) {
         super(props);
 
+        // Initialize the state
         this.state = {
-            showModal: false,
+            showModal: false, // Whether the modal is visible or not
             model: {
-                Name: "",
-                Title: "",
-                CreateDate: null,
-                ModelFile: null,
-                ModelPermissionId: 0,
-                BasinId: 0
+                Name: "", // The name of the model
+                Title: "", // The title of the model
+                CreateDate: null, // The creation date of the model
+                ModelFile: null, // The file that contains the model
+                ModelPermissionId: 0, // The permission id of the model
+                BasinId: 0 // The basin id of the model
             },
             formInvalidFields: {
-                NameInvalid: false,
-                titleInvalid: false,
-                modelFileInvalid: false,
-                basinInvalid: false
+                NameInvalid: false, // Whether the name field is invalid or not
+                titleInvalid: false, // Whether the title field is invalid or not
+                modelFileInvalid: false, // Whether the model file field is invalid or not
+                basinInvalid: false // Whether the basin field is invalid or not
             },
-            availableBasins: null
+            availableBasins: null // The list of available basins
         };
     }
 
-
+    /**
+     * Lifecycle method called after the component mounts.
+     * Gets the basin list from the server and sets the state accordingly.
+     */
 
     componentDidMount() {
         if (this.props.selectedModel !== null && this.props.selectedModel !== undefined) {
@@ -42,6 +46,9 @@ class AddModelModal extends React.Component {
         }
     }
 
+    /**
+   * Gets the list of basins from the server and sets the state accordingly.
+   */
     getBasinList = () => {
         BasinsRemote.getAllBasins().then(response => {
             if (response.status === 404) {
@@ -53,13 +60,20 @@ class AddModelModal extends React.Component {
             }
         })
     }
-
+    /**
+     * Gets the modal header.
+     * @returns The modal header component.
+     */
     getModalHeader = () => {
         return <ModalHeader>
             {`${this.props.selectedModel ? 'Edit' : 'Create'}`} Simulation
         </ModalHeader>
     }
 
+    /**
+    * Gets the modal body.
+    * @returns The modal body component.
+    */
     getModalBody = () => {
         return <ModalBody>
             <AddModelForm 
@@ -74,7 +88,10 @@ class AddModelModal extends React.Component {
                 {...this.state.formInvalidFields} />
         </ModalBody>
     }
-
+    /**
+    * Gets the modal footer.
+    * @returns The modal footer component.
+    */
     getModalFooter = () => {
         return <ModalFooter>
             <button type="button" className="btn btn-primary"
@@ -83,11 +100,17 @@ class AddModelModal extends React.Component {
                 onClick={this.dismissModal}>Close</button>
         </ModalFooter>
     }
-
+    /**
+    * Dismisses the modal.
+    * Calls the onDismiss prop function.
+    */
     dismissModal = () => {
         this.setState({ showModal: false }, () => this.props.onDismiss());
     }
-
+    /**
+     * Checks if the model is valid and saves it to the server.
+     * Shows an error message if any required field is invalid.
+     */
     checkModel = () => {
         let model = this.state.model;
         let newInvalidFields = this.state.formInvalidFields;
@@ -103,6 +126,7 @@ class AddModelModal extends React.Component {
       
         if (newInvalidFields.NameInvalid || newInvalidFields.titleInvalid || newInvalidFields.modelFileInvalid || newInvalidFields.basinInvalid) {
             this.setState({ formInvalidFields: newInvalidFields });
+               // Show an error message if any required field is invalid
             return Swal.fire({
                 title: "Incorrect Form Fields",
                 text: "Please fill the required fields correctly to create new simulation!",
@@ -152,7 +176,10 @@ class AddModelModal extends React.Component {
                 }
             });
     }
-    
+    /**
+  * Renders the component.
+  * @returns The component's HTML representation.
+  */
     render() {
         return <>
             <Modal isOpen={this.state.showModal}>

@@ -11,7 +11,7 @@ import NotAllowedPage from "../Common/NotAllowedPage";
 class Models extends Component {
     constructor(props) {
         super(props);
-
+  // State variables
         this.state = {
             loadingModels: true,
             models: [],
@@ -23,14 +23,14 @@ class Models extends Component {
             authorizedToView: false,
             loadingPage: true
         };
-
+          // Table columns
         this.tableColumns = ['Name', 'Title', 'Create Date', 'Observation Data File', 'Simulation Permission'];
     }
-
+        // Check permissions when component is mounted
     componentDidMount() {
         this.checkPermissions();
     }
-
+       // Refresh data when a new or edited model is saved, or when the user's session or authorization status changes
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (this.state.savedModel) {
             this.refreshData();
@@ -41,12 +41,13 @@ class Models extends Component {
             this.refreshData();
         }
     }
-
+      // Check whether a valid session exists for the user and whether the user is authorized to view the component
     checkPermissions = () => {
         let session = window.localStorage.getItem("hydroFlowSession");
         if (session !== null) {
             SessionsRemote.validateSession(session, (status) => {
                 if (status) {
+                      // Load data if user has valid session and is authorized to view
                     this.setState({ validSessionPresent: true }, () => {
                         let sessionData = JSON.parse(session);
                         this.setState({
@@ -77,7 +78,7 @@ class Models extends Component {
             });
         }
     }
-
+        // Retrieve all models from server
     refreshData = async () => {
         ModelsRemote.getAllModels()
             .then((response) => {
@@ -94,27 +95,29 @@ class Models extends Component {
                 this.setState({ loadingModels: false });
             });
     }
-
+        // Toggle display of "Add Model" modal
     toggleAddModelModal = () => {
         this.setState({
             savedModel: false,
             showAddModelModal: !this.state.showAddModelModal
         });
     }
+        // Toggle display of "Add Model" modal in edit mode
     toggleEditModelModal = () => {
         this.setState({ editingModel: !this.state.editingModel });
 
     }
-
+        // Set savedModel state variable to true
     onSaveModel = () => {
         this.setState({ savedModel: true })
     }
-
+     // Set selectedModel state variable to specified model and toggle display of "Add Model" modal in edit mode
     editModel = (model) => {
         this.setState({ selectedModel: model }, () => {
             this.toggleEditModelModal();
         });
     }
+    // Display confirmation dialog and delete model if user confirms deletion
     deleteModel = (id) => {
         Swal.fire({
             title: 'Confirm Deletion',
@@ -146,7 +149,7 @@ class Models extends Component {
             }
         });
     }
-
+        // Download observation data for specified model
     downloadModelData = (id) => {
         ModelsRemote.downloadModelData(id).then(response => response.json().then(model => {
             let data = model.modelFile;
@@ -160,7 +163,7 @@ class Models extends Component {
             link.remove();
         }))
     }
-
+        // Return table body for displaying simulation models
     getBody() {
         return (
             <table className="table table-striped" aria-labelledby="tableLabel">
@@ -199,8 +202,9 @@ class Models extends Component {
             </table>
         );
     }
-
+        // Return JSX for displaying component
     render() {
+              // Display loading message
         return this.state.loadingPage ? <></>
             : !this.state.validSessionPresent ? <Navigate to={"/login"}/>
                 : !this.state.authorizedToView ? <NotAllowedPage/> : <>
