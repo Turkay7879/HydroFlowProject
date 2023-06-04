@@ -56,6 +56,8 @@ class Optimization extends React.Component {
             showStatisticsModal: false,
             dates: null,
             optimizationPercentage: 0,
+            optimizationDates: null,
+            verificationDates: null,
         };
     }
     
@@ -167,6 +169,8 @@ class Optimization extends React.Component {
                 predictedDataVerification: null,
                 scatterDataOptimization: null,
                 scatterDataVerification: null,
+                optimizationDates: null,
+                verificationDates: null,
             })
         }));
         let session = JSON.parse(window.localStorage.getItem("hydroFlowSession"));
@@ -229,6 +233,8 @@ class Optimization extends React.Component {
         const pet = [];
         const obsmm = [];
         const dates = [];
+        const optimizationDates = [];
+        const verificationDates = [];
         columnData.Obsmm.forEach((item, index) => {
             if (typeof(item) !== 'undefined') {
                 p.push(columnData.P[index]);
@@ -244,12 +250,21 @@ class Optimization extends React.Component {
                 const year = jsDate.getFullYear();
 
                 const formattedDate = day + '.' + month + '.' + year;
+                if (index < columnData.Date.length * (percentage / 100)) {
+                    optimizationDates.push(formattedDate.split(".").slice(1).join("."));
+                } else {
+                    verificationDates.push(formattedDate.split(".").slice(1).join("."));
+                }
                 dates.push(formattedDate);
             }
         });
 
-        this.setState({ dates: dates, optimizationPercentage: percentage });
-
+        this.setState({
+            optimizationDates: optimizationDates,
+            verificationDates: verificationDates,
+            optimizationPercentage: percentage,
+            dates: dates
+        })
         return {
             P: p,
             PET: pet,
@@ -258,29 +273,40 @@ class Optimization extends React.Component {
     }
     
     runOptimization = (percentage) => {
-        let { P, PET, Obsmm } = this.convertData(percentage);
+        this.setState({
+            observedDataOptimization: null,
+            predictedDataOptimization: null,
+            observedDataVerification: null,
+            predictedDataVerification: null,
+            scatterDataOptimization: null,
+            scatterDataVerification: null,
+            optimizationDates: null,
+            verificationDates: null
+        }, () => {
+            let { P, PET, Obsmm } = this.convertData(percentage);
 
-        let payload = {
-            Model_Id: this.state.selectedModel.id,
-            Model_Type: this.state.modelingType,
-            Parameters: JSON.stringify(this.state.parameters),
-            P: JSON.stringify(P),
-            PET: JSON.stringify(PET),
-            Obsmm: JSON.stringify(Obsmm),
-            Optimization_Percentage: percentage
-        }
-
-        this.setState({ runningOptimization: true }, () => {
-            OptimizationRemote.optimize(payload).then(response => {
-                if (response.status === 400) {
-                    Swal.fire({
-                        title: "Incorrect Request",
-                        text: `An incorrect request was sent to server.`,
-                        icon: "error"
-                    });
-                } else if (response.ok) {
-                    response.json().then(data => this.handleOptimizationResult(data));
-                }
+            let payload = {
+                Model_Id: this.state.selectedModel.id,
+                Model_Type: this.state.modelingType,
+                Parameters: JSON.stringify(this.state.parameters),
+                P: JSON.stringify(P),
+                PET: JSON.stringify(PET),
+                Obsmm: JSON.stringify(Obsmm),
+                Optimization_Percentage: percentage
+            }
+    
+            this.setState({ runningOptimization: true }, () => {
+                OptimizationRemote.optimize(payload).then(response => {
+                    if (response.status === 400) {
+                        Swal.fire({
+                            title: "Incorrect Request",
+                            text: `An incorrect request was sent to server.`,
+                            icon: "error"
+                        });
+                    } else if (response.ok) {
+                        response.json().then(data => this.handleOptimizationResult(data));
+                    }
+                });
             });
         });
     }
@@ -336,10 +362,14 @@ class Optimization extends React.Component {
         this.setState({
             runningOptimization: false,
             errorRates: statistics,
-            observedDataOptimization: data.observed_Data_Optimization.map(item => Number(item).toFixed(0)),
-            predictedDataOptimization: data.predicted_Data_Optimization.map(item => Number(item).toFixed(0)),
-            observedDataVerification: data.observed_Data_Verification.map(item => Number(item).toFixed(0)),
-            predictedDataVerification: data.predicted_Data_Verification.map(item => Number(item).toFixed(0)),
+            observedDataOptimization: data.observed_Data_Optimization.map(item => Number(item).toFixed(0))
+                .slice(0, data.observed_Data_Optimization.length > this.state.optimizationDates.length ? data.observed_Data_Optimization.length - 1 : data.observed_Data_Optimization.length),
+            predictedDataOptimization: data.predicted_Data_Optimization.map(item => Number(item).toFixed(0))
+                .slice(0, data.predicted_Data_Optimization.length > this.state.optimizationDates.length ? data.predicted_Data_Optimization.length - 1 : data.predicted_Data_Optimization.length),
+            observedDataVerification: data.observed_Data_Verification.map(item => Number(item).toFixed(0))
+                .slice(0, data.observed_Data_Verification.length > this.state.verificationDates.length ? data.observed_Data_Verification.length - 1 : data.observed_Data_Verification.length),
+            predictedDataVerification: data.predicted_Data_Verification.map(item => Number(item).toFixed(0))
+                .slice(0, data.predicted_Data_Verification.length > this.state.verificationDates.length ? data.predicted_Data_Verification.length - 1 : data.predicted_Data_Verification.length),
             scatterDataOptimization: optimizationScatter,
             scatterDataVerification: verificationScatter,
         });
@@ -394,16 +424,14 @@ class Optimization extends React.Component {
                                 <h4 style={{marginBottom: "20px"}}>Auto-Calibration Results</h4>
                             )}
                         <div style={{ display: "flex" }}>
-                            {this.state.observedDataOptimization && this.state.predictedDataOptimization && (
+                            {this.state.observedDataOptimization && this.state.predictedDataOptimization && this.state.optimizationDates && (
                                 <div>
                                     <LineChart
                                         type1="Observed Streamflow"
                                         actual={this.state.observedDataOptimization}
                                         type2="Predicted Streamflow"
                                         predicted={this.state.predictedDataOptimization}
-                                        date={this.state.dates && this.state.optimizationPercentage !== 0 && this.state.dates
-                                            .map(item => item.split(".").at(1) + "." + item.split(".").at(2))
-                                            .slice(0, this.state.dates.length * this.state.optimizationPercentage / 100)}
+                                        date={this.state.optimizationDates}
                                     />
 
                                 </div>
@@ -414,19 +442,17 @@ class Optimization extends React.Component {
                         </div>
                         {this.state.observedDataVerification && this.state.predictedDataVerification
                             && this.state.scatterDataVerification && (
-                                <h4 style={{marginBottom: "20px"}}>Verification Results</h4>
+                                <h4 style={{marginBottom: "20px", marginTop: "1rem"}}>Verification Results</h4>
                             )}
                         <div style={{display: "flex"}}>
                             {
-                                this.state.observedDataVerification && this.state.predictedDataVerification && <>
+                                this.state.observedDataVerification && this.state.predictedDataVerification && this.state.verificationDates && <>
                                     <LineChart
                                         type1="Observed Streamflow"
                                         actual={this.state.observedDataVerification}
                                         type2="Predicted Streamflow"
                                         predicted={this.state.predictedDataVerification}
-                                        date={this.state.dates && this.state.optimizationPercentage !== 0 && this.state.dates
-                                            .map(item => item.split(".").at(1) + "." + item.split(".").at(2))
-                                            .slice(this.state.dates.length * this.state.optimizationPercentage / 100)}/>
+                                        date={this.state.verificationDates}/>
                                 </>
                             }
                             {
