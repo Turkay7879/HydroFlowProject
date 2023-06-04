@@ -1,0 +1,152 @@
+﻿﻿.model-selector-container {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    height: 5rem;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.selected-model {
+    display: flex;
+    align-items: center;
+    padding-left: 2.5rem;
+}
+
+.selected-model > span {
+    font-weight: 600;
+}
+
+.model-selector {
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.model-actions {
+    display: flex;
+}
+
+.delete-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.add-model-button {
+    display: flex;
+    align-self: center;
+    padding-right: 2.5rem;
+}
+
+.give-permission-button {
+    display: flex;
+    align-self: center;
+    padding-right: 1.5rem;
+}
+
+.calibrations-container {
+    display: flex;
+}
+
+.main-left-panel {
+    width: 25%;
+    height: fit-content;
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+}
+
+.main-left-panel > h4 {
+    text-align: center;
+    margin-bottom: 3rem;
+    flex-grow: 1;
+}
+
+.single-slider-container {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+}
+
+.single-slider-container > span {
+    font-weight: 600;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.calibrate-button {
+    align-self: center;
+    padding-left: 0.35rem;
+    margin-top: 1.75rem;
+}
+
+.save-button {
+    align-self: center;
+    margin-top: 1.75rem;
+}
+
+.calibration-output-main-container {
+    width: 50%;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 1.5rem;
+}
+
+.statistics-main-container-calibration {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    width: 25%;
+    height: fit-content;
+    display: inline-block;
+    vertical-align: top;
+    margin-bottom: 1rem;
+    margin-right: 0;
+    text-align: left;
+}
+
+.statistics-main-container-calibration > h4 {
+    text-align: center;
+}
+
+.statistics-main-container-calibration > span {
+    margin-left: 1rem;
+}
+
+.statistics-container-calibration {
+    border: 3.5px solid #1b6ec2;
+    border-radius: 10px;
+    width: 100%;
+    height: fit-content;
+    display: inline-block;
+    vertical-align: top;
+    padding: 1rem;
+    text-align: left;
+}
+
+.current-statistics-calibration {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 0 !important;
+}
+
+.current-statistics-calibration > span {
+    margin-left: 1rem;
+}
+
+.current-statistics > div > span {
+    margin-left: 2rem;
+}
+
+.standart-deviation-calibration > span {
+    margin-left: 2rem;
+}

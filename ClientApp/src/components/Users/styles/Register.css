@@ -1,0 +1,19 @@
+﻿.registerContainer {
+    height: 52rem;
+}
+
+.registerFormDiv {
+    display: flex;
+    justify-content: center;
+    margin-top: 5rem;
+}
+
+.registerFormDiv > form {
+    width: 60%;
+}
+
+.registerButton {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}

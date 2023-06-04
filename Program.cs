@@ -1,21 +1,26 @@
+using HydroFlowProject.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Runtime.InteropServices;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-/*
-builder.Services.AddDbContext<CONTEXT NAME HERE>(options =>
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
 {
-    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
     }
-    else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.OSX))
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
     {
         options.UseSqlServer(builder.Configuration.GetConnectionString("MacDockerConnection"));
     }
 
 });
-*/
-builder.Services.AddControllersWithViews();
+
+builder.Services.AddControllersWithViews().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
@@ -24,8 +29,8 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        //var context = services.GetRequiredService<CONTEXT NAME HERE>();
-        //DbInitializer.Initialize(context);
+        var context = services.GetRequiredService<SqlServerDbContext>();
+        SqlServerDbInit.Initialize(context);
     }
     catch (Exception ex)
     {
@@ -43,12 +48,12 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRouting();
-
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller}/{action=Index}/{id?}");
+    pattern: "api/{controller}/{action}");
+
+app.UseRouting();
 
 app.MapFallbackToFile("index.html");
 
